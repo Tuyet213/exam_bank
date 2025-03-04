@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animation for card fade-in */
+.animated-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation for error shake */
+.animated-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25%, 75% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+}
+
+/* Custom styles for Card Header */
+.shadow-lg {
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.2) !important;
+}
+
+.border-radius-lg {
+  border-radius: 0.75rem !important;
+}
+
+/* Form styles */
+.form-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.form-control {
+  border: none;
+  border-bottom: 1px solid #d1d1d1;
+  border-radius: 0;
+  padding: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.form-control:focus {
+  box-shadow: none;
+  border-bottom: 1px solid #5EB562;
+}
+
+.form-check-input:checked {
+  background-color: #5EB562;
+  border-color: #5EB562;
+}
+
+.btn-success {
+  background-color: #5EB562;
+  border: none;
+}
+
+.btn-success:hover {
+  background-color: #4a9b51;
+}
+
+.text-success {
+  color: #5EB562 !important;
+}
+
+.font-weight-bolder {
+  font-weight: 700;
+}
+
+.font-weight-bold {
+  font-weight: 600;
+}

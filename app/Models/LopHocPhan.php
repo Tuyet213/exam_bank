@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+class LopHocPhan extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'id',
+        'ten',
+        'ky_hoc',
+        'nam_hoc',
+        'so_luong_sinh_vien',
+        'id_khoa',
+        'id_vien_chuc',
+        'id_hoc_phan',
+    ];
+
+    public function deThis()
+    {
+        return $this->hasMany(DeThi::class, 'id_lop');
+    }
+
+    public function khoa()
+    {
+        return $this->belongsTo(Khoa::class, 'id_khoa');
+    }
+
+    public function vienChuc()
+    {
+        return $this->belongsTo(VienChuc::class, 'id_vien_chuc');
+    }
+
+    public function hocPhan()
+    {
+        return $this->belongsTo(HocPhan::class, 'id_hoc_phan');
+    }
+
+}
