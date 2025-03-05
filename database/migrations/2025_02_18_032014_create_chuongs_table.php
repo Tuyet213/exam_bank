@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('ten', 255);
             $table->string('id_hoc_phan', 6);
+            $table->boolean('able')->default(true);
             $table->foreign('id_hoc_phan')->references('id')->on('hoc_phans');
         });
     }

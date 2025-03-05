@@ -14,7 +14,8 @@ class HocPhan extends Model
         'so_tin_chi',
         'hoc_phi',
         'id_bo_mon',
-        'id_bac_dao_tao'
+        'id_bac_dao_tao',
+        'able'
     ];
 
     protected $primaryKey = 'id';

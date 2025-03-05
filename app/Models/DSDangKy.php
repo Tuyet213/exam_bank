@@ -12,7 +12,8 @@ class DSDangKy extends Model
         'id',
         'ten',
         'id_bo_mon',
-        'thoi_gian'
+        'thoi_gian',
+        'able'
     ];
 
   

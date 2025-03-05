@@ -10,7 +10,8 @@ class BacDaoTao extends Model
 
     protected $fillable = [
         'id',
-        'ten',  
+        'ten', 
+        'able' 
     ];
 
     protected $primaryKey = 'id';

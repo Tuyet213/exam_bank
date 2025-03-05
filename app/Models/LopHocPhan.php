@@ -17,6 +17,7 @@ class LopHocPhan extends Model
         'id_khoa',
         'id_vien_chuc',
         'id_hoc_phan',
+        'able'
     ];
 
     public function deThis()
@@ -31,7 +32,7 @@ class LopHocPhan extends Model
 
     public function vienChuc()
     {
-        return $this->belongsTo(VienChuc::class, 'id_vien_chuc');
+        return $this->belongsTo(User::class, 'id_vien_chuc');
     }
 
     public function hocPhan()

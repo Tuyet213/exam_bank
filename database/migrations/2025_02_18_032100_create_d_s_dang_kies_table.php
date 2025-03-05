@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('id_bo_mon', 6);
             $table->foreign('id_bo_mon')->references('id')->on('bo_mons');
             $table->dateTime('thoi_gian');
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }

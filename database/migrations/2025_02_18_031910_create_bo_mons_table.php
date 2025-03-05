@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('bo_mons', function (Blueprint $table) {
             $table->string('id', 6)->primary();
             $table->string('ten', 255);
+            $table->boolean('able')->default(true);
             $table->string('id_khoa', 6);
             $table->foreign('id_khoa')->references('id')->on('khoas');
             $table->timestamps();

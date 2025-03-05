@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('khoas', function (Blueprint $table) {
             $table->string('id', 6)->primary();
             $table->string('ten', 255);
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }

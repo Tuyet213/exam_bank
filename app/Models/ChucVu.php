@@ -12,6 +12,7 @@ class ChucVu extends Model
     protected $fillable = [
         'id',
         'ten',
+        'able'
     ];      
 
     protected $primaryKey = 'id';
@@ -20,6 +21,6 @@ class ChucVu extends Model
 
     public function vienChucs()
     {
-        return $this->hasMany(VienChuc::class, 'id_chuc_vu');
+        return $this->hasMany(  User::class, 'id_chuc_vu');
     }
 }

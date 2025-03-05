@@ -13,6 +13,7 @@ class CTDeThi extends Model
         'id',
         'id_de_thi',
         'id_cau_hoi',
+        'able'
     ];
 
     public function deThi()

@@ -11,7 +11,8 @@ class Chuong extends Model
     protected $fillable = [
         'id',
         'ten',
-        'id_hoc_phan'
+        'id_hoc_phan',
+        'able'
     ];
 
     

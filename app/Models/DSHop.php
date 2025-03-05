@@ -14,6 +14,7 @@ class DSHop extends Model
         'id_nhiem_vu',
         'id_vien_chuc',
         'so_gio',
+        'able'
     ];
 
 
@@ -29,7 +30,7 @@ class DSHop extends Model
 
     public function vienChuc()
     {
-        return $this->belongsTo(VienChuc::class, 'id_vien_chuc');
+        return $this->belongsTo(User::class, 'id_vien_chuc');
     }
 
     

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->date('ngay_thi');
             $table->string('loai');
             $table->boolean('su_dung_tai_lieu');
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }

@@ -1,9 +1,5 @@
 <script setup>
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 const form = useForm({
@@ -21,93 +17,136 @@ const submit = () => {
 </script>
 
 <template>
-    <GuestLayout>
-        <Head title="Register" />
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="name" value="Name" />
-
-                <TextInput
-                    id="name"
-                    type="text"
-                    class="mt-1 block w-full"
-                    v-model="form.name"
-                    required
-                    autofocus
-                    autocomplete="name"
-                />
-
-                <InputError class="mt-2" :message="form.errors.name" />
+  <GuestLayout>
+    <Head title="Sign up" />
+  <div class="container my-auto">
+    <div class="row">
+      <div class="col-lg-5 col-md-8 col-12 mx-auto mt-5">
+        <div class="card z-index-0 animated-fade-in">
+          <!-- Card Header -->
+          <div class="card-header p-0 mx-4 z-index-2" style="position: relative; top: -30px;">
+            <div
+              class="shadow-lg border-radius-lg py-4 pe-1"
+              style="background-color: #5EB562"
+            >
+              <h4 class="text-white font-weight-bolder text-center mt-2 mb-0">
+                Sign in
+              </h4>
+              <div class="row mt-3">
+                <div class="col-2 text-center ms-auto">
+                  <a class="btn btn-link px-3" href="javascript:;">
+                    <i class="fab fa-facebook-f text-white text-lg"></i>
+                  </a>
+                </div>
+                <div class="col-2 text-center px-1">
+                  <a class="btn btn-link px-3" href="javascript:;">
+                    <i class="fab fa-github text-white text-lg"></i>
+                  </a>
+                </div>
+                <div class="col-2 text-center me-auto">
+                  <a class="btn btn-link px-3" href="javascript:;">
+                    <i class="fab fa-google text-white text-lg"></i>
+                  </a>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <div class="mt-4">
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autocomplete="username"
+          <!-- Card Body -->
+          <div class="card-body">
+            <form role="form" @submit.prevent="submit">
+                <!-- Name Input     -->
+                <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input
+                  id="name"
+                  type="text"
+                  class="form-control"
+                  :class="{ 'is-invalid': form.errors.name }"
+                  v-model="form.name"
+                  required
                 />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="new-password"
+                <div v-if="form.errors.name" class="invalid-feedback animated-shake">
+                  {{ form.errors.name }}
+                </div>
+              </div>
+                <!-- Email Input -->
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  class="form-control"
+                  :class="{ 'is-invalid': form.errors.email }"
+                  v-model="form.email"
+                  required
                 />
+                <div v-if="form.errors.email" class="invalid-feedback animated-shake">
+                  {{ form.errors.email }}
+                </div>
+              </div>
 
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
+              <!-- Password Input -->
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  class="form-control"
+                  :class="{ 'is-invalid': form.errors.password }"
+                  v-model="form.password"
+                  required
                 />
-
-                <TextInput
-                    id="password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
-                    required
-                    autocomplete="new-password"
+                <div v-if="form.errors.password" class="invalid-feedback animated-shake">
+                  {{ form.errors.password }}
+                </div>
+              </div>
+              <!-- Password Confirmation Input -->
+            <div class="mb-3">
+                <label for="password_confirmation" class="form-label">Password Confirmation</label>
+                <input
+                  id="password_confirmation"
+                  type="password"
+                  class="form-control"
+                  :class="{ 'is-invalid': form.errors.password_confirmation }"
+                  v-model="form.password_confirmation"
+                  required
                 />
+                <div v-if="form.errors.password_confirmation" class="invalid-feedback animated-shake">
+                  {{ form.errors.password_confirmation }}
+                </div>
+              </div>
+              
+              <!-- Sign In Button -->
+              <div class="text-center">
+                <button
+                  type="submit"
+                  class="btn btn-success w-100 my-4 mb-2"
+                  :class="{ 'opacity-50': form.processing }"
+                  :disabled="form.processing"
+                >
+                  Sign up
+                </button>
+              </div>
 
-                <InputError
-                    class="mt-2"
-                    :message="form.errors.password_confirmation"
-                />
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
+              <!-- Links -->
+              <p class="mt-4 text-sm text-center">
+                Already have an account?
                 <Link
-                    :href="route('login')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  :href="route('login')"
+                  class="text-success font-weight-bold"
                 >
-                    Already registered?
+                  Sign in
                 </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Register
-                </PrimaryButton>
-            </div>
-        </form>
-    </GuestLayout>
+              </p>
+              
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </GuestLayout>
 </template>
+
+

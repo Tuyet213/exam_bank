@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('nhiem_vus', function (Blueprint $table) {
             $table->id();
             $table->string('ten');
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }

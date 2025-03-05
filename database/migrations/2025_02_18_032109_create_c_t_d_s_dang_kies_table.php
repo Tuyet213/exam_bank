@@ -17,9 +17,10 @@ return new class extends Migration
             $table->string('id_hoc_phan', 6);
             $table->foreign('id_hoc_phan')->references('id')->on('hoc_phans');
             $table->string('id_vien_chuc', 6);
-            $table->foreign('id_vien_chuc')->references('id')->on('vien_chucs');
+            $table->foreign('id_vien_chuc')->references('id')->on('users');
             $table->integer('so_gio');
             $table->string('trang_thai', 255);
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }

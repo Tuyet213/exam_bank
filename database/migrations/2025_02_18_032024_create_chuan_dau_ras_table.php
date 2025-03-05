@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();         
             $table->string('ten', 255);
             $table->text('noi_dung');
-            
+            $table->boolean('able')->default(true);
         });
     }
 

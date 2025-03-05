@@ -15,7 +15,8 @@ class CTDSDangKy extends Model
         'id_hoc_phan',
         'id_vien_chuc',
         'so_gio',
-        'trang_thai'
+        'trang_thai',
+        'able'
     ];
 
     public function dsDangKy()
@@ -30,7 +31,7 @@ class CTDSDangKy extends Model
 
     public function vienChuc()
     {
-        return $this->belongsTo(VienChuc::class, 'id_vien_chuc');
+        return $this->belongsTo(User::class, 'id_vien_chuc');
     }
     
 

@@ -12,6 +12,7 @@ class ChuanDauRa extends Model
         'id',
         'ten',
         'noi_dung',
+        'able'
         // 'id_chuong'     
     ];
 

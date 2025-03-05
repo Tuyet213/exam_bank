@@ -12,6 +12,7 @@ class BoMon extends Model
         'id',
         'ten',
         'id_khoa',
+        'able'
     ];
 
     protected $primaryKey = 'id';
@@ -26,5 +27,9 @@ class BoMon extends Model
     public function hocPhans()
     {
         return $this->hasMany(HocPhan::class, 'id_bo_mon');
+    }
+    public function vienChucs()
+    {
+        return $this->hasMany(User::class, 'id_bo_mon');
     }
 }

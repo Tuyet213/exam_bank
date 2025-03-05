@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Animation for card fade-in */
+
 .animated-fade-in {
   animation: fadeIn 0.5s ease-in-out;
 }
@@ -18,7 +18,6 @@
   }
 }
 
-/* Animation for error shake */
 .animated-shake {
   animation: shake 0.3s ease-in-out;
 }
@@ -35,7 +34,6 @@
   }
 }
 
-/* Custom styles for Card Header */
 .shadow-lg {
   box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.2) !important;
 }
@@ -44,7 +42,6 @@
   border-radius: 0.75rem !important;
 }
 
-/* Form styles */
 .form-label {
   font-size: 0.875rem;
   color: #6c757d;
@@ -55,7 +52,8 @@
   border: none;
   border-bottom: 1px solid #d1d1d1;
   border-radius: 0;
-  padding: 0.5rem 0;
+  padding-left: 1rem;
+  padding-right: 1rem;
   font-size: 1rem;
 }
 
@@ -88,4 +86,137 @@
 
 .font-weight-bold {
   font-weight: 600;
+}
+ 
+/* Table index */
+.card {
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+.card-header {
+  font-weight: bold;
+  padding: 30px 20px;
+}
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table {
+  background-color: white;
+  border-radius: 5px;
+  
+}
+
+.table th {
+  padding: 12px;
+  vertical-align: middle;
+  color: #666;
+}
+
+.table td {
+  padding: 12px;
+  vertical-align: middle;
+  color: #1b1818;
+}
+
+
+.btn-success-add {
+  background-color: #00c853;
+  border: none;
+  color: white;
+  box-shadow: 0 2px 5px rgba(10, 134, 22, 0.616);
+
+}
+
+.btn-success-add:hover {
+  background-color: #00b140;
+  color: white;
+}
+.btn-success-edit {
+  background-color: #00c853;
+  border: none;
+  border-radius: 100%;
+  color: white;
+  box-shadow: 0 2px 5px rgba(10, 134, 22, 0.616);
+
+}
+
+.btn-success-edit:hover {
+  background-color: #00b140;
+  color: white;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+}
+
+.btn-danger-delete {
+  background-color: #ff4d4f;
+  border: none;
+  color: white;
+  box-shadow: 0 2px 5px rgba(255, 0, 0, 0.616);
+  border-radius: 100%;
+}
+
+.btn-danger-delete:hover {
+  background-color: #e63946;
+  color: white;
+}
+
+/* Create update */
+.bg-success-tb{
+  background-color: #5eb562;
+}
+.form-floating {
+  position: relative;
+}
+
+/* Phân trang */
+.pagination {
+  gap: 8px; 
+}
+
+.page-item {
+  display: flex;
+  align-items: center;
+}
+
+.page-link {
+  width: 40px; 
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e0e0e0;
+  color: #333;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.page-link.rounded-circle {
+  border-radius: 50%;
+}
+
+.active .page-link,
+.active-page {
+  background-color: #007bff; 
+  color: white !important;
+  border-color: #007bff;
+}
+
+.page-link i {
+  font-size: 14px;
+}
+
+.page-link:hover:not(.disabled-link):not(.active-page) {
+  background-color: #f0f0f0;
+  border-color: #007bff;
+}
+
+.disabled .page-link,
+.disabled-link {
+  background-color: #f5f5f5;
+  color: #aaa;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
 }

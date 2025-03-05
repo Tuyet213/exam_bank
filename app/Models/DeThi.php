@@ -16,7 +16,8 @@ class DeThi extends Model
         'nam',
         'ngay_thi',
         'loai',
-        'su_dung_tai_lieu'
+        'su_dung_tai_lieu',
+        'able'
     ];
 
     public function hocPhan()

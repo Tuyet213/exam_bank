@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('ma_trans', function (Blueprint $table) {
             $table->id();
-                $table->foreignId('id_chuan_dau_ra')->constrained('chuan_dau_ras');
-                $table->foreignId('id_chuong')->constrained('chuongs');
+            $table->foreignId('id_chuan_dau_ra')->constrained('chuan_dau_ras');
+            $table->foreignId('id_chuong')->constrained('chuongs');
             $table->double('diem');
-           
+            $table->boolean('able')->default(true);
 
         });
     }

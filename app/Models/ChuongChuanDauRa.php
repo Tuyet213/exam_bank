@@ -11,7 +11,7 @@ class ChuongChuanDauRa extends Model
         'id',
         'id_chuong',
         'id_chuan_dau_ra',
-        
+        'able'
     ];
 
     public function chuong()

@@ -1,10 +1,45 @@
+<script>
+import { useForm } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
+import GuestLayout from '@/Layouts/GuestLayout.vue';
+
+export default {
+  components: {
+    Link,
+  },
+  props: {
+    canResetPassword: Boolean,
+  },
+  setup() {
+    const form = useForm({
+      email: '',
+      password: '',
+      remember: false,
+    });
+
+    const submit = () => {
+      form.post(route('login'), {
+        onFinish: () => form.reset('password'),
+      });
+    };
+
+    return { form, submit };
+  },
+};
+</script>
+<!-- Giữ v-model="model" để binding dữ liệu.
+Giữ ref="input" để tham chiếu DOM. -->
+
+
 <template>
+  <GuestLayout>
+    <Head title="Signin" />
   <div class="container my-auto">
-    <div class="row">
-      <div class="col-lg-4 col-md-8 col-12 mx-auto mt-5">
+    <div class="row mt-5">
+      <div class="col-lg-5 col-md-8 col-12 mx-auto mt-5">
         <div class="card z-index-0 animated-fade-in">
           <!-- Card Header -->
-          <div class="card-header p-0 mt-n6 mx-4 z-index-2" style="position: relative; top: -20px;">
+          <div class="card-header p-0 mt-n6 mx-3 z-index-2" style="position: relative; top: -10px;">
             <div
               class="shadow-lg border-radius-lg py-4 pe-1"
               style="background-color: #5EB562"
@@ -45,6 +80,8 @@
                   :class="{ 'is-invalid': form.errors.email }"
                   v-model="form.email"
                   required
+                  autofocus
+                  autocomplete="email"
                 />
                 <div v-if="form.errors.email" class="invalid-feedback animated-shake">
                   {{ form.errors.email }}
@@ -61,6 +98,8 @@
                   :class="{ 'is-invalid': form.errors.password }"
                   v-model="form.password"
                   required
+                  
+
                 />
                 <div v-if="form.errors.password" class="invalid-feedback animated-shake">
                   {{ form.errors.password }}
@@ -90,7 +129,7 @@
                 </button>
               </div>
 
-              <!-- Links -->
+              <!-- Links
               <p class="mt-4 text-sm text-center">
                 Don't have an account?
                 <Link
@@ -99,7 +138,7 @@
                 >
                   Sign up
                 </Link>
-              </p>
+              </p> -->
               <div class="mb-4 flex items-center justify-center">
                 <Link
                   v-if="canResetPassword"
@@ -115,123 +154,6 @@
       </div>
     </div>
   </div>
+  </GuestLayout>
 </template>
 
-<script>
-import { useForm } from '@inertiajs/vue3';
-import { Link } from '@inertiajs/vue3';
-
-export default {
-  components: {
-    Link,
-  },
-  props: {
-    canResetPassword: Boolean,
-  },
-  setup() {
-    const form = useForm({
-      email: '',
-      password: '',
-      remember: false,
-    });
-
-    const submit = () => {
-      form.post(route('login'), {
-        onFinish: () => form.reset('password'),
-      });
-    };
-
-    return { form, submit };
-  },
-};
-</script>
-
-<!-- <style scoped>
-/* Animation for card fade-in */
-.animated-fade-in {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Animation for error shake */
-.animated-shake {
-  animation: shake 0.3s ease-in-out;
-}
-
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25%, 75% {
-    transform: translateX(-5px);
-  }
-  50% {
-    transform: translateX(5px);
-  }
-}
-
-/* Custom styles for Card Header */
-.shadow-lg {
-  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.2) !important;
-}
-
-.border-radius-lg {
-  border-radius: 0.75rem !important;
-}
-
-/* Form styles */
-.form-label {
-  font-size: 0.875rem;
-  color: #6c757d;
-  margin-bottom: 0.25rem;
-}
-
-.form-control {
-  border: none;
-  border-bottom: 1px solid #d1d1d1;
-  border-radius: 0;
-  padding: 0.5rem 0;
-  font-size: 1rem;
-}
-
-.form-control:focus {
-  box-shadow: none;
-  border-bottom: 1px solid #5EB562;
-}
-
-.form-check-input:checked {
-  background-color: #5EB562;
-  border-color: #5EB562;
-}
-
-.btn-success {
-  background-color: #5EB562;
-  border: none;
-}
-
-.btn-success:hover {
-  background-color: #4a9b51;
-}
-
-.text-success {
-  color: #5EB562 !important;
-}
-
-.font-weight-bolder {
-  font-weight: 700;
-}
-
-.font-weight-bold {
-  font-weight: 600;
-}
-</style> -->

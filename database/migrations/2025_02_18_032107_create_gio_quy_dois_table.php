@@ -16,6 +16,7 @@ return new class extends Migration
             $table->tinyInteger('gio');
             $table->tinyInteger('tin_chi');
             $table->tinyInteger('cau'); 
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }

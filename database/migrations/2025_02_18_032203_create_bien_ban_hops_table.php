@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('noi_dung');
             $table->string('dia_diem');
             $table->string('loai');
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }

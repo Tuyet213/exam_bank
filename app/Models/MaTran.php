@@ -14,7 +14,8 @@ class MaTran extends Model
         //'id_hoc_phan',
         'id_chuan_dau_ra',
         'id_chuong',
-        'diem'
+        'diem',
+        'able'
     ];
 
 

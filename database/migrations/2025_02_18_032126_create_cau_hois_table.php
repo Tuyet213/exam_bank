@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('id_chuong')->constrained('chuongs');
             $table->string('phan_loai');
             $table->double('diem');
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }

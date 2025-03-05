@@ -20,9 +20,17 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'id',
         'name',
+        'sdt',
         'email',
         'password',
+        'dia_chi',
+        'ngay_sinh',
+        'gioi_tinh',
+        'id_bo_mon',
+        'id_chuc_vu',
+        'able'
     ];
 
     /**
@@ -47,8 +55,27 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function products(): HasMany
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    public function boMon()
     {
-        return $this->hasMany(Product::class);
+        return $this->belongsTo(BoMon::class, 'id_bo_mon');
+    }
+
+    public function chucVu()
+    {
+        return $this->belongsTo(ChucVu::class, 'id_chuc_vu');
+    }
+
+    public function ctDSDangKies()
+    {
+        return $this->hasMany(CTDSDangKy::class, 'id_vien_chuc');
+    }
+
+    public function dsHops()
+    {
+        return $this->hasMany(DSHop::class, 'id_vien_chuc');
     }
 }

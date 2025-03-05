@@ -12,7 +12,8 @@ class GioQuyDoi extends Model
         'id',
         'gio',
         'tin_chi',
-        'cau'
+        'cau',
+        'able'
     ];
 
     

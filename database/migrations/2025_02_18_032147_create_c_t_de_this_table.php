@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('id_de_thi')->constrained('de_this');
             $table->foreignId('id_cau_hoi')->constrained('cau_hois');
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }

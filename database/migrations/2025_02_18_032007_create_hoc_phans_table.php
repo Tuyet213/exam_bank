@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('ten', 255);
             $table->tinyInteger('so_tin_chi', false, true);
             $table->double('hoc_phi');
+            $table->boolean('able')->default(true);
             $table->string('id_bo_mon', 6);
             $table->string('id_bac_dao_tao', 6);
             $table->foreign('id_bo_mon')->references('id')->on('bo_mons');

@@ -11,6 +11,7 @@ class Khoa extends Model
     protected $fillable = [
         'id',
         'ten',
+        'able'
     ];
 
     protected $primaryKey = 'id';

@@ -15,6 +15,7 @@ class BienBanHop extends Model
         'noi_dung',
         'thoi_gian',
         'id_ct_ds_dang_ky',
+        'able'
     ];
 
     public function ctDSDangKy()

@@ -12,7 +12,8 @@ class DapAn extends Model
         'id',
         'id_cau_hoi',
         'dap_an',
-        'trang_thai'
+        'trang_thai',
+        'able'
     ];
 
     public function cauHoi()

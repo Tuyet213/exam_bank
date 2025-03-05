@@ -11,6 +11,7 @@ class NhiemVu extends Model
     protected $fillable = [
         'id',
         'ten',
+        'able'
     ];
 
     public function dsHops()

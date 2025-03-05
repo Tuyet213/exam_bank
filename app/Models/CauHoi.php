@@ -16,6 +16,7 @@ class CauHoi extends Model
         'id_chuong',
         'diem',
         'phan_loai',
+        'able'
     ];
  
 

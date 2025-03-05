@@ -16,8 +16,9 @@ return new class extends Migration
             $table->foreignId('id_bien_ban_hop')->constrained('bien_ban_hops');
             $table->foreignId('id_nhiem_vu')->constrained('nhiem_vus');
             $table->string('id_vien_chuc', 6);
-            $table->foreign('id_vien_chuc')->references('id')->on('vien_chucs');
+            $table->foreign('id_vien_chuc')->references('id')->on('users');
             $table->integer('so_gio');
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }

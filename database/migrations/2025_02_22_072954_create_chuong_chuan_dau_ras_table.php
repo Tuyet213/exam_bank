@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('id_chuong')->constrained('chuongs');
             $table->foreignId('id_chuan_dau_ra')->constrained('chuan_dau_ras');
+            $table->boolean('able')->default(true);
             $table->timestamps();
         });
     }
