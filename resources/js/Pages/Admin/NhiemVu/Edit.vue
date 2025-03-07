@@ -1,27 +1,27 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
-import {useForm } from "@inertiajs/vue3";
+import { useForm } from "@inertiajs/vue3";
 
-const { chucVu } = defineProps({
-    chucVu: {
+const { nhiemvu } = defineProps({
+    nhiemvu: {
         type: Object,
         required: true,
     },
 });
 
 const form = useForm({
-    id: chucVu.id,
-    ten: chucVu.ten,
+    id: nhiemvu.id,
+    ten: nhiemvu.ten,
 });
 
 const submit = () => {
-    form.put(route("admin.chucvu.update", form.id), {
+    form.put(route("admin.nhiemvu.update", { id: form.id }), {
         onSuccess: () => {
-            alert("Cập nhật Chức vụ thành công!");
+            alert("Cập nhật Nhiệm vụ thành công!");
             form.reset();
         },
         onError: (errors) => {
-            alert("Có lỗi xảy ra khi cập nhật Chức vụ!");
+            alert("Có lỗi xảy ra khi cập nhật Nhiệm vụ!");
             console.error(errors);
         },
     });
@@ -32,8 +32,8 @@ const submit = () => {
     <AdminLayout>
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
-            <li class="breadcrumb-item"><a :href="route('admin.chucvu.index')">Chức vụ</a></li>
-            <li class="breadcrumb-item active">Edit</li>
+            <li class="breadcrumb-item"><a :href="route('admin.nhiemvu.index')">Nhiệm vụ</a></li>
+            <li class="breadcrumb-item active">Update</li>
         </template>
 
         <!-- Nội dung chính -->
@@ -42,7 +42,7 @@ const submit = () => {
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
                     <!-- Card Header -->
                     <div class="card-header bg-success-tb text-white p-4">
-                        <h3 class="mb-0 font-weight-bolder">CẬP NHẬT CHỨC VỤ</h3>
+                        <h3 class="mb-0 font-weight-bolder">CẬP NHẬT NHIỆM VỤ</h3>
                     </div>
 
                     <!-- Card Body -->
@@ -56,15 +56,14 @@ const submit = () => {
                                 </small>
                             </div>
                             <div class="mb-3">
-                                <label for="ten" class="form-label">Chức vụ</label>
+                                <label for="ten" class="form-label">Nhiệm vụ</label>
                                 <input type="text" class="form-control" id="ten" v-model="form.ten" required>
                                 <small v-if="form.errors.ten" class="text-danger">
                                     {{ form.errors.ten }}
                                 </small>
                             </div>
-                            <!-- Nút Create -->
                             <div class="text-end">
-                                <button type="submit" class="btn btn-success font-weight-bold">UPDATE</button>
+                                <button type="submit" class="btn btn-success shadow-lg font-weight-bold">UPDATE</button>
                             </div>
                         </form>
                     </div>

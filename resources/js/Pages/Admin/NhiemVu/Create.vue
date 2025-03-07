@@ -3,18 +3,17 @@ import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 
 const form = useForm({
-    id: "",
     ten: "",
 });
 
 const submit = () => {
-    form.post(route("admin.khoa.store"), {
+    form.post(route("admin.nhiemvu.store"), {
         onSuccess: () => {
-            alert("Tạo Khoa thành công!");
+            alert("Tạo Nhiệm vụ thành công!");
             form.reset();
         },
         onError: (errors) => {
-            alert("Có lỗi xảy ra khi tạo Khoa!");
+            alert("Có lỗi xảy ra khi tạo Nhiệm vụ!");
             console.error(errors);
         },
     });
@@ -26,7 +25,7 @@ const submit = () => {
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
-                <a :href="route('admin.khoa.index')">Khoa</a>
+                <a :href="route('admin.nhiemvu.index')">Nhiệm vụ</a>
             </li>
             <li class="breadcrumb-item active">Create</li>
         </template>
@@ -37,32 +36,15 @@ const submit = () => {
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
                     <!-- Card Header -->
                     <div class="card-header bg-success-tb text-white p-4">
-                        <h3 class="mb-0 font-weight-bolder">TẠO KHOA MỚI</h3>
+                        <h3 class="mb-0 font-weight-bolder">TẠO NHIỆM VỤ MỚI</h3>
                     </div>
 
                     <!-- Card Body -->
                     <div class="card-body p-4">
                         <form @submit.prevent="submit">
                             <div class="mb-3">
-                                <div class="mb-3">
-                                    <label for="ten" class="form-label"
-                                        >ID</label
-                                    >
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        id="id"
-                                        v-model="form.id"
-                                        required
-                                        placeholder=""
-                                    />
-                                    <small v-if="form.errors.id" class="text-danger">
-                                        {{ form.errors.id }}
-                                    </small>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="ten" class="form-label"
-                                        >Khoa</label
+                                <label for="ten" class="form-label"
+                                    >Nhiệm vụ</label
                                     >
                                     <input
                                         type="text"
@@ -74,8 +56,7 @@ const submit = () => {
                                     />
                                     <small v-if="form.errors.ten" class="text-danger">
                                         {{ form.errors.ten }}
-                                    </small>
-                                </div>
+                                </small>
                             </div>
                             <!-- Nút Create -->
                             <div class="text-end">
@@ -93,35 +74,4 @@ const submit = () => {
         </template>
     </AdminLayout>
 </template>
-<style scoped>
-.form-label-tb {
-    position: absolute;
-    top: 40%;
-    transition: all 0.5s ease;
-    pointer-events: none;
-    color: #6c757d;
-    font-size: 1rem;
-}
-.form-control:focus + .form-label-tb,
-.form-control.has-value + .form-label-tb {
-    top: 0;
-    transform: translateY(-30%);
-    font-size: 0.875rem;
-    color: #5eb562;
-}
 
-.form-control {
-    padding-top: 1.5rem;
-    padding-bottom: 0.5rem;
-    border: none;
-    border-bottom: 1px solid #d1d1d1;
-    border-radius: 0;
-    font-size: 1rem;
-    width: 100%;
-}
-
-.form-control:focus {
-    box-shadow: none;
-    border-bottom: 1px solid #5eb562;
-}
-</style>

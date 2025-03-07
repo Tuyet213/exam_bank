@@ -8,13 +8,13 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route("admin.khoa.store"), {
+    form.post(route("admin.bacdaotao.store"), {
         onSuccess: () => {
-            alert("Tạo Khoa thành công!");
+            alert("Tạo Bậc đào tạo thành công!");
             form.reset();
         },
         onError: (errors) => {
-            alert("Có lỗi xảy ra khi tạo Khoa!");
+            alert("Có lỗi xảy ra khi tạo Bậc đào tạo!");
             console.error(errors);
         },
     });
@@ -26,7 +26,7 @@ const submit = () => {
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
-                <a :href="route('admin.khoa.index')">Khoa</a>
+                <a :href="route('admin.bacdaotao.index')">Bậc đào tạo</a>
             </li>
             <li class="breadcrumb-item active">Create</li>
         </template>
@@ -37,7 +37,7 @@ const submit = () => {
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
                     <!-- Card Header -->
                     <div class="card-header bg-success-tb text-white p-4">
-                        <h3 class="mb-0 font-weight-bolder">TẠO KHOA MỚI</h3>
+                        <h3 class="mb-0 font-weight-bolder">TẠO BẬC ĐÀO TẠO MỚI</h3>
                     </div>
 
                     <!-- Card Body -->
@@ -62,7 +62,7 @@ const submit = () => {
                                 </div>
                                 <div class="mb-3">
                                     <label for="ten" class="form-label"
-                                        >Khoa</label
+                                        >Tên</label
                                     >
                                     <input
                                         type="text"
@@ -93,35 +93,4 @@ const submit = () => {
         </template>
     </AdminLayout>
 </template>
-<style scoped>
-.form-label-tb {
-    position: absolute;
-    top: 40%;
-    transition: all 0.5s ease;
-    pointer-events: none;
-    color: #6c757d;
-    font-size: 1rem;
-}
-.form-control:focus + .form-label-tb,
-.form-control.has-value + .form-label-tb {
-    top: 0;
-    transform: translateY(-30%);
-    font-size: 0.875rem;
-    color: #5eb562;
-}
 
-.form-control {
-    padding-top: 1.5rem;
-    padding-bottom: 0.5rem;
-    border: none;
-    border-bottom: 1px solid #d1d1d1;
-    border-radius: 0;
-    font-size: 1rem;
-    width: 100%;
-}
-
-.form-control:focus {
-    box-shadow: none;
-    border-bottom: 1px solid #5eb562;
-}
-</style>

@@ -42,19 +42,21 @@ onUnmounted(() => {
       </div>
       <ul class="sidebar-menu">
         <li><i class="fas fa-tachometer-alt"></i> <Link :href="route('admin.dashboard')">Dashboard</Link></li>
-        <li><i class="fas fa-table"></i> <Link :href="route('admin.khoa.index')">Khoa</Link></li>
-        <li><i class="fas fa-file-invoice-dollar"></i> <Link :href="route('admin.bomon.index')">Bộ môn</Link></li>
-        <li><i class="fas fa-globe"></i> <Link :href="route('admin.chucvu.index')">Chức vụ</Link></li>
-        <li><i class="fas fa-bell"></i> Notifications</li>
-        <li class="active"><i class="fas fa-users"></i> Users</li>
+        <li><i class="fas fa-building"></i> <Link :href="route('admin.khoa.index')">Khoa</Link></li>
+        <li><i class="fas fa-building"></i> <Link :href="route('admin.bomon.index')">Bộ môn</Link></li>
+        <li><i class="fas fa-building"></i> <Link :href="route('admin.chucvu.index')">Chức vụ</Link></li>
+        <li><i class="fas fa-building"></i> <Link :href="route('admin.bacdaotao.index')">Bậc đào tạo</Link></li>
+        <li><i class="fas fa-building"></i> <Link :href="route('admin.hocphan.index')">Học phần</Link></li>
+        <li><i class="fas fa-building"></i> <Link :href="route('admin.chuandaura.index')">Chuẩn đầu ra</Link></li>
+        <li><i class="fas fa-building"></i> <Link :href="route('admin.lophocphan.index')">Lớp học phần</Link></li>
+        <li><i class="fas fa-building"></i> <Link :href="route('admin.nhiemvu.index')">Nhiệm vụ</Link></li>
+        <li><i class="fas fa-users"></i> <Link :href="route('admin.user.index')">Users</Link></li>
+        
       </ul>
       <div class="sidebar-footer">
-        <h5>ACCOUNT PAGES</h5>
-        <ul>
-          <li><i class="fas fa-user"></i> User Profile</li>
-          <li class="active"><i class="fas fa-users"></i> Users</li>
-        </ul>
-        <button class="btn btn-success w-100 mt-3">UPGRADE TO PRO</button>
+        <Link class="btn btn-success w-100 mt-3" :href="route('dashboard')">Client Page</Link>
+        
+        <Link class="btn btn-success w-100 mt-3" :href="route('logout')" method="post" as="button">Logout</Link>
       </div>
     </div>
 

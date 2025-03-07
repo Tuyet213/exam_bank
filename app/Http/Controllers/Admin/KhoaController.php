@@ -26,12 +26,8 @@ class KhoaController extends Controller
             'ten' => 'required|string|max:255',
         ]);
 
-        try{
-            $khoa = Khoa::create($request->all());
-            return redirect()->route('admin.khoa.index');
-        }catch(\Exception $e){
-            return redirect()->route('admin.khoa.index');
-        }
+        Khoa::create($request->all());
+        return redirect()->route('admin.khoa.index');
         
     }
 
@@ -43,6 +39,10 @@ class KhoaController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'id' => 'required|string|max:6',
+            'ten' => 'required|string|max:255',
+        ]);
         $khoa = Khoa::find($id);
         $khoa->update($request->all());
         return redirect()->route('admin.khoa.index');

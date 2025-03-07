@@ -3,8 +3,8 @@ import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3';
 
-const {chucVus, message, success } = defineProps({
-    chucVus: {
+const { hocphans, message, success } = defineProps({
+    hocphans: {
         type: Object, 
         required: true,
         default: () => ({
@@ -25,20 +25,20 @@ const {chucVus, message, success } = defineProps({
     },
 });
 
-const deleteChucVu = (id) => {
+const deleteHocPhan = (id) => {
     console.log('Bắt đầu xử lý xóa, ID:', id);
-    const confirmed = confirm('Bạn có chắc chắn muốn xóa Chức vụ này?');
+    const confirmed = confirm('Bạn có chắc chắn muốn xóa Học phần này?');
     console.log('Kết quả confirm:', confirmed);
     if (confirmed) {
         console.log('Gửi yêu cầu xóa cho ID:', id);
-        router.delete(route('admin.chucvu.destroy', id), {
+        router.delete(route('admin.hocphan.destroy', id), {
             onSuccess: () => {
                 console.log('Xóa thành công');
-                alert('Chức vụ đã được xóa thành công!');
+                alert('Học phần đã được xóa thành công!');
             },
             onError: (errors) => {
                 console.log('Xóa thất bại', errors);
-                alert('Có lỗi xảy ra khi xóa Chức vụ!');
+                alert('Có lỗi xảy ra khi xóa Học phần!');
                 console.error(errors);
             },
         });
@@ -52,7 +52,7 @@ const deleteChucVu = (id) => {
     <AdminLayout>
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">
-                <a :href="route('admin.chucvu.index')">Chức vụ</a>
+                <a :href="route('admin.hocphan.index')">Học phần</a>
             </li>
         </template>
         <template v-slot:content>
@@ -61,12 +61,12 @@ const deleteChucVu = (id) => {
                     <div
                         class="card-header d-flex justify-content-between align-items-center"
                     >
-                        <h3 class="mb-0">Chức vụ</h3>
+                        <h3 class="mb-0">Học phần</h3>
                         <Link
-                            :href="route('admin.chucvu.create')"
+                            :href="route('admin.hocphan.create')"
                             class="btn btn-success-add"
                         >
-                            <i class="fas fa-user-plus"></i> Add Chức vụ
+                            <i class="fas fa-user-plus"></i> Add Học phần
                         </Link>
                     </div>
                     <div class="card-body">
@@ -76,28 +76,36 @@ const deleteChucVu = (id) => {
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Chức vụ</th>
+                                        <th>Học phần</th>
+                                        <th>Số tín chỉ</th>
+                                        <th>Học phí</th>
+                                        <th>Bộ môn</th>
+                                        <th>Bậc đào tạo</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-if="chucVus.data.length === 0">
-                                        <td colspan="3" class="text-center">
+                                    <tr v-if="hocphans.data.length === 0">
+                                        <td colspan="7" class="text-center">
                                             Không có dữ liệu
                                         </td>
                                     </tr>
                                     <tr
-                                        v-for="chucVu in chucVus.data"
-                                        :key="chucVu.id"
+                                        v-for="hocphan in hocphans.data"
+                                        :key="hocphan.id"
                                     >
-                                        <td>{{ chucVu.id }}</td>
-                                        <td>{{ chucVu.ten }}</td>
+                                        <td>{{ hocphan.id }}</td>
+                                        <td>{{ hocphan.ten }}</td>
+                                        <td>{{ hocphan.so_tin_chi }}</td>
+                                        <td>{{ hocphan.hoc_phi }}</td>
+                                        <td>{{ hocphan.bomon.ten }}</td>
+                                        <td>{{ hocphan.bacdaotao.ten }}</td>
                                         <td>
                                             <Link
                                                 :href="
                                                     route(
-                                                        'admin.chucvu.edit',
-                                                        chucVu.id
+                                                        'admin.hocphan.edit',
+                                                        hocphan.id
                                                     )
                                                 "
                                                 class="btn btn-sm btn-success-edit me-2"
@@ -106,7 +114,7 @@ const deleteChucVu = (id) => {
                                             </Link>
                                             <button
                                                 class="btn btn-sm btn-danger-delete"
-                                                @click="deleteChucVu(chucVu.id)"
+                                                @click="deleteHocPhan(hocphan.id)"
                                             >
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -123,15 +131,15 @@ const deleteChucVu = (id) => {
                                 <li
                                     class="page-item"
                                     :class="{
-                                        disabled: chucVus.current_page === 1,
+                                        disabled: hocphans.current_page === 1,
                                     }"
                                 >
                                     <Link
-                                        :href="chucVus.links[0]?.url || '#'"
+                                        :href=" hocphans.links[0]?.url || '#'"
                                         class="page-link rounded-circle"
                                         :class="{
                                             'disabled-link':
-                                                !chucVus.links[0]?.url,
+                                                !hocphans.links[0]?.url,
                                         }"
                                     >
                                         <i class="fas fa-chevron-left"></i>
@@ -140,7 +148,7 @@ const deleteChucVu = (id) => {
 
                                 <!-- Các số trang -->
                                 <li
-                                    v-for="link in chucVus.links.slice(1, -1)"
+                                                v-for="link in hocphans.links.slice(1, -1)"
                                     :key="link.label"
                                     class="page-item"
                                     :class="{ active: link.active }"
@@ -159,21 +167,21 @@ const deleteChucVu = (id) => {
                                     class="page-item"
                                     :class="{
                                         disabled:
-                                            chucVus.current_page ===
-                                            chucVus.last_page,
+                                            hocphans.current_page ===
+                                            hocphans.last_page,
                                     }"
                                 >
                                     <Link
                                         :href="
-                                            chucVus.links[
-                                                chucVus.links.length - 1
+                                            hocphans.links[
+                                                hocphans.links.length - 1
                                             ]?.url || '#'
                                         "
                                         class="page-link rounded-circle"
                                         :class="{
                                             'disabled-link':
-                                                !chucVus.links[
-                                                    chucVus.links.length - 1
+                                                !hocphans.links[
+                                                    hocphans.links.length - 1
                                                 ]?.url,
                                         }"
                                     >

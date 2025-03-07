@@ -1,6 +1,7 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Link } from "@inertiajs/vue3";
+import { router } from '@inertiajs/vue3';
 
 const { bomons, message, success } = defineProps({
     bomons: {
@@ -24,18 +25,26 @@ const { bomons, message, success } = defineProps({
     },
 });
 
-const deleteKhoa = (id) => {
-    const bomon = bomons.data.find((bomon) => bomon.id === id); // Lưu ý: dùng bomons.data
-    if (!bomon) {
-        alert("Bộ môn không tồn tại!");
-        return;
+const deleteBomon = (id) => {
+    console.log('Bắt đầu xử lý xóa, ID:', id);
+    const confirmed = confirm('Bạn có chắc chắn muốn xóa Bộ môn này?');
+    console.log('Kết quả confirm:', confirmed);
+    if (confirmed) {
+        console.log('Gửi yêu cầu xóa cho ID:', id);
+        router.delete(route('admin.bomon.destroy', id), {
+            onSuccess: () => {
+                console.log('Xóa thành công');
+                alert('Bộ môn đã được xóa thành công!');
+            },
+            onError: (errors) => {
+                console.log('Xóa thất bại', errors);
+                    alert('Có lỗi xảy ra khi xóa Bộ môn!');
+                console.error(errors);
+            },
+        });
+    } else {
+        console.log('Hủy xóa, không gửi yêu cầu');
     }
-
-    const bomonTen = bomon.ten || "Không có tên";
-    if (confirm(`Bạn có muốn xóa Bộ môn "${bomonTen}" không?`)) {
-        return true;
-    }
-    return false;
 };
 </script>
 
@@ -97,23 +106,12 @@ const deleteKhoa = (id) => {
                                             >
                                                 <i class="fas fa-edit"></i>
                                             </Link>
-                                            <Link
-                                                :href="
-                                                    route(
-                                                        'admin.bomon.destroy',
-                                                        bomon.id
-                                                    )
-                                                "
-                                                method="delete"
-                                                as="button"
+                                            <button
                                                 class="btn btn-sm btn-danger-delete"
-                                                @click.prevent="
-                                                    deleteKhoa(bomon.id) ||
-                                                        $event.preventDefault()
-                                                "
+                                                @click="deleteBomon(bomon.id)"
                                             >
                                                 <i class="fas fa-trash"></i>
-                                            </Link>
+                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>

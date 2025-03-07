@@ -1,10 +1,12 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Link } from "@inertiajs/vue3";
-import { router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
-const {chucVus, message, success } = defineProps({
-    chucVus: {
+const gioitinh = ref([]);
+
+const { users, message, success } = defineProps({
+    users: {
         type: Object, 
         required: true,
         default: () => ({
@@ -25,26 +27,20 @@ const {chucVus, message, success } = defineProps({
     },
 });
 
-const deleteChucVu = (id) => {
-    console.log('Bắt đầu xử lý xóa, ID:', id);
-    const confirmed = confirm('Bạn có chắc chắn muốn xóa Chức vụ này?');
-    console.log('Kết quả confirm:', confirmed);
-    if (confirmed) {
-        console.log('Gửi yêu cầu xóa cho ID:', id);
-        router.delete(route('admin.chucvu.destroy', id), {
-            onSuccess: () => {
-                console.log('Xóa thành công');
-                alert('Chức vụ đã được xóa thành công!');
-            },
-            onError: (errors) => {
-                console.log('Xóa thất bại', errors);
-                alert('Có lỗi xảy ra khi xóa Chức vụ!');
-                console.error(errors);
-            },
-        });
-    } else {
-        console.log('Hủy xóa, không gửi yêu cầu');
+console.log(users);
+
+const deleteUser = (id) => {
+    const user = users.data.find((user) => user.id === id); 
+    if (!user) {
+        alert("Người dùng không tồn tại!");
+        return;
     }
+
+    const userTen = user.ten || "Không có tên";
+    if (confirm(`Bạn có muốn xóa Người dùng "${userTen}" không?`)) {
+        return true;
+    }
+    return false;
 };
 </script>
 
@@ -52,7 +48,7 @@ const deleteChucVu = (id) => {
     <AdminLayout>
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">
-                <a :href="route('admin.chucvu.index')">Chức vụ</a>
+                <a :href="route('admin.user.index')">Người dùng</a>
             </li>
         </template>
         <template v-slot:content>
@@ -61,12 +57,12 @@ const deleteChucVu = (id) => {
                     <div
                         class="card-header d-flex justify-content-between align-items-center"
                     >
-                        <h3 class="mb-0">Chức vụ</h3>
+                        <h3 class="mb-0">Người dùng</h3>
                         <Link
-                            :href="route('admin.chucvu.create')"
+                            :href="route('admin.user.create')"
                             class="btn btn-success-add"
                         >
-                            <i class="fas fa-user-plus"></i> Add Chức vụ
+                            <i class="fas fa-user-plus"></i> Add Người dùng
                         </Link>
                     </div>
                     <div class="card-body">
@@ -76,40 +72,63 @@ const deleteChucVu = (id) => {
                                 <thead>
                                     <tr>
                                         <th>ID</th>
+                                        <th>Tên</th>
+                                        <th>Email</th>
+                                        <th>Số điện thoại</th>
+                                        <th>Ngày sinh</th>
+                                        <th>Giới tính</th>
                                         <th>Chức vụ</th>
+                                        <th>Bộ môn</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-if="chucVus.data.length === 0">
-                                        <td colspan="3" class="text-center">
+                                    <tr v-if="users.data.length === 0">
+                                        <td colspan="4" class="text-center">
                                             Không có dữ liệu
                                         </td>
                                     </tr>
                                     <tr
-                                        v-for="chucVu in chucVus.data"
-                                        :key="chucVu.id"
+                                        v-for="user in users.data"
+                                        :key="user.id"
                                     >
-                                        <td>{{ chucVu.id }}</td>
-                                        <td>{{ chucVu.ten }}</td>
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.sdt }}</td>
+                                        <td>{{ user.ngay_sinh }}</td>
+                                        <td>{{ user.gioi_tinh === 1 ? 'Nam' : 'Nữ' }}</td>
+                                        <td>{{ user.chucvu.ten }}</td>
+                                        <td>{{ user.bomon.ten }}</td>
                                         <td>
                                             <Link
                                                 :href="
                                                     route(
-                                                        'admin.chucvu.edit',
-                                                        chucVu.id
+                                                        'admin.user.edit',
+                                                        user.id
                                                     )
                                                 "
                                                 class="btn btn-sm btn-success-edit me-2"
                                             >
                                                 <i class="fas fa-edit"></i>
                                             </Link>
-                                            <button
+                                            <Link
+                                                :href="
+                                                    route(
+                                                        'admin.user.destroy',
+                                                        user.id
+                                                    )
+                                                "
+                                                method="delete"
+                                                as="button"
                                                 class="btn btn-sm btn-danger-delete"
-                                                @click="deleteChucVu(chucVu.id)"
+                                                @click.prevent="
+                                                    deleteUser(user.id) ||
+                                                        $event.preventDefault()
+                                                "
                                             >
                                                 <i class="fas fa-trash"></i>
-                                            </button>
+                                            </Link>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -123,15 +142,15 @@ const deleteChucVu = (id) => {
                                 <li
                                     class="page-item"
                                     :class="{
-                                        disabled: chucVus.current_page === 1,
+                                        disabled: users.current_page === 1,
                                     }"
                                 >
                                     <Link
-                                        :href="chucVus.links[0]?.url || '#'"
+                                        :href="users.links[0]?.url || '#'"
                                         class="page-link rounded-circle"
                                         :class="{
                                             'disabled-link':
-                                                !chucVus.links[0]?.url,
+                                                !users.links[0]?.url,
                                         }"
                                     >
                                         <i class="fas fa-chevron-left"></i>
@@ -140,7 +159,7 @@ const deleteChucVu = (id) => {
 
                                 <!-- Các số trang -->
                                 <li
-                                    v-for="link in chucVus.links.slice(1, -1)"
+                                    v-for="link in users.links.slice(1, -1)"
                                     :key="link.label"
                                     class="page-item"
                                     :class="{ active: link.active }"
@@ -159,21 +178,21 @@ const deleteChucVu = (id) => {
                                     class="page-item"
                                     :class="{
                                         disabled:
-                                            chucVus.current_page ===
-                                            chucVus.last_page,
+                                            users.current_page ===
+                                            users.last_page,
                                     }"
                                 >
                                     <Link
                                         :href="
-                                            chucVus.links[
-                                                chucVus.links.length - 1
+                                                users.links[
+                                                users.links.length - 1
                                             ]?.url || '#'
                                         "
                                         class="page-link rounded-circle"
                                         :class="{
                                             'disabled-link':
-                                                !chucVus.links[
-                                                    chucVus.links.length - 1
+                                                !users.links[
+                                                    users.links.length - 1
                                                 ]?.url,
                                         }"
                                     >

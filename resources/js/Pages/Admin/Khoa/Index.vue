@@ -1,6 +1,7 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Link } from "@inertiajs/vue3";
+import { router } from '@inertiajs/vue3';
 
 const {khoas, message, success } = defineProps({
     khoas: {
@@ -25,17 +26,25 @@ const {khoas, message, success } = defineProps({
 });
 
 const deleteKhoa = (id) => {
-    const khoa = khoas.data.find((khoa) => khoa.id === id); 
-    if (!khoa) {
-        alert("Khoa không tồn tại!");
-        return;
+    console.log('Bắt đầu xử lý xóa, ID:', id);
+    const confirmed = confirm('Bạn có chắc chắn muốn xóa Khoa này?');
+    console.log('Kết quả confirm:', confirmed);
+    if (confirmed) {
+        console.log('Gửi yêu cầu xóa cho ID:', id);
+        router.delete(route('admin.khoa.destroy', id), {
+            onSuccess: () => {
+                console.log('Xóa thành công');
+                alert('Khoa đã được xóa thành công!');
+            },
+            onError: (errors) => {
+                console.log('Xóa thất bại', errors);
+                alert('Có lỗi xảy ra khi xóa Khoa!');
+                console.error(errors);
+            },
+        });
+    } else {
+        console.log('Hủy xóa, không gửi yêu cầu');
     }
-
-    const khoaTen = khoa.ten || "Không có tên";
-    if (confirm(`Bạn có muốn xóa Khoa "${khoaTen}" không?`)) {
-        return true;
-    }
-    return false;
 };
 </script>
 
@@ -95,23 +104,12 @@ const deleteKhoa = (id) => {
                                             >
                                                 <i class="fas fa-edit"></i>
                                             </Link>
-                                            <Link
-                                                :href="
-                                                    route(
-                                                        'admin.khoa.destroy',
-                                                        khoa.id
-                                                    )
-                                                "
-                                                method="delete"
-                                                as="button"
+                                            <button
                                                 class="btn btn-sm btn-danger-delete"
-                                                @click.prevent="
-                                                    deleteKhoa(khoa.id) ||
-                                                        $event.preventDefault()
-                                                "
+                                                @click="deleteKhoa(khoa.id)"
                                             >
                                                 <i class="fas fa-trash"></i>
-                                            </Link>
+                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>

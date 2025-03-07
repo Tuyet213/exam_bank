@@ -9,7 +9,6 @@ class NhiemVu extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id',
         'ten',
         'able'
     ];

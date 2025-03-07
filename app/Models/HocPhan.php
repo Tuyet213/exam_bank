@@ -58,6 +58,9 @@ class HocPhan extends Model
         return $this->hasMany(CTDSDangKy::class, 'id_hoc_phan');
     }
 
-    
+    public function lopHocPhans()
+    {
+        return $this->hasMany(LopHocPhan::class, 'id_hoc_phan');
+    }
 
 }

@@ -9,7 +9,6 @@ class ChuanDauRa extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id',
         'ten',
         'noi_dung',
         'able'

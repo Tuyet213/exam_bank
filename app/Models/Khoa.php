@@ -22,5 +22,8 @@ class Khoa extends Model
     {
         return $this->hasMany(BoMon::class, 'id_khoa');
     }
-    
+    public function lopHocPhans()
+    {
+        return $this->hasMany(LopHocPhan::class, 'id_khoa');
+    }
 }

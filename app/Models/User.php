@@ -59,6 +59,10 @@ class User extends Authenticatable
     public $incrementing = false;
     protected $keyType = 'string';
 
+    public function lopHocPhans()
+    {
+        return $this->hasMany(LopHocPhan::class, 'id_vien_chuc');
+    }
     public function boMon()
     {
         return $this->belongsTo(BoMon::class, 'id_bo_mon');

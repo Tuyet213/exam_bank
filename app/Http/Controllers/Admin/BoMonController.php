@@ -18,7 +18,7 @@ class BoMonController extends Controller
 
     public function create()
     {
-        $khoas = Khoa::all()->where('able', true);
+        $khoas = Khoa::where('able', true)->get();
         return Inertia::render('Admin/BoMon/Create', compact('khoas'));
     }
 
@@ -42,12 +42,17 @@ class BoMonController extends Controller
     public function edit($id)
     {
         $bomon = BoMon::find($id);
-        $khoas = Khoa::all()->where('able', true);
+        $khoas = Khoa::where('able', true)->get();
         return Inertia::render('Admin/BoMon/Edit', compact('bomon', 'khoas'));
     }
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'id' => 'required|string|max:6',
+            'ten' => 'required|string|max:255',
+            'id_khoa' => 'required|exists:khoas,id',
+        ]);
         $bomon = BoMon::find($id);
         $bomon->update($request->all());
         return redirect()->route('admin.bomon.index');

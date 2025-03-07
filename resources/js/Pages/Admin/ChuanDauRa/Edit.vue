@@ -1,27 +1,28 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
-import {useForm } from "@inertiajs/vue3";
+import { useForm } from "@inertiajs/vue3";
 
-const { chucVu } = defineProps({
-    chucVu: {
+const { chuanDauRa } = defineProps({
+    chuanDauRa: {
         type: Object,
         required: true,
     },
 });
 
 const form = useForm({
-    id: chucVu.id,
-    ten: chucVu.ten,
+    id: chuanDauRa.id,
+    ten: chuanDauRa.ten,
+    noi_dung: chuanDauRa.noi_dung,
 });
 
 const submit = () => {
-    form.put(route("admin.chucvu.update", form.id), {
+    form.put(route("admin.chuandaura.update", { id: form.id }), {
         onSuccess: () => {
-            alert("Cập nhật Chức vụ thành công!");
+            alert("Cập nhật Chuẩn đầu ra thành công!");
             form.reset();
         },
         onError: (errors) => {
-            alert("Có lỗi xảy ra khi cập nhật Chức vụ!");
+            alert("Có lỗi xảy ra khi cập nhật Chuẩn đầu ra!");
             console.error(errors);
         },
     });
@@ -32,8 +33,8 @@ const submit = () => {
     <AdminLayout>
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
-            <li class="breadcrumb-item"><a :href="route('admin.chucvu.index')">Chức vụ</a></li>
-            <li class="breadcrumb-item active">Edit</li>
+            <li class="breadcrumb-item"><a :href="route('admin.chuandaura.index')">Chuẩn đầu ra</a></li>
+            <li class="breadcrumb-item active">Update</li>
         </template>
 
         <!-- Nội dung chính -->
@@ -42,7 +43,7 @@ const submit = () => {
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
                     <!-- Card Header -->
                     <div class="card-header bg-success-tb text-white p-4">
-                        <h3 class="mb-0 font-weight-bolder">CẬP NHẬT CHỨC VỤ</h3>
+                        <h3 class="mb-0 font-weight-bolder">CẬP NHẬT CHUẨN ĐẦU RA</h3>
                     </div>
 
                     <!-- Card Body -->
@@ -56,15 +57,21 @@ const submit = () => {
                                 </small>
                             </div>
                             <div class="mb-3">
-                                <label for="ten" class="form-label">Chức vụ</label>
+                                <label for="ten" class="form-label">Chuẩn đầu ra</label>
                                 <input type="text" class="form-control" id="ten" v-model="form.ten" required>
                                 <small v-if="form.errors.ten" class="text-danger">
                                     {{ form.errors.ten }}
                                 </small>
                             </div>
-                            <!-- Nút Create -->
+                            <div class="mb-3">
+                                <label for="noi_dung" class="form-label">Nội dung</label>
+                                <input type="text" class="form-control" id="noi_dung" v-model="form.noi_dung" required>
+                                <small v-if="form.errors.noi_dung" class="text-danger">
+                                    {{ form.errors.noi_dung }}
+                                </small>
+                            </div>
                             <div class="text-end">
-                                <button type="submit" class="btn btn-success font-weight-bold">UPDATE</button>
+                                <button type="submit" class="btn btn-success shadow-lg font-weight-bold">UPDATE</button>
                             </div>
                         </form>
                     </div>

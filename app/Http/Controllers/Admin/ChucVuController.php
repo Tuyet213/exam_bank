@@ -27,12 +27,9 @@ class ChucVuController extends Controller
             'ten' => 'required|string|max:255',
         ]);
 
-        try{
-            $chucVu = ChucVu::create($request->all());
-            return redirect()->route('admin.chucvu.index');
-        }catch(\Exception $e){
-            return redirect()->route('admin.chucvu.index');
-        }
+        ChucVu::create($request->all());
+        return redirect()->route('admin.chucvu.index');
+        
         
     }
 

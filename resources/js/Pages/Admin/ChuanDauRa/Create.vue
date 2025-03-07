@@ -3,18 +3,18 @@ import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 
 const form = useForm({
-    id: "",
     ten: "",
+    noi_dung: "",
 });
 
 const submit = () => {
-    form.post(route("admin.khoa.store"), {
+    form.post(route("admin.chuandaura.store"), {
         onSuccess: () => {
-            alert("Tạo Khoa thành công!");
+            alert("Tạo Chuẩn đầu ra thành công!");
             form.reset();
         },
         onError: (errors) => {
-            alert("Có lỗi xảy ra khi tạo Khoa!");
+            alert("Có lỗi xảy ra khi tạo Chuẩn đầu ra!");
             console.error(errors);
         },
     });
@@ -26,7 +26,7 @@ const submit = () => {
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
-                <a :href="route('admin.khoa.index')">Khoa</a>
+                <a :href="route('admin.chuandaura.index')">Chuẩn đầu ra</a>
             </li>
             <li class="breadcrumb-item active">Create</li>
         </template>
@@ -37,14 +37,14 @@ const submit = () => {
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
                     <!-- Card Header -->
                     <div class="card-header bg-success-tb text-white p-4">
-                        <h3 class="mb-0 font-weight-bolder">TẠO KHOA MỚI</h3>
+                        <h3 class="mb-0 font-weight-bolder">TẠO CHUẨN ĐẦU RA MỚI</h3>
                     </div>
 
                     <!-- Card Body -->
                     <div class="card-body p-4">
                         <form @submit.prevent="submit">
                             <div class="mb-3">
-                                <div class="mb-3">
+                                <!-- <div class="mb-3">
                                     <label for="ten" class="form-label"
                                         >ID</label
                                     >
@@ -59,10 +59,10 @@ const submit = () => {
                                     <small v-if="form.errors.id" class="text-danger">
                                         {{ form.errors.id }}
                                     </small>
-                                </div>
+                                </div> -->
                                 <div class="mb-3">
                                     <label for="ten" class="form-label"
-                                        >Khoa</label
+                                        >Chuẩn đầu ra</label
                                     >
                                     <input
                                         type="text"
@@ -76,6 +76,22 @@ const submit = () => {
                                         {{ form.errors.ten }}
                                     </small>
                                 </div>
+                                <div class="mb-3">
+                                    <label for="noi_dung" class="form-label"
+                                        >Nội dung</label
+                                    >
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="noi_dung"
+                                        v-model="form.noi_dung"
+                                        required
+                                        placeholder=""  
+                                    />
+                                    <small v-if="form.errors.noi_dung" class="text-danger">
+                                        {{ form.errors.noi_dung }}
+                                    </small>
+                                </div>  
                             </div>
                             <!-- Nút Create -->
                             <div class="text-end">

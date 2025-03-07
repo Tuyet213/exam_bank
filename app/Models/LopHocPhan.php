@@ -9,7 +9,6 @@ class LopHocPhan extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id',
         'ten',
         'ky_hoc',
         'nam_hoc',
