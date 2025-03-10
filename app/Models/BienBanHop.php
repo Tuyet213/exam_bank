@@ -10,7 +10,7 @@ class BienBanHop extends Model
 
     protected $fillable = [
         'id',
-        'loai',
+        'cap',
         'dia_diem',
         'noi_dung',
         'thoi_gian',

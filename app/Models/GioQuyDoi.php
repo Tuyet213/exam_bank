@@ -9,10 +9,10 @@ class GioQuyDoi extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id',
+        'loai_de_thi',
+        'loai_hanh_dong',
         'gio',
-        'tin_chi',
-        'cau',
+        'so_luong',
         'able'
     ];
 

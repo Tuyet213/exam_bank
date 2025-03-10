@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\HocPhanController;
 use App\Http\Controllers\Admin\ChuanDauRaController;
 use App\Http\Controllers\Admin\LopHocPhanController;
 use App\Http\Controllers\Admin\NhiemVuController;
+use App\Http\Controllers\Admin\GioQuyDoiController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -25,7 +26,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin'])->group(  function () {
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(  function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Admin/Dashboard');
     })->name('admin.dashboard');
@@ -102,6 +103,13 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin'])->group(  
     Route::put('/nhiemvu/update/{id}', [NhiemVuController::class, 'update'])->name('admin.nhiemvu.update');
     Route::delete('/nhiemvu/destroy/{id}', [NhiemVuController::class, 'destroy'])->name('admin.nhiemvu.destroy');
 
+    // Gio quy doi
+    Route::get('/gioquydoi', [GioQuyDoiController::class, 'index'])->name('admin.gioquydoi.index');
+    Route::get('/gioquydoi/create', [GioQuyDoiController::class, 'create'])->name('admin.gioquydoi.create');
+    Route::post('/gioquydoi/store', [GioQuyDoiController::class, 'store'])->name('admin.gioquydoi.store');
+    Route::get('/gioquydoi/edit/{id}', [GioQuyDoiController::class, 'edit'])->name('admin.gioquydoi.edit');
+    Route::put('/gioquydoi/update/{id}', [GioQuyDoiController::class, 'update'])->name('admin.gioquydoi.update');
+    Route::delete('/gioquydoi/destroy/{id}', [GioQuyDoiController::class, 'destroy'])->name('admin.gioquydoi.destroy');
 
 });
 
@@ -130,7 +138,7 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 // Route::middleware('auth')->group(function () {
 //     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

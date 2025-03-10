@@ -50,6 +50,7 @@ onUnmounted(() => {
         <li><i class="fas fa-building"></i> <Link :href="route('admin.chuandaura.index')">Chuẩn đầu ra</Link></li>
         <li><i class="fas fa-building"></i> <Link :href="route('admin.lophocphan.index')">Lớp học phần</Link></li>
         <li><i class="fas fa-building"></i> <Link :href="route('admin.nhiemvu.index')">Nhiệm vụ</Link></li>
+        <li><i class="fas fa-building"></i> <Link :href="route('admin.gioquydoi.index')">Giờ quy đổi</Link></li>
         <li><i class="fas fa-users"></i> <Link :href="route('admin.user.index')">Users</Link></li>
         
       </ul>

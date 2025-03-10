@@ -1,11 +1,11 @@
-<!-- resources/js/Pages/Admin/Users/Create.vue -->
+
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import axios from "axios";
+import { onMounted } from "vue";
 
-// Nhận props từ backend
 const { chucvus, bomons } = defineProps({
     chucvus: {
         type: Array,
@@ -17,7 +17,6 @@ const { chucvus, bomons } = defineProps({
     },
 });
 
-// Khởi tạo form với useForm
 const form = useForm({
     id: "",
     name: "",
@@ -40,12 +39,10 @@ const form = useForm({
 });
 
 
-// Dữ liệu địa chỉ
 const tinhs = ref([]);
 const quans = ref([]);
 const xas = ref([]);
 
-// Lấy danh sách Tỉnh/Thành phố khi component được tải
 const fetchTinhThanh = async () => {
     try {
         const response = await axios.get(
@@ -59,7 +56,6 @@ const fetchTinhThanh = async () => {
     }
 };
 
-// Lấy danh sách Quận/Huyện dựa trên Tỉnh
 const fetchQuanHuyen = async () => {
     console.log(form.tinh_id);
     if (!form.tinh_id) {
@@ -81,19 +77,12 @@ const fetchQuanHuyen = async () => {
             xas.value = [];
             form.xa_id = "";
             form.xa_name = "";
-
-            // Cập nhật tinh_name
-            const selectedTinh = tinhs.value.find(
-                (tinh) => tinh.id === form.tinh_id
-            );
-            form.tinh_name = selectedTinh ? selectedTinh.full_name : "";
         }
     } catch (error) {
         console.error("Error fetching districts:", error);
     }
 };
 
-// Lấy danh sách Xã/Phường dựa trên Quận/Huyện
 const fetchXaPhuong = async () => {
     if (!form.quan_id) {
         xas.value = [];
@@ -110,27 +99,13 @@ const fetchXaPhuong = async () => {
             xas.value = response.data.data;
             form.xa_id = "";
             form.xa_name = "";
-
-            // Cập nhật quan_name
-            const selectedQuan = quans.value.find(
-                (quan) => quan.id === form.quan_id
-            );
-            form.quan_name = selectedQuan ? selectedQuan.full_name : "";
         }
     } catch (error) {
         console.error("Error fetching wards:", error);
     }
 };
 
-// Cập nhật xa_name khi chọn xã/phường
-const updateXaName = () => {
-    const selectedXa = xas.value.find((xa) => xa.id === form.xa_id);
-    form.xa_name = selectedXa ? selectedXa.full_name : "";
-};
-
-// Gọi API khi component được tải
-fetchTinhThanh();
-
+onMounted(()=>fetchTinhThanh());
 // Theo dõi form.xa_id để cập nhật xa_name
 watch(() => form.xa_id, updateXaName);
 
@@ -140,9 +115,6 @@ const submit = () => {
         onSuccess: () => {
             alert("Tạo tài khoản thành công!");
             form.reset();
-            // Reset danh sách địa chỉ
-            quans.value = [];
-            xas.value = [];
         },
         onError: (errors) => {
             alert("Có lỗi xảy ra khi tạo tài khoản!");

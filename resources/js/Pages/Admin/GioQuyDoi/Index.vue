@@ -3,8 +3,8 @@ import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3';
 
-const { hocphans, message, success } = defineProps({
-    hocphans: {
+const {gioQuyDois, message, success } = defineProps({
+    gioQuyDois: {
         type: Object, 
         required: true,
         default: () => ({
@@ -25,20 +25,20 @@ const { hocphans, message, success } = defineProps({
     },
 });
 
-const deleteHocPhan = (id) => {
+const deleteGioQuyDoi = (id) => {
     console.log('Bắt đầu xử lý xóa, ID:', id);
-    const confirmed = confirm('Bạn có chắc chắn muốn xóa Học phần này?');
+    const confirmed = confirm('Bạn có chắc chắn muốn xóa Gio Quy Doi này?');
     console.log('Kết quả confirm:', confirmed);
     if (confirmed) {
         console.log('Gửi yêu cầu xóa cho ID:', id);
-        router.delete(route('admin.hocphan.destroy', id), {
+        router.delete(route('admin.gioquydoi.destroy', id), {
             onSuccess: () => {
                 console.log('Xóa thành công');
-                alert('Học phần đã được xóa thành công!');
+                alert('Gio Quy Doi đã được xóa thành công!');
             },
             onError: (errors) => {
                 console.log('Xóa thất bại', errors);
-                alert('Có lỗi xảy ra khi xóa Học phần!');
+                alert('Có lỗi xảy ra khi xóa Gio Quy Doi!');
                 console.error(errors);
             },
         });
@@ -52,7 +52,7 @@ const deleteHocPhan = (id) => {
     <AdminLayout>
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">
-                <a :href="route('admin.hocphan.index')">Học phần</a>
+                <a :href="route('admin.gioquydoi.index')">Gio Quy Doi</a>
             </li>
         </template>
         <template v-slot:content>
@@ -61,12 +61,12 @@ const deleteHocPhan = (id) => {
                     <div
                         class="card-header d-flex justify-content-between align-items-center"
                     >
-                        <h3 class="mb-0">Học phần</h3>
+                        <h3 class="mb-0">Gio Quy Doi</h3>
                         <Link
-                            :href="route('admin.hocphan.create')"
+                            :href="route('admin.gioquydoi.create')"
                             class="btn btn-success-add"
                         >
-                            <i class="fas fa-user-plus"></i> Add Học phần
+                            <i class="fas fa-user-plus"></i> Add Giờ Quy Đổi
                         </Link>
                     </div>
                     <div class="card-body">
@@ -76,34 +76,34 @@ const deleteHocPhan = (id) => {
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Học phần</th>
-                                        <th>Số tín chỉ</th>
-                                        <th>Bộ môn</th>
-                                        <th>Bậc đào tạo</th>
+                                        <th>Loại đề thi</th>
+                                        <th>Loại hành động</th>
+                                        <th>Giờ</th>
+                                        <th>Số lượng</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-if="hocphans.data.length === 0">
-                                        <td colspan="7" class="text-center">
+                                    <tr v-if="gioQuyDois.data.length === 0">
+                                        <td colspan="6" class="text-center">
                                             Không có dữ liệu
                                         </td>
                                     </tr>
                                     <tr
-                                        v-for="hocphan in hocphans.data"
-                                        :key="hocphan.id"
+                                        v-for="gioQuyDoi in gioQuyDois.data"
+                                        :key="gioQuyDoi.id"
                                     >
-                                        <td>{{ hocphan.id }}</td>
-                                        <td>{{ hocphan.ten }}</td>
-                                        <td>{{ hocphan.so_tin_chi }}</td>
-                                        <td>{{ hocphan.bomon.ten }}</td>
-                                        <td>{{ hocphan.bacdaotao.ten }}</td>
+                                        <td>{{ gioQuyDoi.id }}</td>
+                                        <td>{{ gioQuyDoi.loai_de_thi === 0 ? 'Trắc nghiệm' : gioQuyDoi.loai_de_thi === 1 ? 'Tự luận' : 'Trắc nghiệm + Tự luận' }}</td>
+                                        <td>{{ gioQuyDoi.loai_hanh_dong === 0 ? 'Biên soạn' : gioQuyDoi.loai_hanh_dong === 1 ? 'Họp phản biện cấp Bộ môn' : 'Họp thẩm định cấp Khoa' }}</td>
+                                        <td>{{ gioQuyDoi.gio }}</td>
+                                        <td>{{ gioQuyDoi.so_luong }}</td>
                                         <td>
                                             <Link
                                                 :href="
                                                     route(
-                                                        'admin.hocphan.edit',
-                                                        hocphan.id
+                                                        'admin.gioquydoi.edit',
+                                                        gioQuyDoi.id
                                                     )
                                                 "
                                                 class="btn btn-sm btn-success-edit me-2"
@@ -112,7 +112,7 @@ const deleteHocPhan = (id) => {
                                             </Link>
                                             <button
                                                 class="btn btn-sm btn-danger-delete"
-                                                @click="deleteHocPhan(hocphan.id)"
+                                                @click="deleteGioQuyDoi(gioQuyDoi.id)"
                                             >
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -129,15 +129,15 @@ const deleteHocPhan = (id) => {
                                 <li
                                     class="page-item"
                                     :class="{
-                                        disabled: hocphans.current_page === 1,
+                                        disabled: gioQuyDois.current_page === 1,
                                     }"
                                 >
                                     <Link
-                                        :href=" hocphans.links[0]?.url || '#'"
+                                        :href="gioQuyDois.links[0]?.url || '#'"
                                         class="page-link rounded-circle"
                                         :class="{
                                             'disabled-link':
-                                                !hocphans.links[0]?.url,
+                                                !gioQuyDois.links[0]?.url,
                                         }"
                                     >
                                         <i class="fas fa-chevron-left"></i>
@@ -146,7 +146,7 @@ const deleteHocPhan = (id) => {
 
                                 <!-- Các số trang -->
                                 <li
-                                                v-for="link in hocphans.links.slice(1, -1)"
+                                    v-for="link in gioQuyDois.links.slice(1, -1)"
                                     :key="link.label"
                                     class="page-item"
                                     :class="{ active: link.active }"
@@ -165,21 +165,21 @@ const deleteHocPhan = (id) => {
                                     class="page-item"
                                     :class="{
                                         disabled:
-                                            hocphans.current_page ===
-                                            hocphans.last_page,
+                                            gioQuyDois.current_page ===
+                                            gioQuyDois.last_page,
                                     }"
                                 >
                                     <Link
                                         :href="
-                                            hocphans.links[
-                                                hocphans.links.length - 1
+                                            gioQuyDois.links[
+                                                gioQuyDois.links.length - 1
                                             ]?.url || '#'
                                         "
                                         class="page-link rounded-circle"
                                         :class="{
                                             'disabled-link':
-                                                !hocphans.links[
-                                                    hocphans.links.length - 1
+                                                !gioQuyDois.links[
+                                                    gioQuyDois.links.length - 1
                                                 ]?.url,
                                         }"
                                     >

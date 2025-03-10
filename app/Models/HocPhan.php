@@ -12,7 +12,6 @@ class HocPhan extends Model
         'id',
         'ten',
         'so_tin_chi',
-        'hoc_phi',
         'id_bo_mon',
         'id_bac_dao_tao',
         'able'

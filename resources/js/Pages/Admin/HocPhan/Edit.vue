@@ -22,8 +22,7 @@ const form = useForm({
     ten: hocphan.ten,
     id_bac_dao_tao: hocphan.id_bac_dao_tao,
     id_bo_mon: hocphan.id_bo_mon,
-    so_tin_chi: hocphan.so_tin_chi,
-    hoc_phi: hocphan.hoc_phi,
+    so_tin_chi: hocphan.so_tin_chi
 });
 
 const submit = () => {
@@ -74,22 +73,13 @@ const submit = () => {
                                     {{ form.errors.ten }}
                                 </small>
                             </div>  
-                            <div class="row">
-                                <div class="mb-3 col-md-6 col-sm-12">
+                            <div class="mb-3">
                                     <label for="so_tin_chi" class="form-label">Số tín chỉ</label>
                                     <input type="number" class="form-control" id="so_tin_chi" v-model="form.so_tin_chi" required min="1" step="1">
                                     <small v-if="form.errors.so_tin_chi" class="text-danger">
                                         {{ form.errors.so_tin_chi }}
                                     </small>
                                 </div>
-                                <div class="mb-3 col-md-6 col-sm-12">
-                                    <label for="hoc_phi" class="form-label">Học phí</label>
-                                    <input type="number" class="form-control" id="hoc_phi" v-model="form.hoc_phi" required min="1" step="1">
-                                    <small v-if="form.errors.hoc_phi" class="text-danger">
-                                        {{ form.errors.hoc_phi }}
-                                    </small>
-                                </div>
-                            </div>
 
                             <div class="row">
                                 <div class="mb-3 col-md-6 col-sm-12">

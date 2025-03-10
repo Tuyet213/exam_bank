@@ -1,10 +1,11 @@
-<script setup>
+<!-- <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
-</script>
+</script> -->
 
 <template>
-    <Head title="Dashboard" />
+    Hello
+    <!-- <Head title="Dashboard" />
 
     <AuthenticatedLayout>
         <template #header>
@@ -26,5 +27,5 @@ import { Head } from '@inertiajs/vue3';
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </AuthenticatedLayout> -->
 </template>
