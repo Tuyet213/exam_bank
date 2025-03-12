@@ -6,11 +6,31 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Khoa;
 use Inertia\Inertia;
+
 class KhoaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $khoas = Khoa::where('able', true)->paginate(10);
+        $query = Khoa::where('able', true);
+
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $searchTerm = $request->input('search');
+            $filterBy = $request->input('filter', 'all');
+
+            if ($filterBy === 'id') {
+                $query->where('id', 'like', "%{$searchTerm}%");
+            } elseif ($filterBy === 'ten') {
+                $query->where('ten', 'like', "%{$searchTerm}%");
+            } else {
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('id', 'like', "%{$searchTerm}%")
+                      ->orWhere('ten', 'like', "%{$searchTerm}%");
+                });
+            }
+        }
+
+        $khoas = $query->paginate(10)->withQueryString();
+
         return Inertia::render('Admin/Khoa/Index', compact('khoas'));
     }
 
@@ -27,8 +47,7 @@ class KhoaController extends Controller
         ]);
 
         Khoa::create($request->all());
-        return redirect()->route('admin.khoa.index');
-        
+        return redirect()->route('admin.khoa.index')->with('success', 'Khoa đã được thêm thành công!');
     }
 
     public function edit($id)
@@ -45,7 +64,7 @@ class KhoaController extends Controller
         ]);
         $khoa = Khoa::find($id);
         $khoa->update($request->all());
-        return redirect()->route('admin.khoa.index');
+        return redirect()->route('admin.khoa.index')->with('success', 'Khoa đã được cập nhật thành công!');
     }
 
     public function destroy($id)
@@ -53,6 +72,6 @@ class KhoaController extends Controller
         $khoa = Khoa::find($id);
         $khoa->able = false;
         $khoa->save();
-        return redirect()->route('admin.khoa.index');
+        return redirect()->route('admin.khoa.index')->with('success', 'Khoa đã được xóa thành công!');
     }
 }

@@ -8,9 +8,24 @@ use App\Models\GioQuyDoi;
 use Inertia\Inertia;
 class GioQuyDoiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $gioQuyDois = GioQuyDoi::where('able', 1)->paginate(10);
+        $query = GioQuyDoi::where('able', true);
+
+        if ($request->has('loai_de_thi') && $request->input('loai_de_thi') !== '') {
+            $query->where('loai_de_thi', $request->input('loai_de_thi'));
+        }
+
+        if ($request->has('loai_hanh_dong') && $request->input('loai_hanh_dong') !== '') {
+            $query->where('loai_hanh_dong', $request->input('loai_hanh_dong'));
+        }
+
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $query->where('id', 'like', "%{$request->input('search')}%");
+        }
+
+        $gioQuyDois = $query->paginate(10)->withQueryString();
+
         return Inertia::render('Admin/GioQuyDoi/Index', compact('gioQuyDois'));
     }
 

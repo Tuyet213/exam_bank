@@ -300,8 +300,7 @@ const submit = () => {
                                         </small>
                                     </div>
                                 </div>
-
-                                <!-- Địa chỉ: Tỉnh, Quận, Xã -->
+<!-- //////////////////////////////////////////Địa chỉ: Tỉnh, Quận, Xã ////////////////////////////////////-->
                                 <div class="row">
                                     <div
                                         class="col-md-4 col-sm-12 mb-3 form-floating form-group"
@@ -318,7 +317,7 @@ const submit = () => {
                                         >
                                             <option value="">Chọn tỉnh</option>
                                             <option
-                                                v-for="tinh in tinhs"
+                                                v-for="tinh in tinhs.data"
                                                 :key="tinh.id"
                                                 :value="tinh.id"
                                             >

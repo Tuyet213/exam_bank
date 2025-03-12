@@ -8,9 +8,28 @@ use App\Models\NhiemVu;
 use Inertia\Inertia;
 class NhiemVuController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $nhiemvus = NhiemVu::where('able', true)->paginate(10);
+        $query = NhiemVu::where('able', true);
+
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $searchTerm = $request->input('search');
+            $filterBy = $request->input('filter', 'all');
+
+            if ($filterBy === 'id') {
+                $query->where('id', 'like', "%{$searchTerm}%");
+            } elseif ($filterBy === 'ten') {
+                $query->where('ten', 'like', "%{$searchTerm}%");
+            } else {
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('id', 'like', "%{$searchTerm}%")
+                      ->orWhere('ten', 'like', "%{$searchTerm}%");
+                });
+            }
+        }
+
+        $nhiemvus = $query->paginate(10)->withQueryString();
+
         return Inertia::render('Admin/NhiemVu/Index', compact('nhiemvus'));
     }
 

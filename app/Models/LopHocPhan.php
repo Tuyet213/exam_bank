@@ -12,7 +12,6 @@ class LopHocPhan extends Model
         'ten',
         'ky_hoc',
         'nam_hoc',
-        'so_luong_sinh_vien',
         'id_khoa',
         'id_vien_chuc',
         'id_hoc_phan',

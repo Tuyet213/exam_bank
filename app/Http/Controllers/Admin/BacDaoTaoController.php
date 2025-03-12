@@ -8,9 +8,28 @@ use App\Models\BacDaoTao;
 use Inertia\Inertia;
 class BacDaoTaoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bacdaotaos = BacDaoTao::where('able', true)->paginate(10);
+        $query = BacDaoTao::where('able', true);
+
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $searchTerm = $request->input('search');
+            $filterBy = $request->input('filter', 'all');
+
+            if ($filterBy === 'id') {
+                $query->where('id', 'like', "%{$searchTerm}%");
+            } elseif ($filterBy === 'ten') {
+                $query->where('ten', 'like', "%{$searchTerm}%");
+            } else {
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('id', 'like', "%{$searchTerm}%")
+                      ->orWhere('ten', 'like', "%{$searchTerm}%");
+                });
+            }
+        }
+
+        $bacdaotaos = $query->paginate(10)->withQueryString();
+
         return Inertia::render('Admin/BacDaoTao/Index', compact('bacdaotaos'));
     }
 

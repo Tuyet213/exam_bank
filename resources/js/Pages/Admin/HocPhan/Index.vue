@@ -2,18 +2,29 @@
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3';
+import { ref, watch } from "vue";
 
-const { hocphans, message, success } = defineProps({
+const { hocphans, bomons, bacdaotaos, message, success } = defineProps({
     hocphans: {
-        type: Object, 
+        type: Object,
         required: true,
         default: () => ({
-            data: [], 
+            data: [],
             current_page: 1,
             last_page: 1,
             total: 0,
-            links: [], 
+            links: [],
         }),
+    },
+    bomons: {
+        type: Array,
+        required: true,
+        default: () => [],
+    },
+    bacdaotaos: {
+        type: Array,
+        required: true,
+        default: () => [],
     },
     message: {
         type: String,
@@ -25,25 +36,57 @@ const { hocphans, message, success } = defineProps({
     },
 });
 
+// Biến cho chức năng tìm kiếm
+const searchTerm = ref("");
+const selectedBoMon = ref("");
+const selectedBacDaoTao = ref("");
+const debounceTimeout = ref(null);
+
 const deleteHocPhan = (id) => {
-    console.log('Bắt đầu xử lý xóa, ID:', id);
     const confirmed = confirm('Bạn có chắc chắn muốn xóa Học phần này?');
-    console.log('Kết quả confirm:', confirmed);
     if (confirmed) {
-        console.log('Gửi yêu cầu xóa cho ID:', id);
         router.delete(route('admin.hocphan.destroy', id), {
             onSuccess: () => {
-                console.log('Xóa thành công');
                 alert('Học phần đã được xóa thành công!');
             },
             onError: (errors) => {
-                console.log('Xóa thất bại', errors);
                 alert('Có lỗi xảy ra khi xóa Học phần!');
                 console.error(errors);
             },
         });
-    } else {
-        console.log('Hủy xóa, không gửi yêu cầu');
+    }
+};
+
+// Hàm thực hiện tìm kiếm
+const performSearch = () => {
+    if (debounceTimeout.value) {
+        clearTimeout(debounceTimeout.value);
+    }
+    debounceTimeout.value = setTimeout(() => {
+        router.get(
+            route("admin.hocphan.index"),
+            {
+                search: searchTerm.value,
+                id_bo_mon: selectedBoMon.value,
+                id_bac_dao_tao: selectedBacDaoTao.value,
+            },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
+    }, 300); // Delay 300ms để tránh gọi API quá nhiều
+};
+
+// Theo dõi thay đổi của các biến tìm kiếm
+watch([searchTerm, selectedBoMon, selectedBacDaoTao], () => {
+    performSearch();
+});
+
+// Xử lý tìm kiếm thủ công khi nhấn Enter
+const handleSearch = (event) => {
+    if (event.key === "Enter") {
+        performSearch();
     }
 };
 </script>
@@ -58,19 +101,58 @@ const deleteHocPhan = (id) => {
         <template v-slot:content>
             <div class="content">
                 <div class="card">
-                    <div
-                        class="card-header d-flex justify-content-between align-items-center"
-                    >
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h3 class="mb-0">Học phần</h3>
+                        <div class="d-flex gap-2 align-items-center " >
+                            <!-- Ô tìm kiếm -->
+                            <div class="input-group" style="width: 300px;">
+                                <input
+                                    v-model="searchTerm"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Tìm theo ID hoặc tên Học phần..."
+                                    @keyup="handleSearch"
+                                />
+                                <button
+                                    class="btn btn-success-add"
+                                    @click="performSearch"
+                                >
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <!-- Select Bộ môn -->
+                            <select
+                                v-model="selectedBoMon"
+                                class="form-control"
+                                style="width: 200px;"
+                            >
+                                <option value="">Tất cả Bộ môn</option>
+                                <option v-for="bomon in bomons" :key="bomon.id" :value="bomon.id">
+                                    {{ bomon.ten }}
+                                </option>
+                            </select>
+                            <!-- Select Bậc đào tạo -->
+                            <select
+                                v-model="selectedBacDaoTao"
+                                class="form-control"
+                                style="width: 200px;"
+                            >
+                                <option value="">Tất cả Bậc đào tạo</option>
+                                <option v-for="bacdaotao in bacdaotaos" :key="bacdaotao.id" :value="bacdaotao.id">
+                                    {{ bacdaotao.ten }}
+                                </option>
+                            </select>
+                            <!-- Nút thêm Học phần -->
+                           
+                        </div>
                         <Link
-                            :href="route('admin.hocphan.create')"
-                            class="btn btn-success-add"
-                        >
-                            <i class="fas fa-user-plus"></i> Add Học phần
-                        </Link>
+                                :href="route('admin.hocphan.create')"
+                                class="btn btn-success-add ml-2"
+                            >
+                                <i class="fas fa-user-plus"></i> Add Học phần
+                            </Link>
                     </div>
                     <div class="card-body">
-                        <!-- Bảng hiển thị danh sách người dùng -->
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
@@ -85,14 +167,11 @@ const deleteHocPhan = (id) => {
                                 </thead>
                                 <tbody>
                                     <tr v-if="hocphans.data.length === 0">
-                                        <td colspan="7" class="text-center">
+                                        <td colspan="6" class="text-center">
                                             Không có dữ liệu
                                         </td>
                                     </tr>
-                                    <tr
-                                        v-for="hocphan in hocphans.data"
-                                        :key="hocphan.id"
-                                    >
+                                    <tr v-for="hocphan in hocphans.data" :key="hocphan.id">
                                         <td>{{ hocphan.id }}</td>
                                         <td>{{ hocphan.ten }}</td>
                                         <td>{{ hocphan.so_tin_chi }}</td>
@@ -100,12 +179,7 @@ const deleteHocPhan = (id) => {
                                         <td>{{ hocphan.bacdaotao.ten }}</td>
                                         <td>
                                             <Link
-                                                :href="
-                                                    route(
-                                                        'admin.hocphan.edit',
-                                                        hocphan.id
-                                                    )
-                                                "
+                                                :href="route('admin.hocphan.edit', hocphan.id)"
                                                 class="btn btn-sm btn-success-edit me-2"
                                             >
                                                 <i class="fas fa-edit"></i>
@@ -125,28 +199,17 @@ const deleteHocPhan = (id) => {
                         <!-- Phân trang -->
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center mt-3">
-                                <!-- Nút Previous -->
-                                <li
-                                    class="page-item"
-                                    :class="{
-                                        disabled: hocphans.current_page === 1,
-                                    }"
-                                >
+                                <li class="page-item" :class="{ disabled: hocphans.current_page === 1 }">
                                     <Link
-                                        :href=" hocphans.links[0]?.url || '#'"
+                                        :href="hocphans.links[0]?.url || '#'"
                                         class="page-link rounded-circle"
-                                        :class="{
-                                            'disabled-link':
-                                                !hocphans.links[0]?.url,
-                                        }"
+                                        :class="{ 'disabled-link': !hocphans.links[0]?.url }"
                                     >
                                         <i class="fas fa-chevron-left"></i>
                                     </Link>
                                 </li>
-
-                                <!-- Các số trang -->
                                 <li
-                                                v-for="link in hocphans.links.slice(1, -1)"
+                                    v-for="link in hocphans.links.slice(1, -1)"
                                     :key="link.label"
                                     class="page-item"
                                     :class="{ active: link.active }"
@@ -159,29 +222,14 @@ const deleteHocPhan = (id) => {
                                         {{ link.label }}
                                     </Link>
                                 </li>
-
-                                <!-- Nút Next -->
                                 <li
                                     class="page-item"
-                                    :class="{
-                                        disabled:
-                                            hocphans.current_page ===
-                                            hocphans.last_page,
-                                    }"
+                                    :class="{ disabled: hocphans.current_page === hocphans.last_page }"
                                 >
                                     <Link
-                                        :href="
-                                            hocphans.links[
-                                                hocphans.links.length - 1
-                                            ]?.url || '#'
-                                        "
+                                        :href="hocphans.links[hocphans.links.length - 1]?.url || '#'"
                                         class="page-link rounded-circle"
-                                        :class="{
-                                            'disabled-link':
-                                                !hocphans.links[
-                                                    hocphans.links.length - 1
-                                                ]?.url,
-                                        }"
+                                        :class="{ 'disabled-link': !hocphans.links[hocphans.links.length - 1]?.url }"
                                     >
                                         <i class="fas fa-chevron-right"></i>
                                     </Link>

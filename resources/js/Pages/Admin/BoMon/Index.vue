@@ -2,6 +2,7 @@
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 
 const { bomons, message, success } = defineProps({
     bomons: {
@@ -25,6 +26,10 @@ const { bomons, message, success } = defineProps({
     },
 });
 
+const searchTerm = ref("");
+const filterBy = ref("all"); // all, id, ten
+const debounceTimeout = ref(null);
+
 const deleteBomon = (id) => {
     console.log('Bắt đầu xử lý xóa, ID:', id);
     const confirmed = confirm('Bạn có chắc chắn muốn xóa Bộ môn này?');
@@ -46,6 +51,25 @@ const deleteBomon = (id) => {
         console.log('Hủy xóa, không gửi yêu cầu');
     }
 };
+
+const performSearch = () => {
+    if (debounceTimeout.value) {
+        clearTimeout(debounceTimeout.value);
+    }
+    debounceTimeout.value = setTimeout(() => {
+        router.get(route('admin.bomon.index'), { search: searchTerm.value, filter: filterBy.value }, { preserveState: true, replace: true });
+    }, 300);
+};
+watch([searchTerm, filterBy], () => {
+    performSearch();
+});
+
+// Xử lý tìm kiếm thủ công khi nhấn Enter
+const handleSearch = (event) => {
+    if (event.key === "Enter") {
+        performSearch();
+    }
+};
 </script>
 
 <template>
@@ -62,6 +86,34 @@ const deleteBomon = (id) => {
                         class="card-header d-flex justify-content-between align-items-center"
                     >
                         <h3 class="mb-0">Bộ môn</h3>
+                        <div class="d-flex gap-2">
+                            <div class="input-group" style="width: 300px;">
+                                <input
+                                    v-model="searchTerm"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Tìm theo ID hoặc tên Bộ môn..."
+                                    @keyup="handleSearch"
+                                />
+                                <button
+                                    class="btn btn-success-add"
+                                    @click="performSearch"
+                                >
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <select
+                                v-model="filterBy"
+                                class="form-control mr-2"
+                                style="width: 150px;"
+                            >
+                                <option value="all">Tất cả</option>
+                                <option value="id">Theo ID</option>
+                                <option value="ten">Theo tên</option>
+                                <option value="khoa">Theo Khoa</option>
+                            </select>
+                        
+                        </div>
                         <Link
                             :href="route('admin.bomon.create')"
                             class="btn btn-success-add"

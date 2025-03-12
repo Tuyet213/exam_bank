@@ -26,7 +26,6 @@ const form = useForm({
     ten: lophocphan.ten,
     ky_hoc: lophocphan.ky_hoc,
     nam_hoc: lophocphan.nam_hoc,
-    so_luong_sinh_vien: lophocphan.so_luong_sinh_vien,
     id_khoa: lophocphan.id_khoa,
     id_hoc_phan: lophocphan.id_hoc_phan,
     id_vien_chuc: lophocphan.id_vien_chuc,
@@ -72,13 +71,6 @@ const submit = () => {
                                 <small v-if="form.errors.ten" class="text-danger">
                                     {{ form.errors.ten }}
                                 </small>
-                            </div>
-                            <div class="mb-3">
-                                    <label for="so_luong_sinh_vien" class="form-label">Số lượng sinh viên</label>
-                                    <input type="number" class="form-control" id="so_luong_sinh_vien" v-model="form.so_luong_sinh_vien" required min="1" step="1">
-                                    <small v-if="form.errors.so_luong_sinh_vien" class="text-danger">
-                                        {{ form.errors.so_luong_sinh_vien }}
-                                    </small>
                             </div>
 
                             <div class="row">

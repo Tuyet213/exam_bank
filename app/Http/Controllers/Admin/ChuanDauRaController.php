@@ -8,9 +8,30 @@ use App\Models\ChuanDauRa;
 use Inertia\Inertia;
 class ChuanDauRaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $chuanDauRas = ChuanDauRa::where('able', true)->paginate(10);
+        $query = ChuanDauRa::where('able', true);
+
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $searchTerm = $request->input('search');
+            $filterBy = $request->input('filter', 'all');
+
+            if ($filterBy === 'id') {
+                $query->where('id', 'like', "%{$searchTerm}%");
+            } elseif ($filterBy === 'ten') {
+                $query->where('ten', 'like', "%{$searchTerm}%")
+                ->orWhere('noi_dung', 'like', "%{$searchTerm}%");
+            } else {
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('id', 'like', "%{$searchTerm}%")
+                      ->orWhere('ten', 'like', "%{$searchTerm}%")
+                      ->orWhere('noi_dung', 'like', "%{$searchTerm}%");
+                });
+            }
+        }
+
+        $chuanDauRas = $query->paginate(10)->withQueryString();
+
         return Inertia::render('Admin/ChuanDauRa/Index', compact('chuanDauRas'));
     }
 

@@ -10,9 +10,35 @@ use Inertia\Inertia;
 
 class BoMonController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bomons = BoMon::where('able', true)->with('khoa')->paginate(10);
+        $query = BoMon::where('able', true)->with('khoa');
+
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $searchTerm = $request->input('search');
+            $filterBy = $request->input('filter', 'all');
+
+            if ($filterBy === 'id') {
+                $query->where('id', 'like', "%{$searchTerm}%");
+            } elseif ($filterBy === 'ten') {
+                $query->where('ten', 'like', "%{$searchTerm}%");
+            } elseif ($filterBy === 'khoa') {
+                $query->whereHas('khoa', function ($q) use ($searchTerm) {
+                    $q->where('ten', 'like', "%{$searchTerm}%");
+                });
+            } else {
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('id', 'like', "%{$searchTerm}%")
+                      ->orWhere('ten', 'like', "%{$searchTerm}%")
+                      ->orWhereHas('khoa', function ($q) use ($searchTerm) {
+                          $q->where('ten', 'like', "%{$searchTerm}%");
+                      });
+                });
+            }
+        }
+
+        $bomons = $query->paginate(10)->withQueryString();
+
         return Inertia::render('Admin/BoMon/Index', compact('bomons'));
     }
 
@@ -30,13 +56,12 @@ class BoMonController extends Controller
             'id_khoa' => 'required|exists:khoas,id',
         ]);
 
-        try{
+        try {
             $bomon = BoMon::create($request->all());
-            return redirect()->route('admin.bomon.index');
-        }catch(\Exception $e){
-            return redirect()->route('admin.bomon.index');
+            return redirect()->route('admin.bomon.index')->with('success', 'Bộ môn đã được thêm thành công!');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.bomon.index')->with('error', 'Có lỗi xảy ra khi thêm Bộ môn!');
         }
-        
     }
 
     public function edit($id)
@@ -55,7 +80,7 @@ class BoMonController extends Controller
         ]);
         $bomon = BoMon::find($id);
         $bomon->update($request->all());
-        return redirect()->route('admin.bomon.index');
+        return redirect()->route('admin.bomon.index')->with('success', 'Bộ môn đã được cập nhật thành công!');
     }
 
     public function destroy($id)
@@ -63,8 +88,6 @@ class BoMonController extends Controller
         $bomon = BoMon::find($id);
         $bomon->able = false;
         $bomon->save();
-        return redirect()->route('admin.bomon.index');
+        return redirect()->route('admin.bomon.index')->with('success', 'Bộ môn đã được xóa thành công!');
     }
 }
-
-

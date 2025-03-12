@@ -10,10 +10,32 @@ use App\Models\BacDaoTao;
 use Inertia\Inertia;
 class HocPhanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $hocphans = HocPhan::where('able', true)->with('bomon','bacdaotao')->paginate(10);
-        return Inertia::render('Admin/HocPhan/Index', compact('hocphans'));
+        $query = HocPhan::where('able', true)->with('bomon', 'bacdaotao');
+
+        if ($request->has('search') && !empty($request->input('search'))) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('id', 'like', "%{$searchTerm}%")
+                  ->orWhere('ten', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        if ($request->has('id_bo_mon') && !empty($request->input('id_bo_mon'))) {
+            $query->where('id_bo_mon', $request->input('id_bo_mon'));
+        }
+
+        if ($request->has('id_bac_dao_tao') && !empty($request->input('id_bac_dao_tao'))) {
+            $query->where('id_bac_dao_tao', $request->input('id_bac_dao_tao'));
+        }
+
+        $hocphans = $query->paginate(10)->withQueryString();
+
+        $bomons = BoMon::where('able', true)->get(['id', 'ten']);
+        $bacdaotaos = BacDaoTao::where('able', true)->get(['id', 'ten']);
+
+        return Inertia::render('Admin/HocPhan/Index', compact('hocphans', 'bomons', 'bacdaotaos'));
     }
 
     public function create()

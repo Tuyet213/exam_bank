@@ -1,18 +1,19 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Link } from "@inertiajs/vue3";
-import { router } from '@inertiajs/vue3';
+import { router } from "@inertiajs/vue3";
+import { ref, watch } from "vue";
 
-const {khoas, message, success } = defineProps({
+const { khoas, message, success } = defineProps({
     khoas: {
-        type: Object, 
+        type: Object,
         required: true,
         default: () => ({
-            data: [], 
+            data: [],
             current_page: 1,
             last_page: 1,
             total: 0,
-            links: [], 
+            links: [],
         }),
     },
     message: {
@@ -25,25 +26,53 @@ const {khoas, message, success } = defineProps({
     },
 });
 
+const searchTerm = ref("");
+const filterBy = ref("all"); // all, id, ten
+const debounceTimeout = ref(null);
+
 const deleteKhoa = (id) => {
-    console.log('Bắt đầu xử lý xóa, ID:', id);
-    const confirmed = confirm('Bạn có chắc chắn muốn xóa Khoa này?');
-    console.log('Kết quả confirm:', confirmed);
+    const confirmed = confirm("Bạn có chắc chắn muốn xóa Khoa này?");
     if (confirmed) {
-        console.log('Gửi yêu cầu xóa cho ID:', id);
-        router.delete(route('admin.khoa.destroy', id), {
+        router.delete(route("admin.khoa.destroy", id), {
             onSuccess: () => {
-                console.log('Xóa thành công');
-                alert('Khoa đã được xóa thành công!');
+                alert("Khoa đã được xóa thành công!");
             },
             onError: (errors) => {
-                console.log('Xóa thất bại', errors);
-                alert('Có lỗi xảy ra khi xóa Khoa!');
+                alert("Có lỗi xảy ra khi xóa Khoa!");
                 console.error(errors);
             },
         });
-    } else {
-        console.log('Hủy xóa, không gửi yêu cầu');
+    }
+};
+
+const performSearch = () => {
+    if (debounceTimeout.value) {
+        clearTimeout(debounceTimeout.value);
+    }
+    debounceTimeout.value = setTimeout(() => {
+        router.get(
+            route("admin.khoa.index"),
+            {
+                search: searchTerm.value,
+                filter: filterBy.value,
+            },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
+    }, 300); // Delay 300ms để tránh gọi API quá nhiều
+};
+
+// Theo dõi thay đổi của searchTerm và filterBy
+watch([searchTerm, filterBy], () => {
+    performSearch();
+});
+
+// Xử lý tìm kiếm thủ công khi nhấn Enter
+const handleSearch = (event) => {
+    if (event.key === "Enter") {
+        performSearch();
     }
 };
 </script>
@@ -62,15 +91,44 @@ const deleteKhoa = (id) => {
                         class="card-header d-flex justify-content-between align-items-center"
                     >
                         <h3 class="mb-0">Khoa</h3>
+                        <div class="d-flex gap-2">
+                            <!-- Ô tìm kiếm -->
+                            <div class="input-group" style="width: 300px;">
+                                <input
+                                    v-model="searchTerm"
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Tìm theo ID hoặc tên Khoa..."
+                                    @keyup="handleSearch"
+                                />
+                                <button
+                                    class="btn btn-success-add"
+                                    @click="performSearch"
+                                >
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <!-- Bộ lọc -->
+                            <select
+                                v-model="filterBy"
+                                class="form-control"
+                                style="width: 150px;"
+                            >
+                                <option value="all">Tất cả</option>
+                                <option value="id">Theo ID</option>
+                                <option value="ten">Theo tên</option>
+                            </select>
+                            <!-- Nút thêm Khoa -->
+                            
+                        </div>
                         <Link
-                            :href="route('admin.khoa.create')"
-                            class="btn btn-success-add"
-                        >
-                            <i class="fas fa-user-plus"></i> Add Khoa
-                        </Link>
+                                :href="route('admin.khoa.create')"
+                                class="btn btn-success-add"
+                            >
+                                <i class="fas fa-user-plus"></i> Add Khoa
+                            </Link>
                     </div>
                     <div class="card-body">
-                        <!-- Bảng hiển thị danh sách người dùng -->
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
@@ -119,7 +177,6 @@ const deleteKhoa = (id) => {
                         <!-- Phân trang -->
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center mt-3">
-                                <!-- Nút Previous -->
                                 <li
                                     class="page-item"
                                     :class="{
@@ -137,8 +194,6 @@ const deleteKhoa = (id) => {
                                         <i class="fas fa-chevron-left"></i>
                                     </Link>
                                 </li>
-
-                                <!-- Các số trang -->
                                 <li
                                     v-for="link in khoas.links.slice(1, -1)"
                                     :key="link.label"
@@ -153,8 +208,6 @@ const deleteKhoa = (id) => {
                                         {{ link.label }}
                                     </Link>
                                 </li>
-
-                                <!-- Nút Next -->
                                 <li
                                     class="page-item"
                                     :class="{
