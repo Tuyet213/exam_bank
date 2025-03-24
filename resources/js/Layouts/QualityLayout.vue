@@ -35,28 +35,16 @@ onUnmounted(() => {
     <!-- Sidebar -->
     <div class="sidebar" :class="{ 'sidebar-hidden': !isSidebarVisible }">
       <div class="sidebar-header">
-        <h4>QUẢN LÝ ĐÀO TẠO</h4>
+        <h4>QUẢN LÝ CHẤT LƯỢNG</h4>
         <button class="btn btn-close-sidebar" @click="toggleSidebar" v-show="isMobile">
           <i class="fas fa-arrow-left"></i>
         </button>
       </div>
       <ul class="sidebar-menu">
-        <!-- <li><i class="fas fa-tachometer-alt"></i> <Link :href="route('admin.dashboard')">Dashboard</Link></li> -->
-        <li><i class="fas fa-building"></i> <Link :href="route('admin.khoa.index')">Khoa</Link></li>
-        <li><i class="fas fa-building"></i> <Link :href="route('admin.bomon.index')">Bộ môn</Link></li>
-        <li><i class="fas fa-building"></i> <Link :href="route('admin.chucvu.index')">Chức vụ</Link></li>
-        <li><i class="fas fa-building"></i> <Link :href="route('admin.bacdaotao.index')">Bậc đào tạo</Link></li>
-        <li><i class="fas fa-building"></i> <Link :href="route('admin.hocphan.index')">Học phần</Link></li>
-        <li><i class="fas fa-building"></i> <Link :href="route('admin.chuandaura.index')">Chuẩn đầu ra</Link></li>
-        <li><i class="fas fa-building"></i> <Link :href="route('admin.lophocphan.index')">Lớp học phần</Link></li>
-        <li><i class="fas fa-building"></i> <Link :href="route('admin.nhiemvu.index')">Nhiệm vụ</Link></li>
-        <li><i class="fas fa-building"></i> <Link :href="route('admin.gioquydoi.index')">Giờ quy đổi</Link></li>
-        <li><i class="fas fa-users"></i> <Link :href="route('admin.user.index')">Users</Link></li>
+        <li><i class="fas fa-users"></i> <Link :href="route('qlo.notice.create')">Thông báo quy định</Link></li>
         
       </ul>
       <div class="sidebar-footer">
-        <Link class="btn btn-success w-100 mt-3" :href="route('dashboard')">Client Page</Link>
-        
         <Link class="btn btn-success w-100 mt-3" :href="route('logout')" method="post" as="button">Logout</Link>
       </div>
     </div>
@@ -70,7 +58,7 @@ onUnmounted(() => {
         </button>
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Admin</a></li>
+            <li class="breadcrumb-item"><a href="#">Quản lý chất lượng</a></li>
             <slot name="sub-link" />
           </ol>
         </nav>

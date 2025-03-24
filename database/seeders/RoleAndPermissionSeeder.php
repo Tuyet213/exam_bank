@@ -31,7 +31,7 @@ class RoleAndPermissionSeeder extends Seeder
         $teacher = Role::firstOrCreate(['name' => 'teacher']);
         $teacher->givePermissionTo(['create-questions', 'extract-exam-matrix']);
 
-        $qualitySurvey = Role::firstOrCreate(['name' => 'quality-survey']);
+        $qualitySurvey = Role::firstOrCreate(['name' => 'quality']);
         $qualitySurvey->givePermissionTo(['approve-exam-registration']);
 
         $TBM = Role::firstOrCreate(['name' => 'TBM']);

@@ -38,7 +38,7 @@ const form = useForm({
     more_address: "",
 });
 
-
+//ref: theo dõi thay đổi cùng vs watch (ở dưới)
 const tinhs = ref([]);
 const quans = ref([]);
 const xas = ref([]);
@@ -129,9 +129,9 @@ const submit = () => {
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
-                <a :href="route('admin.user.index')">Bộ môn</a>
+                <a :href="route('admin.useindex')">Người dùng</a>
             </li>
-            <li class="breadcrumb-item active">Create</li>
+            <li class="breadcrumb-item active">Tạo tài khoản</li>
         </template>
 
         <!-- Nội dung chính -->

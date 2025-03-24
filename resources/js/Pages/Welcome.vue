@@ -55,14 +55,23 @@ function handleImageError() {
                         </svg>
                     </div>
                     <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-end">
-                        <Link
-                            v-if="$page.props.auth.user"
-                            :href="route('dashboard')"
-                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                        >
-                            Dashboard
-                        </Link>
-
+                        <div v-if="$page.props.auth.user">
+                            Xin chào {{ $page.props.auth.user.name }}
+                            <Link
+                                :href="route('dashboard')"
+                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                            >
+                                Dashboard
+                            </Link>
+                            <Link
+                                :href="route('logout')"
+                                method="post"
+                                as="button"
+                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                            >
+                                Logout
+                            </Link>
+                        </div>
                         <template v-else>
                             <Link
                                 :href="route('login')"
