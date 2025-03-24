@@ -22,7 +22,7 @@ createInertiaApp({
         //h là hàm render component
         return createApp({ render: () => h(App, props) })
             .use(plugin) //kết nối Inertia với Vue
-            .use(ZiggyVue) //giúp vue sử dụng route laravel dễ dàng
+            .use(ZiggyVue)//giúp vue sử dụng route laravel dễ dàng
             .mount(el); //gắn ứng udngj vào DOM
     },
     progress: {

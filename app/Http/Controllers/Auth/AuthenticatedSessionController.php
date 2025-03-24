@@ -31,10 +31,14 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-        if(Auth::user()->hasRole('admin')){
-            return redirect()->intended(route('admin.khoa.index', absolute: false));
+        $role = Auth::user()->getRoleNames();
+        if($role->contains('admin')){
+            return redirect(route('admin.khoa.index'));
         }
-        return redirect()->intended(route('dashboard', absolute: false));
+        if($role->contains('quality')){
+            return redirect(route('qlo.notice.create'));
+        }
+       // return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**
