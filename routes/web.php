@@ -16,6 +16,7 @@
     use Illuminate\Support\Facades\Route;
     use Inertia\Inertia;
     use Illuminate\Support\Facades\Http;
+
     // chỉ trả về component hoặc page vì nó tự import vào app.blade.php
 
     Route::get('/', function () {
@@ -135,6 +136,8 @@
         //notice
         Route::get('/notice/create', [QualityOfficerController::class, 'create'])->name('qlo.notice.create');
         Route::post('/notice/store', [QualityOfficerController::class, 'store'])->name('qlo.notice.store');
+        Route::get('/notice/show/{id}', [QualityOfficerController::class, 'show'])->name('qlo.notice.show');
+        Route::get('/notice/index', [QualityOfficerController::class, 'index'])->name('qlo.notice.index');
     });
 
     Route::middleware('auth')->group(function () {

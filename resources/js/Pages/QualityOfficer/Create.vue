@@ -26,9 +26,10 @@ const handleFileChange = (event) => {
 <template>
     <QualityLayout>
         <template #sub-link>
-            <li class="breadcrumb-item active">
-                <a :href="route('qlo.notice.create')">Thông báo quy định</a>
+            <li class="breadcrumb-item">
+                <a :href="route('qlo.notice.index')">Thông báo quy định</a>
             </li>
+            <li class="breadcrumb-item active">Create</li>
         </template>
         <template #content>
             <div class="content">

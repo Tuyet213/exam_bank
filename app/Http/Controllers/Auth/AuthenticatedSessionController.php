@@ -36,7 +36,7 @@ class AuthenticatedSessionController extends Controller
             return redirect(route('admin.khoa.index'));
         }
         if($role->contains('quality')){
-            return redirect(route('qlo.notice.create'));
+            return redirect(route('qlo.notice.index'));
         }
        // return redirect()->intended(route('dashboard', absolute: false));
     }

@@ -22,3 +22,4 @@ yarn-error.log
 /.vscode
 /.zed
 *.apps.googleusercontent.com.json
+storage/credentials/google-drive.json

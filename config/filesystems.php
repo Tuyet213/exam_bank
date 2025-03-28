@@ -1,4 +1,9 @@
 <?php
+use Masbug\Flysystem\GoogleDriveAdapter;
+use League\Flysystem\Filesystem;
+use Google\Client as GoogleClient;
+use Google\Service\Drive;
+
 
 return [
 
@@ -58,6 +63,18 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
             'report' => false,
+        ],
+        'google' => [
+            'driver' => 'google',
+            'via'    => GoogleDriveAdapter::class,
+            'client' => function () {
+                $client = new GoogleClient();
+                $client->setAuthConfig(storage_path('credentials/google-drive.json'));
+                $client->addScope(Drive::DRIVE);
+                return $client;
+            },
+            'folder_id' => env('GOOGLE_DRIVE_FOLDER_ID'),
+            
         ],
 
     ],

@@ -8,15 +8,29 @@ use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\NoticeMail;
 use App\Models\ThongBao;
-use Exception;
-use Google\Client;
-use Google\Photos\Library\V1\PhotosLibraryClient;
-use Google\Auth\Credentials\UserRefreshCredentials;
-use Google\Photos\Library\V1\PhotosLibraryResourceFactory;
+use Illuminate\Support\Facades\Storage;
+use Google\Client as Google_Client;
+use Google\Service\Drive as Google_Service_Drive;
+use Google\Service\Drive\Permission as Google_Service_Drive_Permission;
+
 //New code
 
 class QualityOfficerController extends Controller
 {
+    public function index()
+    {
+        $query = ThongBao::where('able', true);
+        $thongbaos = $query->paginate(10)->withQueryString();
+        return Inertia::render('QualityOfficer/Index', compact('thongbaos'));
+    }
+
+    public function show($id)
+    {
+        $thongbao = ThongBao::find($id);
+        $thongbao->files = json_decode($thongbao->files);
+        return Inertia::render('QualityOfficer/Show', compact('thongbao'));
+    }
+
     public function create()
     {
         return Inertia::render('QualityOfficer/Create');
@@ -24,7 +38,6 @@ class QualityOfficerController extends Controller
 
     public function store(Request $request)
     {
-        // Xác thực dữ liệu đầu vào
         $request->validate([
             'title' => 'required|string',
             'content' => 'required|string',
@@ -42,45 +55,42 @@ class QualityOfficerController extends Controller
     //      Mail::to($receiver->email)->send(new NoticeMail($request->title, $request->content, $request->file('files')));
     //  }
 
-        
-    // https://developers.google.com/photos/library/legacy/guides/get-started-php
-
     
     $fileUrls = [];
     if ($request->hasFile('files')) {
-        $jsonKey = base_path(env('GOOGLE_APPLICATION_CREDENTIALS'));
-        echo $jsonKey;
-        $authCredentials = new UserRefreshCredentials(
-            'https://www.googleapis.com/auth/photoslibrary',
-            $jsonKey,
-        );
-        $photosLibraryClient = new PhotosLibraryClient(['credentials' => $authCredentials]);
-        $newAlbum = PhotosLibraryResourceFactory::album("Exambank");
-        $createdAlbum = $photosLibraryClient->createAlbum($newAlbum);
-        $albumId = $createdAlbum->getId();
-        // Tải từng tệp lên Google Photos
-        foreach ($request->file('files') as $file) {
-            $uploadToken = $photosLibraryClient->upload($file->getRealPath());
-            $newMediaItem = $photosLibraryClient->batchCreateMediaItems([
-                'newMediaItems' => [
-                    [
-                        'simpleMediaItem' => ['uploadToken' => $uploadToken]
-                    ]   
-                ]
-            ]);
-            $photosLibraryClient->batchCreateMediaItems($newMediaItem, ['albumId' => $albumId]);
-            $fileUrls[] = $newMediaItem->getNewMediaItemResults()[0]->getMediaItem()->getBaseUrl();
-            
+        $client = new Google_Client();
+        $client->setAuthConfig(storage_path('credentials/google-drive.json'));
+        $client->addScope(Google_Service_Drive::DRIVE);
+        $service = new Google_Service_Drive($client);
+
+        $files = $request->file('files');
+        foreach ($files as $file) {
+            $filePath = Storage::disk('google')->putFile(env('GOOGLE_DRIVE_FOLDER_ID'), $file);
+
+            if ($filePath) {
+                $fileId = explode("/", $filePath);
+                $fileId = end($fileId); 
+                echo $fileId;
+                $permission = new Google_Service_Drive_Permission();
+                $permission->setRole('reader'); // Quyền xem
+                $permission->setType('anyone'); // Bất kỳ ai có link
+                $service->permissions->create($fileId, $permission);
+
+                $fileUrl = "https://drive.google.com/uc?id={$fileId}";
+                $fileName = $file->getClientOriginalName();
+                $fileUrls[$fileName] = $fileUrl;
+
+            }
         }
     }
 
-    // Lưu thông tin vào bảng ThongBao
+        //dd(Storage::disk('google')->allFiles());
     ThongBao::create([
         'title' => $request->title,
         'content' => $request->content,
         'files' => json_encode($fileUrls),
     ]);
-            return redirect()->back()->with('success', 'Thông báo đã được lưu thành công');
+    return redirect()->back()->with('success', 'Thông báo đã được lưu thành công');
       
     }
 }
