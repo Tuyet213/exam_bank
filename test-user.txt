@@ -1,2 +1,2 @@
 created by user
-conflict admin
+conflict user
