@@ -24,5 +24,5 @@ class DatabaseSeeder extends Seeder
     //     $adminRole = Role::create(['name' => 'admin']);
     //     Permission::create(['name' => 'admin']);
     //     $adminRole->givePermissionTo('admin');
-    // }
+    //
 }
