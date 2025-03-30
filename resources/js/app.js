@@ -1,14 +1,18 @@
-
 import './bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../css/app.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+
+// Thêm cấu hình CSRF token cho Inertia.js
+import axios from 'axios';
+axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]')?.content;
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+axios.defaults.withCredentials = true;
 
 createInertiaApp({
     title: (title) => `${title}`,
