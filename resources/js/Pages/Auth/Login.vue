@@ -5,8 +5,9 @@ import GuestLayout from '@/Layouts/GuestLayout.vue';
 
 export default {
   components: {
-    Link,
+    Link, Head
   },
+  layout: GuestLayout,
   props: {
     canResetPassword: Boolean,
   },
@@ -32,7 +33,7 @@ Giữ ref="input" để tham chiếu DOM. -->
 
 
 <template>
-  <GuestLayout>
+
     <Head title="Signin" />
   <div class="container my-auto">
     <div class="row mt-5">
@@ -154,6 +155,6 @@ Giữ ref="input" để tham chiếu DOM. -->
       </div>
     </div>
   </div>
-  </GuestLayout>
+
 </template>
 
