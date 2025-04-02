@@ -15,9 +15,11 @@ const { thongbao } = defineProps({
 <template>
     <QualityLayout>
         <template #sub-link>
-            <li class="breadcrumb-item active">
+            <li class="breadcrumb-item">
                 <a :href="route('qlo.notice.index')">Thông báo quy định</a>
+                
             </li>
+            <li class="breadcrumb-item active">{{ thongbao.title }}</li>
         </template>
         <template #content>
             <div class="content">
@@ -30,11 +32,15 @@ const { thongbao } = defineProps({
                     </div>
 
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <h3>{{ thongbao.title }}</h3>
-                            <p>{{ thongbao.content }}</p>
-                            <div v-for="(fileUrl, fileName) in thongbao.files" :key="fileName">
-                                <a :href="fileUrl" target="_blank" download>{{ fileName }}</a>
+                        <h3 class="font-weight-bold mb-3">Tiêu đề: {{ thongbao.title }}</h3>
+                        <p class="mb-4" style="font-size: 1.1em;">{{ thongbao.content }}</p>
+                        <h4 class="font-weight-bold">File đính kèm:</h4>
+                        <div class="row">
+                            <div class="col-12" v-for="file in thongbao.files" :key="file.name" style="margin-bottom: 15px;">
+                                <div class="d-flex align-items-center">
+                                    <img :src="file.url" alt="Ảnh" class="img-thumbnail me-2" style="width: 100px; height: 100px;" referrerpolicy="no-referrer">
+                                    <a :href="file.url" target="_blank" download class="btn btn-primary btn-sm">{{ file.name }}</a>
+                                </div>
                             </div>
                         </div>
                     </div>

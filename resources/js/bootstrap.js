@@ -10,3 +10,10 @@ if (token) {
 } else {
     console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
 }
+
+// Force reload CSRF token for the first request
+document.addEventListener('DOMContentLoaded', function() {
+    axios.get('/sanctum/csrf-cookie').then(response => {
+        console.log('CSRF token refreshed');
+    });
+});

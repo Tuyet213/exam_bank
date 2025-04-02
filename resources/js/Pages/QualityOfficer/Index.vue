@@ -9,7 +9,6 @@ const { thongbaos } = defineProps({
         required: true,
     },
 });
-
 </script>
 
 <template>
@@ -23,16 +22,16 @@ const { thongbaos } = defineProps({
             <div class="content">
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
                     <!-- Card Header -->
-                    <div class="card-header bg-success-tb text-white p-4">
+                    <div class="card-header bg-success-tb text-white p-4 d-flex justify-content-between">
                         <h3 class="mb-0 font-weight-bolder">
                             THÔNG BÁO QUY ĐỊNH MỚI
                         </h3>
                         <Link
-                                :href="route('qlo.notice.create')"
-                                class="btn btn-success-add"
-                            >
-                                <i class="fas fa-user-plus"></i> Add Bậc đào tạo
-                            </Link>
+                            :href="route('qlo.notice.create')"
+                            class="btn btn-success-add"
+                        >
+                            <i class="fas fa-user-plus"></i> Thêm thông báo
+                        </Link>
                     </div>
 
                     <div class="card-body">
@@ -43,7 +42,7 @@ const { thongbaos } = defineProps({
                                         <th>ID</th>
                                         <th>Tiêu đề</th>
                                         <th>Nội dung</th>
-                                        <th>Ngày tạo</th>
+                                        <th>Ngày gửi</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -53,19 +52,26 @@ const { thongbaos } = defineProps({
                                             Không có dữ liệu
                                         </td>
                                     </tr>
-                                    <tr v-for="thongbao in thongbaos.data" :key="thongbao.id">
+                                    <tr
+                                        v-for="thongbao in thongbaos.data"
+                                        :key="thongbao.id"
+                                    >
                                         <td>{{ thongbao.id }}</td>
                                         <td>{{ thongbao.title }}</td>
                                         <td>{{ thongbao.content }}</td>
-                                        <td>{{ thongbao.created_at }}</td>
+                                        <td>{{ thongbao.formatted_date }}</td>
                                         <td>
                                             <Link
-                                                :href="route('qlo.notice.show', thongbao.id)"
+                                                :href="
+                                                    route(
+                                                        'qlo.notice.show',
+                                                        thongbao.id
+                                                    )
+                                                "
                                                 class="btn btn-sm btn-success-edit me-2"
                                             >
                                                 <i class="fas fa-eye"></i>
                                             </Link>
-                                            
                                         </td>
                                     </tr>
                                 </tbody>
@@ -77,12 +83,17 @@ const { thongbaos } = defineProps({
                             <ul class="pagination justify-content-center mt-3">
                                 <li
                                     class="page-item"
-                                    :class="{ disabled: thongbaos.current_page === 1 }"
+                                    :class="{
+                                        disabled: thongbaos.current_page === 1,
+                                    }"
                                 >
                                     <Link
                                         :href="thongbaos.links[0]?.url || '#'"
                                         class="page-link rounded-circle"
-                                        :class="{ 'disabled-link': !thongbaos.links[0]?.url }"
+                                        :class="{
+                                            'disabled-link':
+                                                !thongbaos.links[0]?.url,
+                                        }"
                                     >
                                         <i class="fas fa-chevron-left"></i>
                                     </Link>
@@ -103,12 +114,25 @@ const { thongbaos } = defineProps({
                                 </li>
                                 <li
                                     class="page-item"
-                                    :class="{ disabled: thongbaos.current_page === thongbaos.last_page }"
+                                    :class="{
+                                        disabled:
+                                            thongbaos.current_page ===
+                                            thongbaos.last_page,
+                                    }"
                                 >
                                     <Link
-                                        :href="thongbaos.links[thongbaos.links.length - 1]?.url || '#'"
+                                        :href="
+                                            thongbaos.links[
+                                                thongbaos.links.length - 1
+                                            ]?.url || '#'
+                                        "
                                         class="page-link rounded-circle"
-                                            :class="{ 'disabled-link': !thongbaos.links[thongbaos.links.length - 1]?.url }"
+                                        :class="{
+                                            'disabled-link':
+                                                !thongbaos.links[
+                                                    thongbaos.links.length - 1
+                                                ]?.url,
+                                        }"
                                     >
                                         <i class="fas fa-chevron-right"></i>
                                     </Link>

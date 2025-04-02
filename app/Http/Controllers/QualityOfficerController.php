@@ -9,10 +9,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\NoticeMail;
 use App\Models\ThongBao;
 use Illuminate\Support\Facades\Storage;
-use Google\Client as Google_Client;
-use Google\Service\Drive as Google_Service_Drive;
-use Google\Service\Drive\Permission as Google_Service_Drive_Permission;
-
+use GuzzleHttp\Client;
+use App\Services\ImgUrService;
 //New code
 
 class QualityOfficerController extends Controller
@@ -21,6 +19,13 @@ class QualityOfficerController extends Controller
     {
         $query = ThongBao::where('able', true);
         $thongbaos = $query->paginate(10)->withQueryString();
+        
+        // Thêm trường formatted_date thay vì thay đổi created_at
+        $thongbaos->through(function ($thongbao) {
+            $thongbao->formatted_date = date('d/m/Y H:i', strtotime($thongbao->created_at));
+            return $thongbao;
+        });
+        
         return Inertia::render('QualityOfficer/Index', compact('thongbaos'));
     }
 
@@ -28,6 +33,7 @@ class QualityOfficerController extends Controller
     {
         $thongbao = ThongBao::find($id);
         $thongbao->files = json_decode($thongbao->files);
+        $imgUrService = new ImgUrService();
         return Inertia::render('QualityOfficer/Show', compact('thongbao'));
     }
 
@@ -41,56 +47,38 @@ class QualityOfficerController extends Controller
         $request->validate([
             'title' => 'required|string',
             'content' => 'required|string',
-            'files.*' => 'nullable|file'
+            'files.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240'
         ]);
 
          // Gửi email thông báo
-    //      $receivers = User::where('able', true)
-    //      ->whereHas('roles', function ($query) {
-    //          $query->where('name', 'TK');
-    //      })
-    //      ->get();
+         $receivers = User::where('able', true)
+         ->whereHas('roles', function ($query) {
+             $query->where('name', 'TK');
+         })
+         ->get();
 
-    //  foreach ($receivers as $receiver) {
-    //      Mail::to($receiver->email)->send(new NoticeMail($request->title, $request->content, $request->file('files')));
-    //  }
+     foreach ($receivers as $receiver) {
+         Mail::to($receiver->email)->send(new NoticeMail($request->title, $request->content, $request->file('files')));
+     }
 
     
     $fileUrls = [];
     if ($request->hasFile('files')) {
-        $client = new Google_Client();
-        $client->setAuthConfig(storage_path('credentials/google-drive.json'));
-        $client->addScope(Google_Service_Drive::DRIVE);
-        $service = new Google_Service_Drive($client);
-
-        $files = $request->file('files');
-        foreach ($files as $file) {
-            $filePath = Storage::disk('google')->putFile(env('GOOGLE_DRIVE_FOLDER_ID'), $file);
-
-            if ($filePath) {
-                $fileId = explode("/", $filePath);
-                $fileId = end($fileId); 
-                echo $fileId;
-                $permission = new Google_Service_Drive_Permission();
-                $permission->setRole('reader'); // Quyền xem
-                $permission->setType('anyone'); // Bất kỳ ai có link
-                $service->permissions->create($fileId, $permission);
-
-                $fileUrl = "https://drive.google.com/uc?id={$fileId}";
-                $fileName = $file->getClientOriginalName();
-                $fileUrls[$fileName] = $fileUrl;
-
-            }
+        $imgUrService = new ImgUrService();
+        foreach ($request->file('files') as $file) {
+            $fileName = uniqid() . '_' . $file->getClientOriginalName();
+            $fileUrl = $imgUrService->uploadImage($file);
+            $fileUrls[] = ['url' => $fileUrl, 'name' => $fileName];
         }
     }
 
-        //dd(Storage::disk('google')->allFiles());
     ThongBao::create([
         'title' => $request->title,
         'content' => $request->content,
         'files' => json_encode($fileUrls),
     ]);
-    return redirect()->back()->with('success', 'Thông báo đã được lưu thành công');
+    
+    return redirect()->route('qlo.notice.index')->with('success', 'Thông báo đã được lưu thành công');
       
     }
 }

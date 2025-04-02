@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Google\Client as Google_Client;
 use Google\Service\Drive as Google_Service_Drive;
 use Masbug\Flysystem\GoogleDriveAdapter;
@@ -28,6 +30,17 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);     
+        
+        // Đảm bảo session được start trước khi sử dụng
+        if (!app()->runningInConsole() && !Session::isStarted()) {
+            Session::start();
+        }
+        
+        // Đảm bảo CSRF token luôn được tạo
+        if (!Session::has('_token')) {
+            Session::put('_token', Str::random(40));
+        }
+        
         Storage::extend('google', function ($app, $config) {
             $client = new Google_Client();
             $client->setAuthConfig(storage_path('credentials/google-drive.json'));

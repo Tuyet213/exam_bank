@@ -131,6 +131,17 @@
         return $response->json();
     });
 
+    Route::get('/proxy-imgur', function ($request) {
+        $url = $request->query('url');
+    
+        // Đảm bảo chỉ lấy ảnh từ Imgur (tránh lỗ hổng bảo mật)
+        if (!str_starts_with($url, 'https://i.imgur.com/')) {
+            abort(403, 'Forbidden');
+        }
+    
+        $image = file_get_contents($url);
+        return response($image)->header('Content-Type', 'image/jpeg');
+    });
 
     Route::prefix('qlo')->middleware(['auth', 'role:quality'])->group(function () {
         //notice

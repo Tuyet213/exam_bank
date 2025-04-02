@@ -33,11 +33,10 @@ Giữ ref="input" để tham chiếu DOM. -->
 
 
 <template>
-
     <Head title="Signin" />
   <div class="container my-auto">
-    <div class="row mt-5">
-      <div class="col-lg-5 col-md-8 col-12 mx-auto mt-5">
+    <div class="row mt-5 justify-content-center">
+      <div class="col-xxl-6 col-xl-7 col-lg-8 col-md-10 col-12 mx-auto mt-5">
         <div class="card z-index-0 animated-fade-in">
           <!-- Card Header -->
           <div class="card-header p-0 mt-n6 mx-3 z-index-2" style="position: relative; top: -10px;">
