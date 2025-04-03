@@ -145,8 +145,8 @@ const handleSearch = (event) => {
                                         </td>
                                     </tr>
                                     <tr v-for="bacdaotao in bacdaotaos.data" :key="bacdaotao.id">
-                                        <td>{{ bacdaotao.id }}</td>
-                                        <td>{{ bacdaotao.ten }}</td>
+                                        <td>{{ bacdaotao?.id }}</td>
+                                        <td>{{ bacdaotao?.ten }}</td>
                                         <td>
                                             <Link
                                                 :href="route('admin.bacdaotao.edit', bacdaotao.id)"

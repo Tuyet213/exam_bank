@@ -1,21 +1,29 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Link } from "@inertiajs/vue3";
-import { ref } from 'vue';
+import { ref, watch } from "vue";
+import { router } from '@inertiajs/vue3';
 
-const gioitinh = ref([]);
 
-const { users, message, success } = defineProps({
+const { users, message, success, bomons, chucvus } = defineProps({
     users: {
-        type: Object, 
+        type: Object,
         required: true,
         default: () => ({
-            data: [], 
+            data: [],
             current_page: 1,
             last_page: 1,
             total: 0,
-            links: [], 
+            links: [],
         }),
+    },
+    bomons: {
+        type: Array,
+        required: true,
+    },
+    chucvus: {
+        type: Array,
+        required: true,
     },
     message: {
         type: String,
@@ -30,7 +38,7 @@ const { users, message, success } = defineProps({
 console.log(users);
 
 const deleteUser = (id) => {
-    const user = users.data.find((user) => user.id === id); 
+    const user = users.data.find((user) => user.id === id);
     if (!user) {
         alert("Người dùng không tồn tại!");
         return;
@@ -41,6 +49,42 @@ const deleteUser = (id) => {
         return true;
     }
     return false;
+};
+const searchTerm = ref("");
+const selectedBoMon = ref("");
+const selectedChucVu = ref("");
+const debounceTimeout = ref(null);
+
+const performSearch = () => {
+    if (debounceTimeout.value) {
+        clearTimeout(debounceTimeout.value);
+    }
+    debounceTimeout.value = setTimeout(() => {
+        router.get(
+            route("admin.user.index"),
+            {
+                search: searchTerm.value,
+                id_bo_mon: selectedBoMon.value,
+                id_chuc_vu: selectedChucVu.value,
+            },
+            {
+                preserveState: true,
+                replace: true,
+            }
+        );
+    }, 300); // Delay 300ms để tránh gọi API quá nhiều
+};
+
+// Theo dõi thay đổi của các biến tìm kiếm
+watch([searchTerm, selectedBoMon, selectedChucVu], () => {
+    performSearch();
+});
+
+// Xử lý tìm kiếm thủ công khi nhấn Enter
+const handleSearch = (event) => {
+    if (event.key === "Enter") {
+        performSearch();
+    }
 };
 </script>
 
@@ -66,6 +110,48 @@ const deleteUser = (id) => {
                         </Link>
                     </div>
                     <div class="card-body">
+                        <div class="search-form mb-4">
+                            <div class="row justify-content-between">
+                                <div class="col-md-4 col-sm-12">
+                                        <input
+                                            v-model="searchTerm"
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Tìm theo ID, tên, email, sdt"
+                                            @keyup="handleSearch"
+                                        />
+                                    </div>
+                                    <select
+                                        v-model="selectedBoMon"
+                                        class="form-control col-md-4 col-sm-12"
+                                        style="width: 200px"
+                                    >
+                                        <option value="">Tất cả Bộ môn</option>
+                                        <option
+                                            v-for="bomon in bomons"
+                                            :key="bomon.id"
+                                            :value="bomon.id"
+                                        >
+                                            {{ bomon.ten }}
+                                        </option>
+                                    </select>
+                                    <select
+                                        v-model="selectedChucVu"
+                                        class="form-control col-md-4 col-sm-12"
+                                        style="width: 200px"
+                                    >
+                                        <option value="">Tất cả Chức vụ</option>
+                                        <option
+                                            v-for="chucvu in chucvus"
+                                            :key="chucvu.id"
+                                            :value="chucvu.id"
+                                        >
+                                            {{ chucvu.ten }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        
                         <!-- Bảng hiển thị danh sách người dùng -->
                         <div class="table-responsive">
                             <table class="table table-hover">
@@ -74,10 +160,8 @@ const deleteUser = (id) => {
                                         <th>ID</th>
                                         <th>Tên</th>
                                         <th>Email</th>
-                                        <th>Số điện thoại</th>
-                                        <th>Ngày sinh</th>
-                                        <th>Giới tính</th>
                                         <th>Chức vụ</th>
+                                        <th>Khoa</th>
                                         <th>Bộ môn</th>
                                         <th>Actions</th>
                                     </tr>
@@ -92,14 +176,40 @@ const deleteUser = (id) => {
                                         v-for="user in users.data"
                                         :key="user.id"
                                     >
-                                        <td>{{ user.id }}</td>
-                                        <td>{{ user.name }}</td>
-                                        <td>{{ user.email }}</td>
-                                        <td>{{ user.sdt }}</td>
-                                        <td>{{ user.ngay_sinh }}</td>
-                                        <td>{{ user.gioi_tinh === 1 ? 'Nam' : 'Nữ' }}</td>
-                                        <td>{{ user.chucvu.ten }}</td>
-                                        <td>{{ user.bomon.ten }}</td>
+                                        <td>{{ user?.id }}</td>
+                                        <td>{{ user?.name }}</td>
+                                        <td
+                                            style="
+                                                word-wrap: break-word;
+                                                max-width: 150px;
+                                            "
+                                        >
+                                            {{ user?.email }}
+                                        </td>
+                                        <td
+                                            style="
+                                                word-wrap: break-word;
+                                                max-width: 150px;
+                                            "
+                                        >
+                                            {{ user?.chucvu?.ten }}
+                                        </td>
+                                        <td
+                                            style="
+                                                word-wrap: break-word;
+                                                max-width: 150px;
+                                            "
+                                        >
+                                            {{ user?.bomon?.khoa?.ten }}
+                                        </td>
+                                        <td
+                                            style="
+                                                word-wrap: break-word;
+                                                max-width: 150px;
+                                            "
+                                        >
+                                            {{ user?.bomon?.ten }}
+                                        </td>
                                         <td>
                                             <Link
                                                 :href="
@@ -111,6 +221,18 @@ const deleteUser = (id) => {
                                                 class="btn btn-sm btn-success-edit me-2"
                                             >
                                                 <i class="fas fa-edit"></i>
+                                            </Link>
+                                            <Link
+                                                :href="
+                                                    route(
+                                                        'admin.user.show',
+                                                        user.id
+                                                    )
+                                                "
+                                                class="btn btn-sm btn-primary me-2"
+                                                style="border-radius: 50%"
+                                            >
+                                                <i class="fas fa-eye"></i>
                                             </Link>
                                             <Link
                                                 :href="
@@ -184,9 +306,8 @@ const deleteUser = (id) => {
                                 >
                                     <Link
                                         :href="
-                                                users.links[
-                                                users.links.length - 1
-                                            ]?.url || '#'
+                                            users.links[users.links.length - 1]
+                                                ?.url || '#'
                                         "
                                         class="page-link rounded-circle"
                                         :class="{

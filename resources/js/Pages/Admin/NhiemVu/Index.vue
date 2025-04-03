@@ -148,8 +148,8 @@ const handleSearch = (event) => {
                                         </td>
                                     </tr>
                                     <tr v-for="nhiemvu in nhiemvus.data" :key="nhiemvu.id">
-                                        <td>{{ nhiemvu.id }}</td>
-                                        <td>{{ nhiemvu.ten }}</td>
+                                        <td>{{ nhiemvu?.id }}</td>
+                                        <td>{{ nhiemvu?.ten }}</td>
                                         <td>
                                             <Link
                                                 :href="route('admin.nhiemvu.edit', nhiemvu.id)"

@@ -143,9 +143,9 @@ const handleSearch = (event) => {
                                         v-for="bomon in bomons.data"
                                         :key="bomon.id"
                                     >
-                                        <td>{{ bomon.id }}</td>
-                                        <td>{{ bomon.ten }}</td>
-                                        <td>{{ bomon.khoa.ten }}</td>
+                                        <td>{{ bomon?.id }}</td>
+                                        <td>{{ bomon?.ten }}</td>
+                                        <td>{{ bomon?.khoa?.ten }}</td>
                                         <td>
                                             <Link
                                                 :href="

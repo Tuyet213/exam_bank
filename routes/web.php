@@ -64,6 +64,7 @@
         Route::get('/user/edit/{id}', [UserController::class, 'edit'])->name('admin.user.edit');
         Route::put('/user/update/{id}', [UserController::class, 'update'])->name('admin.user.update');
         Route::delete('/user/destroy/{id}', [UserController::class, 'destroy'])->name('admin.user.destroy');
+        Route::get('/user/show/{id}', [UserController::class, 'show'])->name('admin.user.show');
 
         // Bậc đào tạo
         Route::get('/bacdaotao', [BacDaoTaoController::class, 'index'])->name('admin.bacdaotao.index');
