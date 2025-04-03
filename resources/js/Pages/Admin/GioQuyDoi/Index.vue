@@ -151,11 +151,11 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
                                         </td>
                                     </tr>
                                     <tr v-for="gioQuyDoi in gioQuyDois.data" :key="gioQuyDoi.id">
-                                        <td>{{ gioQuyDoi.id }}</td>
-                                        <td>{{ gioQuyDoi.loai_de_thi === 0 ? 'Trắc nghiệm' : gioQuyDoi.loai_de_thi === 1 ? 'Tự luận' : 'Trắc nghiệm + Tự luận' }}</td>
-                                        <td>{{ gioQuyDoi.loai_hanh_dong === 0 ? 'Biên soạn' : gioQuyDoi.loai_hanh_dong === 1 ? 'Họp phản biện cấp Bộ môn' : 'Họp thẩm định cấp Khoa'}}</td>
-                                        <td>{{ gioQuyDoi.gio }}</td>
-                                        <td>{{ gioQuyDoi.so_luong }}</td>
+                                        <td>{{ gioQuyDoi?.id }}</td>
+                                        <td>{{ gioQuyDoi?.loai_de_thi === 0 ? 'Trắc nghiệm' : gioQuyDoi?.loai_de_thi === 1 ? 'Tự luận' : 'Trắc nghiệm + Tự luận' }}</td>
+                                        <td>{{ gioQuyDoi?.loai_hanh_dong === 0 ? 'Biên soạn' : gioQuyDoi?.loai_hanh_dong === 1 ? 'Họp phản biện cấp Bộ môn' : 'Họp thẩm định cấp Khoa'}}</td>
+                                        <td>{{ gioQuyDoi?.gio }}</td>
+                                        <td>{{ gioQuyDoi?.so_luong }}</td>
                                         <td>
                                             <Link
                                                 :href="route('admin.gioquydoi.edit', gioQuyDoi.id)"

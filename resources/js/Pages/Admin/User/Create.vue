@@ -1,4 +1,3 @@
-
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { useForm } from "@inertiajs/vue3";
@@ -6,12 +5,20 @@ import { ref, watch } from "vue";
 import axios from "axios";
 import { onMounted } from "vue";
 
-const { chucvus, bomons } = defineProps({
+const { chucvus, bomons, roles, permissions } = defineProps({
     chucvus: {
         type: Array,
         required: true,
     },
     bomons: {
+        type: Array,
+        required: true,
+    },
+    roles: {
+        type: Array,
+        required: true,
+    },
+    permissions: {
         type: Array,
         required: true,
     },
@@ -25,17 +32,16 @@ const form = useForm({
     password_confirmation: "",
     sdt: "",
     dia_chi: "",
-    ngay_sinh: new Date(),
-    gioi_tinh: " ",
-    id_chucvu: " ",
-    id_bomon: " ",
-    tinh_id: "01",
-    quan_id: "01",
-    xa_id: "01",
-    tinh_name: "Hà Nội",
-    quan_name: "Hoàn Kiếm",
-    xa_name: "Phường Trần Hưng Đạo",
+    ngay_sinh: new Date().toISOString().split('T')[0],
+    gioi_tinh: true,
+    id_chuc_vu: " ",
+    id_bo_mon: " ",
+    tinh_name: "",
+    quan_name: "",
+    xa_name: "",
     more_address: "",
+    roles: [],
+    permissions: [],
 });
 
 //ref: theo dõi thay đổi cùng vs watch (ở dưới)
@@ -43,13 +49,13 @@ const tinhs = ref([]);
 const quans = ref([]);
 const xas = ref([]);
 
+
 const fetchTinhThanh = async () => {
     try {
-        const response = await axios.get(
-            "/proxy/tinh"
-        );
+        const response = await axios.get("/proxy/tinh");
         if (response.data.error === 0) {
             tinhs.value = response.data.data;
+            console.log(tinhs.value);
         }
     } catch (error) {
         console.error("Error fetching provinces:", error);
@@ -57,8 +63,8 @@ const fetchTinhThanh = async () => {
 };
 
 const fetchQuanHuyen = async () => {
-    console.log(form.tinh_id);
-    if (!form.tinh_id) {
+    if (!form.tinh_name) {
+        // Kiểm tra form.tinh_name thay vì form.tinh_id
         quans.value = [];
         xas.value = [];
         form.quan_name = "";
@@ -67,47 +73,67 @@ const fetchQuanHuyen = async () => {
     }
 
     try {
-        const response = await axios.get(
-                `/proxy/quan/${form.tinh_id}`
-        );
+        const selectedTinh = tinhs.value.find(tinh => tinh.full_name === form.tinh_name);
+        if (selectedTinh) {
+            const response = await axios.get(`/proxy/quan/${selectedTinh.id}`);
         if (response.data.error === 0) {
             quans.value = response.data.data;
-            form.quan_id = "";
             form.quan_name = "";
             xas.value = [];
-            form.xa_id = "";
             form.xa_name = "";
         }
+        }
+        
     } catch (error) {
         console.error("Error fetching districts:", error);
     }
 };
 
 const fetchXaPhuong = async () => {
-    if (!form.quan_id) {
+    if (!form.quan_name) {
+        // Kiểm tra form.quan_name thay vì form.quan_id
         xas.value = [];
-        form.xa_id = "";
         form.xa_name = "";
         return;
     }
 
     try {
-        const response = await axios.get(
-            `/proxy/xa/${form.quan_id}`
-        );
+        const selectedQuan = quans.value.find(quan => quan.full_name === form.quan_name);
+        if (selectedQuan) {
+            const response = await axios.get(`/proxy/xa/${selectedQuan.id}`);
         if (response.data.error === 0) {
             xas.value = response.data.data;
-            form.xa_id = "";
             form.xa_name = "";
         }
+        }
+        
     } catch (error) {
         console.error("Error fetching wards:", error);
     }
 };
+watch(
+    () => form.tinh_name,
+    (newTinhName) => {
+        form.tinh_id = newTinhName;
+    }
+);
 
-onMounted(()=>fetchTinhThanh());
-// Theo dõi form.xa_id để cập nhật xa_name
-watch(() => form.xa_id, updateXaName);
+watch(
+    () => form.quan_name,
+    (newQuanName) => {
+        form.quan_id = newQuanName;
+    }
+);
+
+watch(
+    () => form.xa_name,
+    (newXaName) => {
+        form.xa_id = newXaName;
+    }
+);
+onMounted(async () => {
+    await fetchTinhThanh();
+});
 
 // Hàm submit form
 const submit = () => {
@@ -115,6 +141,11 @@ const submit = () => {
         onSuccess: () => {
             alert("Tạo tài khoản thành công!");
             form.reset();
+            // Đặt lại các giá trị mặc định
+            form.tinh_name = "";
+            form.quan_name = "";
+            form.xa_name = "";
+            fetchTinhThanh(); // Tải lại danh sách tỉnh
         },
         onError: (errors) => {
             alert("Có lỗi xảy ra khi tạo tài khoản!");
@@ -129,7 +160,7 @@ const submit = () => {
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
-                <a :href="route('admin.useindex')">Người dùng</a>
+                <a :href="route('admin.user.index')">Người dùng</a>
             </li>
             <li class="breadcrumb-item active">Tạo tài khoản</li>
         </template>
@@ -199,7 +230,9 @@ const submit = () => {
 
                                 <div class="row">
                                     <!-- Số điện thoại -->
-                                    <div class="col-md-6 col-sm-12 mb-3 form-floating form-group">
+                                    <div
+                                        class="col-md-6 col-sm-12 mb-3 form-floating form-group"
+                                    >
                                         <input
                                             v-model="form.sdt"
                                             type="text"
@@ -219,7 +252,9 @@ const submit = () => {
                                         </small>
                                     </div>
                                     <!-- Email -->
-                                    <div class="col-md-6 col-sm-12 mb-3 form-floating form-group">
+                                    <div
+                                        class="col-md-6 col-sm-12 mb-3 form-floating form-group"
+                                    >
                                         <input
                                             v-model="form.email"
                                             type="email"
@@ -300,33 +335,26 @@ const submit = () => {
                                         </small>
                                     </div>
                                 </div>
-<!-- //////////////////////////////////////////Địa chỉ: Tỉnh, Quận, Xã ////////////////////////////////////-->
+                                <!-- //////////////////////////////////////////Địa chỉ: Tỉnh, Quận, Xã ////////////////////////////////////-->
                                 <div class="row">
                                     <div
                                         class="col-md-4 col-sm-12 mb-3 form-floating form-group"
                                     >
                                         <select
                                             v-model="form.tinh_name"
-                                            id="tinh_name"
-                                            class="form-control"
-                                            :class="{
-                                                'has-value': form.tinh_name,
-                                            }"
                                             @change="fetchQuanHuyen"
-                                            required
+                                            class="form-select"
                                         >
                                             <option value="">Chọn tỉnh</option>
                                             <option
-                                                v-for="tinh in tinhs.data"
+                                                v-for="tinh in tinhs"
                                                 :key="tinh.id"
-                                                :value="tinh.id"
+                                                :value="tinh.full_name"
                                             >
                                                 {{ tinh.full_name }}
                                             </option>
                                         </select>
-                                        <label for="tinh_name" class="form-label"
-                                            >Tỉnh</label
-                                        >
+                                        
                                         <small
                                             v-if="form.errors.tinh_name"
                                             class="text-danger"
@@ -339,25 +367,19 @@ const submit = () => {
                                     >
                                         <select
                                             v-model="form.quan_name"
-                                            id="quan_name"
-                                            class="form-control"
-                                            :class="{
-                                                'has-value': form.quan_name,
-                                            }"
-                                            required
+                                            @change="fetchXaPhuong"
+                                            class="form-select"
                                         >
                                             <option value="">Chọn quận</option>
                                             <option
                                                 v-for="quan in quans"
                                                 :key="quan.id"
-                                                :value="quan.id"
+                                                :value="quan.full_name"
                                             >
                                                 {{ quan.full_name }}
                                             </option>
                                         </select>
-                                        <label for="quan_name" class="form-label"
-                                            >Quận</label
-                                        >
+                                       
                                         <small
                                             v-if="form.errors.quan_name"
                                             class="text-danger"
@@ -368,25 +390,17 @@ const submit = () => {
                                     <div
                                         class="col-md-4 col-sm-12 mb-3 form-floating form-group"
                                     >
-                                        <select
-                                            v-model="form.xa_name"
-                                            id="xa_name"
-                                            class="form-control"
-                                            :class="{ 'has-value': form.xa_name }"
-                                            required
-                                        >
+                                        <select v-model="form.xa_name" class="form-select">
                                             <option value="">Chọn xã</option>
                                             <option
                                                 v-for="xa in xas"
                                                 :key="xa.id"
-                                                :value="xa.id"
+                                                :value="xa.full_name"
                                             >
                                                 {{ xa.full_name }}
                                             </option>
                                         </select>
-                                        <label for="xa_name" class="form-label"
-                                            >Xã</label
-                                        >
+                                       
                                         <small
                                             v-if="form.errors.xa_name"
                                             class="text-danger"
@@ -395,29 +409,33 @@ const submit = () => {
                                         </small>
                                     </div>
                                 </div>
-                               <div class="row">
-                                <div class=" col-12 mb-3 form-floating form-group">
-                                    <input
-                                        v-model="form.more_address"
-                                        type="text"
-                                        id="more_address"
-                                        class="form-control"
-                                        :class="{
-                                            'has-value': form.more_address,
-                                        }"
-                                    />
-                                    <label for="more_address" class="form-label"
-                                        >Địa chỉ chi tiết</label
+                                <div class="row">
+                                    <div
+                                        class="col-12 mb-3 form-floating form-group"
                                     >
-                                    <small
-                                        v-if="form.errors.more_address"
-                                        class="text-danger"
-                                    >
-                                        {{ form.errors.more_address }}
-                                    </small>
+                                        <input
+                                            v-model="form.more_address"
+                                            type="text"
+                                            id="more_address"
+                                            class="form-control"
+                                            :class="{
+                                                'has-value': form.more_address,
+                                            }"
+                                        />
+                                        <label
+                                            for="more_address"
+                                            class="form-label"
+                                            >Địa chỉ chi tiết</label
+                                        >
+                                        <small
+                                            v-if="form.errors.more_address"
+                                            class="text-danger"
+                                        >
+                                            {{ form.errors.more_address }}
+                                        </small>
+                                    </div>
                                 </div>
-                               </div>
-                               
+
                                 <div class="row">
                                     <!-- Ngày sinh -->
                                     <div
@@ -462,8 +480,8 @@ const submit = () => {
                                             <option value="">
                                                 Chọn giới tính
                                             </option>
-                                            <option value="1">Nam</option>
-                                            <option value="0">Nữ</option>
+                                            <option value="true">Nam</option>
+                                            <option value="false">Nữ</option>
                                         </select>
                                         <label
                                             for="gioi_tinh"
@@ -485,11 +503,11 @@ const submit = () => {
                                         class="col-md-6 col-sm-12 mb-3 form-floating form-group"
                                     >
                                         <select
-                                            v-model="form.id_chucvu"
-                                            id="id_chucvu"
+                                            v-model="form.id_chuc_vu"
+                                            id="id_chuc_vu"
                                             class="form-control"
                                             :class="{
-                                                'has-value': form.id_chucvu,
+                                                'has-value': form.id_chuc_vu,
                                             }"
                                             required
                                         >
@@ -510,10 +528,10 @@ const submit = () => {
                                             >Chức vụ</label
                                         >
                                         <small
-                                            v-if="form.errors.id_chucvu"
+                                            v-if="form.errors.id_chuc_vu"
                                             class="text-danger"
                                         >
-                                            {{ form.errors.id_chucvu }}
+                                            {{ form.errors.id_chuc_vu }}
                                         </small>
                                     </div>
 
@@ -522,11 +540,11 @@ const submit = () => {
                                         class="col-md-6 col-sm-12 mb-3 form-floating form-group"
                                     >
                                         <select
-                                            v-model="form.id_bomon"
-                                            id="id_bomon"
+                                            v-model="form.id_bo_mon"
+                                            id="id_bo_mon"
                                             class="form-control"
                                             :class="{
-                                                'has-value': form.id_bomon,
+                                                'has-value': form.id_bo_mon,
                                             }"
                                             required
                                         >
@@ -545,11 +563,67 @@ const submit = () => {
                                             >Bộ môn</label
                                         >
                                         <small
-                                            v-if="form.errors.id_bomon"
+                                            v-if="form.errors.id_bo_mon"
                                             class="text-danger"
                                         >
-                                            {{ form.errors.id_bomon }}
+                                            {{ form.errors.id_bo_mon }}
                                         </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Thêm phần Role và Permission vào trước nút Submit -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Vai trò (Roles)</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="role-list">
+                                                <div v-for="role in roles" :key="role.id" class="form-check">
+                                                    <input
+                                                        type="checkbox"
+                                                        :id="'role-' + role.id"
+                                                        :value="role.name"
+                                                        v-model="form.roles"
+                                                        class="form-check-input"
+                                                    />
+                                                    <label :for="'role-' + role.id" class="form-check-label">
+                                                        {{ role.name }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <small v-if="form.errors.roles" class="text-danger">
+                                                {{ form.errors.roles }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Quyền (Permissions)</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="permission-list">
+                                                <div v-for="permission in permissions" :key="permission.id" class="form-check">
+                                                    <input
+                                                        type="checkbox"
+                                                        :id="'permission-' + permission.id"
+                                                        :value="permission.name"
+                                                        v-model="form.permissions"
+                                                        class="form-check-input"
+                                                    />
+                                                    <label :for="'permission-' + permission.id" class="form-check-label">
+                                                        {{ permission.name }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <small v-if="form.errors.permissions" class="text-danger">
+                                                {{ form.errors.permissions }}
+                                            </small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -570,3 +644,11 @@ const submit = () => {
         </template>
     </AdminLayout>
 </template>
+<style scoped>
+.role-list,
+.permission-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+}
+</style>

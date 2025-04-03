@@ -159,13 +159,13 @@ watch([selectedKyHoc, selectedNamHoc, selectedKhoa, selectedHocPhan, searchTerm]
                                         </td>
                                     </tr>
                                     <tr v-for="lophocphan in lophocphans.data" :key="lophocphan.id">
-                                        <td>{{ lophocphan.id }}</td>
-                                        <td>{{ lophocphan.ten }}</td>
-                                        <td>{{ lophocphan.ky_hoc }}</td>
-                                        <td>{{ lophocphan.nam_hoc }}</td>
-                                        <td>{{ lophocphan.khoa.ten }}</td>
-                                        <td>{{ lophocphan.hoc_phan.ten }}</td>
-                                        <td>{{ lophocphan.vien_chuc.name }}</td>
+                                        <td>{{ lophocphan?.id }}</td>
+                                        <td>{{ lophocphan?.ten }}</td>
+                                        <td>{{ lophocphan?.ky_hoc }}</td>
+                                        <td>{{ lophocphan?.nam_hoc }}</td>
+                                        <td>{{ lophocphan?.khoa?.ten }}</td>
+                                        <td>{{ lophocphan?.hoc_phan?.ten }}</td>
+                                        <td>{{ lophocphan?.vien_chuc?.name }}</td>
                                         <td>
                                             <Link
                                                 :href="route('admin.lophocphan.edit', lophocphan.id)"

@@ -148,8 +148,8 @@ const handleSearch = (event) => {
                                         v-for="khoa in khoas.data"
                                         :key="khoa.id"
                                     >
-                                        <td>{{ khoa.id }}</td>
-                                        <td>{{ khoa.ten }}</td>
+                                        <td>{{ khoa?.id }}</td>
+                                        <td>{{ khoa?.ten }}</td>
                                         <td>
                                             <Link
                                                 :href="

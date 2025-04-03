@@ -53,7 +53,6 @@ class HocPhanController extends Controller
             'id_bo_mon' => 'required|exists:bo_mons,id',
             'id_bac_dao_tao' => 'required|exists:bac_dao_taos,id',
             'so_tin_chi' => 'required|integer|min:0',
-            'hoc_phi' => 'required|numeric|min:0',
         ]);
 
         HocPhan::create($request->all());

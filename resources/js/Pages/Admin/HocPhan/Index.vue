@@ -172,11 +172,11 @@ const handleSearch = (event) => {
                                         </td>
                                     </tr>
                                     <tr v-for="hocphan in hocphans.data" :key="hocphan.id">
-                                        <td>{{ hocphan.id }}</td>
-                                        <td>{{ hocphan.ten }}</td>
-                                        <td>{{ hocphan.so_tin_chi }}</td>
-                                        <td>{{ hocphan.bomon.ten }}</td>
-                                        <td>{{ hocphan.bacdaotao.ten }}</td>
+                                        <td>{{ hocphan?.id }}</td>
+                                        <td>{{ hocphan?.ten }}</td>
+                                        <td>{{ hocphan?.so_tin_chi }}</td>
+                                        <td>{{ hocphan?.bomon?.ten }}</td>
+                                        <td>{{ hocphan?.bacdaotao?.ten }}</td>
                                         <td>
                                             <Link
                                                 :href="route('admin.hocphan.edit', hocphan.id)"
