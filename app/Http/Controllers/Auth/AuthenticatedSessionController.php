@@ -38,6 +38,9 @@ class AuthenticatedSessionController extends Controller
         if($role->contains('quality')){
             return redirect(route('qlo.notice.index'));
         }
+        if($role->contains('TBM')){
+            return redirect(route('tbm.dsdangky.index'));
+        }
        // return redirect()->intended(route('dashboard', absolute: false));
     }
 

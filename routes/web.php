@@ -1,5 +1,5 @@
     <?php
-
+    
     use App\Http\Controllers\ProfileController;
     use App\Http\Controllers\Admin\KhoaController;
     use App\Http\Controllers\Admin\BoMonController;
@@ -12,6 +12,9 @@
     use App\Http\Controllers\Admin\NhiemVuController;
     use App\Http\Controllers\Admin\GioQuyDoiController;
     use App\Http\Controllers\QualityOfficerController;
+    
+    use App\Http\Controllers\RegisterProcess\DSDangKyController;
+    use App\Http\Controllers\RegisterProcess\CTDSDangKyController;
     use Illuminate\Foundation\Application;
     use Illuminate\Support\Facades\Route;
     use Inertia\Inertia;
@@ -152,6 +155,25 @@
         Route::get('/notice/index', [QualityOfficerController::class, 'index'])->name('qlo.notice.index');
     });
 
+    Route::prefix('tbm')->middleware(['auth', 'role:TBM'])->group(function () {
+        //DSDangKy
+        Route::get('/dsdangky/create', [DSDangKyController::class, 'create'])->name('tbm.dsdangky.create');
+        Route::post('/dsdangky/store', [DSDangKyController::class, 'store'])->name('tbm.dsdangky.store');
+        Route::get('/dsdangky/index', [DSDangKyController::class, 'index'])->name('tbm.dsdangky.index');
+        Route::post('/dsdangky/send/{id}', [DSDangKyController::class, 'send'])->name('tbm.dsdangky.send');
+        Route::get('/dsdangky/edit/{id}', [DSDangKyController::class, 'edit'])->name('tbm.dsdangky.edit');
+        Route::put('/dsdangky/update/{id}', [DSDangKyController::class, 'update'])->name('tbm.dsdangky.update');
+        
+
+        //CTDSDangKy
+        Route::get('/ctdsdangky/index/{id}', [CTDSDangKyController::class, 'index'])->name('tbm.ctdsdangky.index');
+        Route::get('/ctdsdangky/create/{id}', [CTDSDangKyController::class, 'create'])->name('tbm.ctdsdangky.create');
+        Route::post('/ctdsdangky/store', [CTDSDangKyController::class, 'store'])->name('tbm.ctdsdangky.store');
+        Route::get('/ctdsdangky/edit/{id}', [CTDSDangKyController::class, 'edit'])->name('tbm.ctdsdangky.edit');
+        Route::put('/ctdsdangky/update/{id}', [CTDSDangKyController::class, 'update'])->name('tbm.ctdsdangky.update');
+        Route::delete('/ctdsdangky/destroy/{id}', [CTDSDangKyController::class, 'destroy'])->name('tbm.ctdsdangky.destroy');
+        Route::post('/ctdsdangky/{id_ds_dang_ky}/import', [CTDSDangKyController::class, 'import'])->name('tbm.ctdsdangky.import');
+    });
     Route::middleware('auth')->group(function () {
         Route::get('/admin/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');
         Route::patch('/admin/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
