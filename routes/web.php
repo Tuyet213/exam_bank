@@ -11,7 +11,7 @@
     use App\Http\Controllers\Admin\LopHocPhanController;
     use App\Http\Controllers\Admin\NhiemVuController;
     use App\Http\Controllers\Admin\GioQuyDoiController;
-    use App\Http\Controllers\QualityOfficerController;
+    use App\Http\Controllers\QualityOffice\QualityOfficerController;
     
     use App\Http\Controllers\RegisterProcess\DSDangKyController;
     use App\Http\Controllers\RegisterProcess\CTDSDangKyController;
@@ -147,13 +147,7 @@
         return response($image)->header('Content-Type', 'image/jpeg');
     });
 
-    Route::prefix('qlo')->middleware(['auth', 'role:quality'])->group(function () {
-        //notice
-        Route::get('/notice/create', [QualityOfficerController::class, 'create'])->name('qlo.notice.create');
-        Route::post('/notice/store', [QualityOfficerController::class, 'store'])->name('qlo.notice.store');
-        Route::get('/notice/show/{id}', [QualityOfficerController::class, 'show'])->name('qlo.notice.show');
-        Route::get('/notice/index', [QualityOfficerController::class, 'index'])->name('qlo.notice.index');
-    });
+    
 
     Route::prefix('tbm')->middleware(['auth', 'role:TBM'])->group(function () {
         //DSDangKy
@@ -190,4 +184,30 @@
     //     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     // });
 
+    // Quality Office Routes
+
+    Route::prefix('qlo')->middleware(['auth', 'role:quality'])->group(function () {
+        //notice
+        Route::get('/notice/create', [QualityOfficerController::class, 'create'])->name('qlo.notice.create');
+        Route::post('/notice/store', [QualityOfficerController::class, 'store'])->name('qlo.notice.store');
+        Route::get('/notice/show/{id}', [QualityOfficerController::class, 'show'])->name('qlo.notice.show');
+        Route::get('/notice/index', [QualityOfficerController::class, 'index'])->name('qlo.notice.index');
+    });
+    Route::prefix('quality')->name('quality.')->middleware(['auth', 'role:quality'])->group(function () {
+        Route::get('/dsdangky', [App\Http\Controllers\QualityOffice\DSDangKyController::class, 'index'])->name('dsdangky.index');
+        
+        Route::get('/ctdsdangky/{id_ds_dang_ky}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'index'])->name('ctdsdangky.index');
+
+        Route::put('/ctdsdangky/status/{id}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'updateStatus'])->name('ctdsdangky.updateStatus');
+
+        Route::post('/ctdsdangky/submit/{id_ds_dang_ky}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'submit'])->name('ctdsdangky.submit');
+
+        Route::put('/ctdsdangky/{id}/update-status', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'updateStatus'])
+            ->name('ctdsdangky.updateStatus');
+            
+        Route::put('/ctdsdangky/{dsdangky_id}/update-status-all', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'updateStatusAll'])
+            ->name('ctdsdangky.updateStatusAll');
+    });
+
+    
     require __DIR__.'/auth.php';

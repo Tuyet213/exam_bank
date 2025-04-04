@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\QualityOffice;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
@@ -26,7 +27,7 @@ class QualityOfficerController extends Controller
             return $thongbao;
         });
         
-        return Inertia::render('QualityOfficer/Index', compact('thongbaos'));
+        return Inertia::render('QualityOffice/QualityOfficer/Index', compact('thongbaos'));
     }
 
     public function show($id)
@@ -34,12 +35,12 @@ class QualityOfficerController extends Controller
         $thongbao = ThongBao::find($id);
         $thongbao->files = json_decode($thongbao->files);
         $imgUrService = new ImgUrService();
-        return Inertia::render('QualityOfficer/Show', compact('thongbao'));
+        return Inertia::render('QualityOffice/QualityOfficer/Show', compact('thongbao'));
     }
 
     public function create()
     {
-        return Inertia::render('QualityOfficer/Create');
+        return Inertia::render('QualityOffice/QualityOfficer/Create');
     }
 
     public function store(Request $request)

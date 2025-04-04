@@ -42,7 +42,7 @@ onUnmounted(() => {
       </div>
       <ul class="sidebar-menu">
         <li><i class="fas fa-users"></i> <Link :href="route('qlo.notice.create')">Thông báo quy định</Link></li>
-        
+        <li><i class="fas fa-users"></i> <Link :href="route('quality.dsdangky.index')">Danh sách đăng ký</Link></li>
       </ul>
       <div class="sidebar-footer">
         <Link class="btn btn-success w-100 mt-3" :href="route('logout')" method="post" as="button">Logout</Link>
