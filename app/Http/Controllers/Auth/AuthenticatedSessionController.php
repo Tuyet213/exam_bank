@@ -32,13 +32,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
         $role = Auth::user()->getRoleNames();
-        if($role->contains('admin')){
+        if($role->contains('Admin')){
             return redirect(route('admin.khoa.index'));
         }
-        if($role->contains('quality')){
+        if($role->contains('Nhân viên P.ĐBCL')){
             return redirect(route('qlo.notice.index'));
         }
-        if($role->contains('TBM')){
+        if($role->contains('Trưởng Bộ Môn')){
             return redirect(route('tbm.dsdangky.index'));
         }
        // return redirect()->intended(route('dashboard', absolute: false));

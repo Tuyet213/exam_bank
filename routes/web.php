@@ -31,7 +31,7 @@
         ]);
     });
 
-    Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(  function () {
+    Route::prefix('admin')->middleware(['auth', 'role:Admin'])->group(  function () {
         // Route::get('/dashboard', function () {
         //     return Inertia::render('Admin/Dashboard');
         // })->name('admin.dashboard');
@@ -149,7 +149,7 @@
 
     
 
-    Route::prefix('tbm')->middleware(['auth', 'role:TBM'])->group(function () {
+    Route::prefix('tbm')->middleware(['auth', 'role:Trưởng Bộ Môn'])->group(function () {
         //DSDangKy
         Route::get('/dsdangky/create', [DSDangKyController::class, 'create'])->name('tbm.dsdangky.create');
         Route::post('/dsdangky/store', [DSDangKyController::class, 'store'])->name('tbm.dsdangky.store');
@@ -186,14 +186,14 @@
 
     // Quality Office Routes
 
-    Route::prefix('qlo')->middleware(['auth', 'role:quality'])->group(function () {
+    Route::prefix('qlo')->middleware(['auth', 'role:Nhân viên P.ĐBCL'])->group(function () {
         //notice
         Route::get('/notice/create', [QualityOfficerController::class, 'create'])->name('qlo.notice.create');
         Route::post('/notice/store', [QualityOfficerController::class, 'store'])->name('qlo.notice.store');
         Route::get('/notice/show/{id}', [QualityOfficerController::class, 'show'])->name('qlo.notice.show');
         Route::get('/notice/index', [QualityOfficerController::class, 'index'])->name('qlo.notice.index');
     });
-    Route::prefix('quality')->name('quality.')->middleware(['auth', 'role:quality'])->group(function () {
+    Route::prefix('quality')->name('quality.')->middleware(['auth', 'role:Nhân viên P.ĐBCL'])->group(function () {
         Route::get('/dsdangky', [App\Http\Controllers\QualityOffice\DSDangKyController::class, 'index'])->name('dsdangky.index');
         
         Route::get('/ctdsdangky/{id_ds_dang_ky}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'index'])->name('ctdsdangky.index');

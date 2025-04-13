@@ -17,25 +17,25 @@ class RoleAndPermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permissions = [
-            'create-questions',
-            'extract-exam-matrix',
-            'approve-exam-registration'
+            'Tạo ngân hàng câu hỏi/đề thi',
+            'Xuất đề thi',
+            'Duyệt danh sách đăng ký'
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
-        $admin = Role::firstOrCreate(['name' => 'admin']);
+        $admin = Role::firstOrCreate(['name' => 'Admin']);
         $admin->givePermissionTo($permissions);
 
-        $teacher = Role::firstOrCreate(['name' => 'teacher']);
-        $teacher->givePermissionTo(['create-questions', 'extract-exam-matrix']);
+        $teacher = Role::firstOrCreate(['name' => 'Giảng viên']);
+        $teacher->givePermissionTo(['Tạo ngân hàng câu hỏi/đề thi', 'Xuất đề thi']);
 
-        $qualitySurvey = Role::firstOrCreate(['name' => 'quality']);
-        $qualitySurvey->givePermissionTo(['approve-exam-registration']);
+        $qualitySurvey = Role::firstOrCreate(['name' => 'Nhân viên P.ĐBCL']);
+        $qualitySurvey->givePermissionTo(['Duyệt danh sách đăng ký']);
 
-        $TBM = Role::firstOrCreate(['name' => 'TBM']);
-        $TK = Role::firstOrCreate(['name' => 'TK']);
+        $TBM = Role::firstOrCreate(['name' => 'Trưởng Bộ Môn']);
+        $TK = Role::firstOrCreate(['name' => 'Trưởng Khoa']);
             
     }
 }
