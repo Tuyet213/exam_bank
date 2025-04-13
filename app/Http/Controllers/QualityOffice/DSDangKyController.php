@@ -12,7 +12,9 @@ class DSDangKyController extends Controller
 {
     public function index()
     {
-        $dsDangKy = DSDangKy::with(['boMon', 'ctDSDangKies'])->get()->sortByDesc('created_at');
+        $dsDangKy = DSDangKy::with(['boMon', 'ctDSDangKies'])
+    ->orderBy('created_at', 'desc')
+    ->get();
         
         // Xử lý trạng thái cho từng DSDangKy
         $dsDangKy->each(function ($ds) {

@@ -4,7 +4,7 @@ import { Link } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 
-const { danhsachs, message, success } = defineProps({
+const { danhsachs, message, success, bo_mon } = defineProps({
     danhsachs: {
         type: Object,
         required: true,
@@ -23,6 +23,10 @@ const { danhsachs, message, success } = defineProps({
     success: {
         type: Boolean,
         default: undefined,
+    },
+    bo_mon: {
+        type: String,
+        default: "",
     },
 });
 
@@ -86,7 +90,7 @@ const handleEdit = (id) => {
             <div class="content">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">DANH SÁCH ĐĂNG KÝ</h3>
+                        <h3 class="mb-0">DANH SÁCH ĐĂNG KÝ (Bộ Môn {{ bo_mon }})</h3>
                         <div class="d-flex gap-2">
                             <div class="input-group" style="width: 300px;">
                                 <input
@@ -108,7 +112,7 @@ const handleEdit = (id) => {
                                 :href="route('tbm.dsdangky.create')"
                                 class="btn btn-success-add"
                             >
-                                <i class="fas fa-plus"></i> Thêm mới
+                                <i class="fas fa-plus"></i> Tạo danh sách đăng ký
                             </Link>
                             
                         </div>
@@ -120,8 +124,8 @@ const handleEdit = (id) => {
                                 <thead>
                                     <tr>
                                         <th>STT</th>
-                                        <th>Tên</th>
-                                        <th>Thời gian</th>
+                                        <th>Học kỳ</th>
+                                        <th>Năm học</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -133,7 +137,7 @@ const handleEdit = (id) => {
                                     </tr>
                                     <tr v-for="(ds, index) in danhsachs.data" :key="ds.id">
                                         <td>{{ index + 1 }}</td>
-                                        <td>{{ ds.ten }}</td>
+                                        <td>{{ ds.hoc_ki }}</td>
                                         <td>{{ ds.thoi_gian }}</td>
                                         <td>
                                             <Link 

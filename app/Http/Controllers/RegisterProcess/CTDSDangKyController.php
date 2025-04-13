@@ -37,6 +37,8 @@ class CTDSDangKyController extends Controller
                     'hoc_phan' => $ct->hocPhan->ten,
                     'vien_chuc' => $ct->vienChuc->name,
                     'so_gio' => $ct->so_gio,
+                    'so_luong' => $ct->so_luong,
+                    'loai_ngan_hang' => $ct->loai_ngan_hang==1?'Ngân hàng câu hỏi':'Ngân hàng đề thi',
                     'trang_thai' => $ct->trang_thai
                 ];
             });
@@ -46,9 +48,10 @@ class CTDSDangKyController extends Controller
         if ($count >= 1) {
             $can_create = False;
         }
-
+        $hoc_ki = $dsdangky->hoc_ki;
+        $nam_hoc = $dsdangky->namHoc();
         return Inertia::render('RegisterProcess/CTDSDangKy/Index', 
-            compact('dsdangky', 'chitiet', 'hocphans', 'vienchucs', 'can_create'));
+            compact('dsdangky', 'chitiet', 'hocphans', 'vienchucs', 'can_create', 'hoc_ki', 'nam_hoc'));
     }
     public function create($id)
     {
@@ -80,10 +83,14 @@ class CTDSDangKyController extends Controller
 
     public function edit($id)
     {
-        $ctdsdangky = CTDSDangKy::findOrFail($id);
-        $hocphans = HocPhan::where('able', true)->where('id_bo_mon', $ctdsdangky->id_bo_mon)->get();
-        $vienchucs = User::where('able', true)->where('id_bo_mon', $ctdsdangky->id_bo_mon)->get();
-        return Inertia::render('RegisterProcess/CTDSDangKy/Edit', compact('ctdsdangky', 'hocphans', 'vienchucs'));
+        
+        $ctdsdangky = CTDSDangKy::with(['hocPhan', 'vienChuc'])->findOrFail($id);
+        $dsdangky = DSDangKy::findOrFail($ctdsdangky->id_ds_dang_ky);
+        $nam_hoc = $dsdangky->namHoc();
+        $hocphans = HocPhan::where('able', true)->where('id_bo_mon', $dsdangky->id_bo_mon)->get();
+        $vienchucs = User::where('able', true)->where('id_bo_mon', $dsdangky->id_bo_mon)->get();
+        
+        return Inertia::render('RegisterProcess/CTDSDangKy/Edit', compact('ctdsdangky', 'hocphans', 'vienchucs', 'nam_hoc', 'dsdangky'));
     }
 
     public function update(Request $request, $id)
@@ -91,14 +98,12 @@ class CTDSDangKyController extends Controller
         $request->validate([
             'id_hoc_phan' => 'required|exists:hoc_phans,id',
             'id_vien_chuc' => 'required|exists:users,id',
-            'so_gio' => 'required|numeric|min:1'
         ]);
 
         $ctdsdangky = CTDSDangKy::findOrFail($id);
         $ctdsdangky->update([
             'id_hoc_phan' => $request->id_hoc_phan,
             'id_vien_chuc' => $request->id_vien_chuc,
-            'so_gio' => $request->so_gio
         ]);
 
         return redirect()->route('tbm.ctdsdangky.index', $ctdsdangky->id_ds_dang_ky);

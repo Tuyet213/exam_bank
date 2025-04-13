@@ -18,7 +18,7 @@ const props = defineProps({
 });
 
 const form = useForm({
-    ten: props.dsdangky.ten,
+    hoc_ki: props.dsdangky.hoc_ki,
     thoi_gian: props.dsdangky.thoi_gian
 });
 
@@ -60,16 +60,19 @@ const submit = () => {
                         <form @submit.prevent="submit">
                             <div class="row">
                                 <div class="col-12">
-                                    <label for="ten" class="form-label">Tên danh sách</label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        id="ten" 
-                                        v-model="form.ten"
+                                    <label for="ten" class="form-label">Học kì</label>
+                                    <select 
+                                        id="hoc_ki" 
+                                        class="form-select" 
+                                        v-model="form.hoc_ki"
                                         required
-                                    >
-                                    <small v-if="form.errors.ten" class="text-danger">
-                                        {{ form.errors.ten }}
+                                    >   
+                                        <option value="1">Học kì 1</option> 
+                                        <option value="2">Học kì 2</option>
+                                        <option value="Hè">Học kì Hè</option>
+                                    </select>
+                                    <small v-if="form.errors.hoc_ki" class="text-danger">
+                                        {{ form.errors.hoc_ki }}
                                     </small>
                                 </div>
 

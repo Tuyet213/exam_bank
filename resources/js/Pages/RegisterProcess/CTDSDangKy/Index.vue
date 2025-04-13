@@ -12,6 +12,14 @@ const props = defineProps({
         type: Array,
         required: true
     },
+    hoc_ki: {
+        type: String,
+        required: true
+    },
+    nam_hoc: {
+        type: String,
+        required: true
+    },
     can_create: {
         type: Boolean,
         required: true
@@ -83,14 +91,14 @@ const handleImport = () => {
             <li class="breadcrumb-item">
                 <Link :href="route('tbm.dsdangky.index')">Danh sách đăng ký</Link>
             </li>
-            <li class="breadcrumb-item active">{{ dsdangky.ten }}</li>
+            <li class="breadcrumb-item active">Học kì {{ dsdangky.hoc_ki }}-{{ nam_hoc }}</li>
         </template>
 
         <template v-slot:content>
             <div class="content">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">CHI TIẾT DANH SÁCH PHÂN CÔNG</h3>
+                        <h3 class="mb-0">CHI TIẾT DANH SÁCH XÂY DỰNG NGÂN HÀNG </h3>
                         <div class="d-flex gap-2" v-if="can_create">
                             <button 
                                 disabled
@@ -136,6 +144,8 @@ const handleImport = () => {
                                         <th>STT</th>
                                         <th>Học phần</th>
                                         <th>Viên chức</th>
+                                        <th>Số lượng</th>
+                                        <th>Loại ngân hàng</th>
                                         <th>Số giờ</th>
                                         <th>Trạng thái</th>
                                         <th>Actions</th>
@@ -151,6 +161,9 @@ const handleImport = () => {
                                         <td>{{ index + 1 }}</td>
                                         <td>{{ ct.hoc_phan }}</td>
                                         <td>{{ ct.vien_chuc }}</td>
+                                        <td>{{ ct.so_luong }}</td>
+                                        <td>{{ ct.loai_ngan_hang }}</td>
+
                                         <td>{{ ct.so_gio }}</td>
                                         <td>
                                             <span 

@@ -1,108 +1,230 @@
 <script setup>
 import TBMLayout from "@/Layouts/TBMLayout.vue";
-import { useForm } from "@inertiajs/vue3";
+import { Link, useForm } from "@inertiajs/vue3";
 
-const form = useForm({
-    id: "",
-    ten: "",
-    id_bo_mon: "",
-    thoi_gian: new Date().toISOString().substr(0, 10), // Ngày hiện tại
+const props = defineProps({
+   
+    message: {
+        type: String,
+        default: "",
+    },
+    success: {
+        type: Boolean,
+        default: undefined,
+    },
+    bo_mon: {
+        type: String,
+        default: "",
+    },
+    hoc_phans: {
+        type: Array,
+        default: () => [],
+    },
+    vien_chucs: {
+        type: Array,
+        default: () => [],
+    },
+    
 });
 
-const submit = () => {
-    form.post(route("tbm.dsdangky.store"), {
+const form = useForm({
+    hoc_ki: '',
+    chi_tiet: []
+});
+
+const addChiTiet = () => {
+    form.chi_tiet.push({
+        id_hoc_phan: '',
+        id_vien_chuc: [],
+        loai_ngan_hang: '',
+        so_luong: 0
+    });
+};
+
+const removeChiTiet = (index) => {
+    form.chi_tiet.splice(index, 1);
+};
+
+const handleSubmit = () => {
+    form.post(route('tbm.dsdangky.store'), {
         onSuccess: () => {
-            alert("Tạo danh sách đăng ký thành công!");
+            alert('Tạo danh sách đăng ký thành công!');
             form.reset();
+            window.location.href = route('tbm.dsdangky.index');
         },
         onError: (errors) => {
-            alert("Có lỗi xảy ra khi tạo danh sách!");
+            alert('Có lỗi xảy ra khi tạo danh sách đăng ký!');
             console.error(errors);
-        },
+        }
     });
 };
 </script>
 
 <template>
     <TBMLayout>
-        <!-- Breadcrumb -->
         <template v-slot:sub-link>
-            <li class="breadcrumb-item">
+            <li class="breadcrumb-item active">
                 <a :href="route('tbm.dsdangky.index')">Danh sách đăng ký</a>
             </li>
-            <li class="breadcrumb-item active">Thêm mới</li>
         </template>
 
-        <!-- Nội dung chính -->
         <template v-slot:content>
             <div class="content">
-                <div class="card border-radius-lg shadow-lg animated-fade-in">
-                    <!-- Card Header -->
-                    <div class="card-header bg-success-tb text-white p-4">
-                        <h3 class="mb-0 font-weight-bolder">TẠO DANH SÁCH ĐĂNG KÝ MỚI</h3>
+                <!-- Form tạo danh sách đăng ký -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="mb-0">TẠO DANH SÁCH ĐĂNG KÝ (Bộ Môn {{ bo_mon }})</h3>
                     </div>
-
-                    <!-- Card Body -->
-                    <div class="card-body p-4">
-                        <form @submit.prevent="submit">
-                            <div class="row">
-                               
-                                <div class="col-12">
-                                    <label for="ten" class="form-label">Tên danh sách</label>
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        id="ten" 
-                                        v-model="form.ten"
+                    <div class="card-body">
+                        <form @submit.prevent="handleSubmit">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="hoc_ki" class="form-label">Học kỳ</label>
+                                    <select 
+                                        id="hoc_ki" 
+                                        class="form-select" 
+                                        v-model="form.hoc_ki"
                                         required
                                     >
-                                    <small v-if="form.errors.ten" class="text-danger">
-                                        {{ form.errors.ten }}
-                                    </small>
+                                        <option value="">Chọn học kỳ</option>
+                                        <option value="1">Học kỳ 1</option>
+                                        <option value="2">Học kỳ 2</option>
+                                        <option value="Hè">Học kỳ Hè</option>
+                                    </select>
+                                    <div v-if="form.errors.hoc_ki" class="text-danger">{{ form.errors.hoc_ki }}</div>
                                 </div>
-
                             </div>
 
-                            <!-- Nút Submit -->
-                            <div class="text-end mt-4">
-                                <button 
-                                    type="submit" 
-                                    class="btn btn-success font-weight-bold"
-                                    :disabled="form.processing"
-                                >
-                                    Thêm
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5>Chi tiết danh sách</h5>
+                                    <button type="button" class="btn btn-success" @click="addChiTiet">
+                                        <i class="fas fa-plus"></i> Thêm chi tiết
+                                    </button>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Học phần</th>
+                                                <th>Viên chức</th>
+                                                <th>Loại ngân hàng</th>
+                                                <th>Số lượng</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-if="form.chi_tiet.length === 0">
+                                                <td colspan="5" class="text-center">Chưa có chi tiết nào</td>
+                                            </tr>
+                                            <tr v-for="(ct, index) in form.chi_tiet" :key="index">
+                                                <td>
+                                                    <select 
+                                                        class="form-select" 
+                                                        v-model="ct.id_hoc_phan"
+                                                        required
+                                                    >
+                                                        <option value="">Chọn học phần</option>
+                                                        <option v-for="hp in hoc_phans" :key="hp.id" :value="hp.id">
+                                                            {{ hp.id }} - {{ hp.ten }}
+                                                        </option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <div class="select-wrapper">
+                                                        <small class="text-muted d-block mb-1">
+                                                            Giữ Ctrl (Windows) hoặc Command (Mac) để chọn nhiều viên chức
+                                                        </small>
+                                                        <select 
+                                                            class="form-select" 
+                                                            v-model="ct.id_vien_chuc"
+                                                            multiple
+                                                            required
+                                                        >
+                                                            <option v-for="vc in vien_chucs" :key="vc.id" :value="vc.id">
+                                                                {{ vc.id }} - {{ vc.name }}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <select 
+                                                        class="form-select" 
+                                                        v-model="ct.loai_ngan_hang"
+                                                        required
+                                                    >
+                                                        <option value="">Chọn loại</option>
+                                                        <option value="1">Ngân hàng câu hỏi</option>
+                                                        <option value="0">Ngân hàng đề thi</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input 
+                                                        type="number" 
+                                                        class="form-control" 
+                                                        v-model="ct.so_luong"
+                                                        min="0"
+                                                        required
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <button 
+                                                        type="button" 
+                                                        class="btn btn-danger btn-sm"
+                                                        @click="removeChiTiet(index)"
+                                                    >
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary" :disabled="form.processing">
+                                    <i class="fas fa-save"></i> Lưu danh sách
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
+
             </div>
         </template>
     </TBMLayout>
 </template>
 
 <style scoped>
-.bg-success-tb {
+.btn-success-add {
     background-color: #28a745;
+    color: white;
 }
 
-.border-radius-lg {
-    border-radius: 0.5rem;
+.btn-success-add:hover {
+    background-color: #218838;
+    color: white;
 }
 
-.animated-fade-in {
-    animation: fadeIn 0.5s ease-in-out;
+.btn-success-edit {
+    background-color: #17a2b8;
+    color: white;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.btn-success-edit:hover {
+    background-color: #138496;
+    color: white;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
 }
 
 .form-control:focus {
@@ -110,18 +232,77 @@ const submit = () => {
     box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
 }
 
-.btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
 }
 
-.btn-success:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
+.btn-info:hover {
+    background-color: #138496;
+    color: white;
 }
 
-.form-label {
-    font-weight: 500;
-    color: #495057;
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+/* Thêm tooltip styles */
+[title] {
+    position: relative;
+    cursor: pointer;
+}
+
+[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+.me-2 {
+    margin-right: 0.5rem !important;
+}
+
+/* Style cho select multiple */
+select[multiple] {
+    height: 120px;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+select[multiple] {
+    height: 120px;
+    padding: 8px;
+}
+
+select[multiple] option {
+    padding: 4px 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+}
+
+select[multiple] option:checked {
+    background-color: #007bff;
+    color: white;
+}
+
+select[multiple] option:hover {
+    background-color: #e9ecef;
 }
 </style>

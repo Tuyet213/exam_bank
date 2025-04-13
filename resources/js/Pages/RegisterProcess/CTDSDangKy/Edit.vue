@@ -7,6 +7,14 @@ const props = defineProps({
         type: Object,
         required: true
     },
+    dsdangky: {
+        type: Object,
+        required: true
+    },
+    nam_hoc: {
+        type: String,
+        required: true
+    },
     hocphans: {
         type: Array,
         required: true
@@ -28,15 +36,16 @@ const props = defineProps({
 const form = useForm({
     id_hoc_phan: props.ctdsdangky.id_hoc_phan,
     id_vien_chuc: props.ctdsdangky.id_vien_chuc,
-    so_gio: props.ctdsdangky.so_gio,
     trang_thai: props.ctdsdangky.trang_thai
 });
 
+ console.log(props.ctdsdangky);
+ console.log(form);
 const submit = () => {
     form.put(route('tbm.ctdsdangky.update', props.ctdsdangky.id), {
         onSuccess: () => {
             alert("Cập nhật phân công thành công!");
-            window.location.href = route('tbm.ctdsdangky.index', props.ctdsdangky.id_ds_dang_ky);
+            // window.location.href = route('tbm.ctdsdangky.index', props.ctdsdangky.id_ds_dang_ky);
         },
         onError: (errors) => {
             alert("Có lỗi xảy ra khi cập nhật phân công!");
@@ -53,7 +62,7 @@ const submit = () => {
                 <Link :href="route('tbm.dsdangky.index')">Danh sách đăng ký</Link>
             </li>
             <li class="breadcrumb-item">
-                <Link :href="route('tbm.ctdsdangky.index', ctdsdangky.id_ds_dang_ky)">{{ ctdsdangky.ten }}</Link>
+                <Link :href="route('tbm.ctdsdangky.index', dsdangky.id)">Học kì {{ dsdangky.hoc_ki }}-{{ nam_hoc }}</Link>
             </li>
             <li class="breadcrumb-item active">Cập nhật</li>
         </template>
@@ -113,19 +122,6 @@ const submit = () => {
                                     </select>
                                     <div class="invalid-feedback" v-if="form.errors.id_vien_chuc">
                                         {{ form.errors.id_vien_chuc }}
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Số giờ <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="number"
-                                        class="form-control"
-                                        v-model="form.so_gio"
-                                        :class="{ 'is-invalid': form.errors.so_gio }"
-                                    >
-                                    <div class="invalid-feedback" v-if="form.errors.so_gio">
-                                        {{ form.errors.so_gio }}
                                     </div>
                                 </div>
 

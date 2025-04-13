@@ -61,7 +61,6 @@ const getStatusBadgeClass = (status) => {
                                 <thead>
                                     <tr>
                                         <th>STT</th>
-                                        <th>Tên danh sách</th>
                                         <th>Bộ môn</th>
                                         <th>Thời gian</th>
                                         <th>Trạng thái</th>
@@ -71,7 +70,6 @@ const getStatusBadgeClass = (status) => {
                                 <tbody>
                                     <tr v-for="(ds, index) in dsdangky" :key="ds.id">
                                         <td>{{ index + 1 }}</td>
-                                        <td>{{ ds.ten }}</td>
                                         <td>{{ ds.bo_mon?.ten }}</td>
                                         <td>{{ formatDate(ds.thoi_gian) }}</td>
                                         <td>

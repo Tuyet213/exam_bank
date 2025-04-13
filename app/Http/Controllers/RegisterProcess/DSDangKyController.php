@@ -5,12 +5,15 @@ namespace App\Http\Controllers\RegisterProcess;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\DSDangKy;
-
+use App\Models\HocPhan;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\DSDangKyMail;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\CTDSDangKy;
+
 class DSDangKyController extends Controller
 {
     public function index(Request $request)
@@ -31,12 +34,15 @@ class DSDangKyController extends Controller
                 'id' => $ds->id,
                 'ten' => $ds->ten,
                 'bo_mon' => $ds->boMon->ten,
-                'thoi_gian' => date('d/m/Y', strtotime($ds->thoi_gian)),
+                'hoc_ki' => 'Học kỳ ' . $ds->hoc_ki,
+                'thoi_gian' => $ds->namHoc(),
                 'can_send' => $canSend
             ];
         });
 
-        return Inertia::render('RegisterProcess/DSDangKy/Index', compact('danhsachs'));
+        $bo_mon = Auth::user()->boMon->ten;
+
+        return Inertia::render('RegisterProcess/DSDangKy/Index', compact('danhsachs', 'bo_mon'));
     }
 
     public function send($id)
@@ -83,24 +89,69 @@ class DSDangKyController extends Controller
 
     public function create()
     {
-        return Inertia::render('RegisterProcess/DSDangKy/Create');
+        $hocPhans = HocPhan::where('id_bo_mon', Auth::user()->id_bo_mon)
+            ->orderBy('id')
+            ->get();
+            
+        $vienChucs = User::where('id_bo_mon', Auth::user()->id_bo_mon)->orderBy('name')->get();
+
+        return Inertia::render('RegisterProcess/DSDangKy/Create', [
+            'hoc_phans' => $hocPhans,
+            'vien_chucs' => $vienChucs
+        ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'ten' => 'required|string',
+            'hoc_ki' => 'required|string|in:1,2,Hè',
+            'chi_tiet' => 'required|array|min:1',
+            'chi_tiet.*.id_hoc_phan' => 'required|exists:hoc_phans,id',
+            'chi_tiet.*.id_vien_chuc' => 'required|array|min:1',
+            'chi_tiet.*.id_vien_chuc.*' => 'exists:users,id',
+            'chi_tiet.*.loai_ngan_hang' => 'required|in:1, 0',
+            'chi_tiet.*.so_luong' => 'required|integer|min:0'
         ]);
 
-        DSDangKy::create([
-            'ten' => $request->ten,
-            'id_bo_mon' => Auth::user()->id_bo_mon,
-            'thoi_gian' => now(),
-            'able' => true
-        ]);
+        // try {
+        //     DB::beginTransaction();
 
-        return redirect()->route('tbm.dsdangky.index')
-            ->with('message', 'Tạo danh sách đăng ký thành công!');
+            // Tạo danh sách đăng ký
+            $dsDangKy = DSDangKy::create([
+                'hoc_ki' => $request->hoc_ki,
+                'thoi_gian' => now(),
+                'id_bo_mon' => Auth::user()->id_bo_mon,
+                'trang_thai' => 'Draft'
+            ]);
+
+            // Tạo chi tiết danh sách
+            foreach ($request->chi_tiet as $ct) {
+                foreach ($ct['id_vien_chuc'] as $idVienChuc) {
+                    CTDSDangKy::create([
+                        'id_ds_dang_ky' => $dsDangKy->id,
+                        'id_hoc_phan' => $ct['id_hoc_phan'],
+                        'id_vien_chuc' => $idVienChuc,
+                        'loai_ngan_hang' => $ct['loai_ngan_hang'],
+                        'so_luong' => $ct['so_luong'],
+                        'trang_thai' => 'Draft',
+                        'so_gio' => 0
+                    ]);
+                }
+            }
+
+        //     DB::commit();
+
+        //     return redirect()->route('tbm.dsdangky.index')
+        //         ->with('success', true)
+        //         ->with('message', 'Tạo danh sách đăng ký thành công!');
+
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     return redirect()->back()
+        //         ->with('success', false)
+        //         ->with('message', 'Có lỗi xảy ra: ' . $e->getMessage());
+        // }
+        return redirect()->route('tbm.dsdangky.index')->with('message', 'Tạo danh sách đăng ký thành công!');
     }
 
     public function edit($id)

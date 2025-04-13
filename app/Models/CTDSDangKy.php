@@ -16,7 +16,9 @@ class CTDSDangKy extends Model
         'id_vien_chuc',
         'so_gio',
         'trang_thai',
-        'able'
+        'able',
+        'loai_ngan_hang',
+        'so_luong'
     ];
 
     public function dsDangKy()
