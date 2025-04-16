@@ -12,9 +12,10 @@
     use App\Http\Controllers\Admin\NhiemVuController;
     use App\Http\Controllers\Admin\GioQuyDoiController;
     use App\Http\Controllers\QualityOffice\QualityOfficerController;
+    use App\Http\Controllers\TBM\DSBienBanHopBMController;
     
-    use App\Http\Controllers\RegisterProcess\DSDangKyController;
-    use App\Http\Controllers\RegisterProcess\CTDSDangKyController;
+    use App\Http\Controllers\TBM\DSDangKyController;
+    use App\Http\Controllers\TBM\CTDSDangKyController;
     use Illuminate\Foundation\Application;
     use Illuminate\Support\Facades\Route;
     use Inertia\Inertia;
@@ -167,6 +168,19 @@
         Route::put('/ctdsdangky/update/{id}', [CTDSDangKyController::class, 'update'])->name('tbm.ctdsdangky.update');
         Route::delete('/ctdsdangky/destroy/{id}', [CTDSDangKyController::class, 'destroy'])->name('tbm.ctdsdangky.destroy');
         Route::post('/ctdsdangky/{id_ds_dang_ky}/import', [CTDSDangKyController::class, 'import'])->name('tbm.ctdsdangky.import');
+
+        //DSBienBanHopBM
+        Route::get('/dsbienban/index', [DSBienBanHopBMController::class, 'index'])->name('tbm.dsbienban.index');
+        Route::get('/dsbienban/create', [DSBienBanHopBMController::class, 'create'])->name('tbm.dsbienban.create');
+        Route::post('/dsbienban/store', [DSBienBanHopBMController::class, 'store'])->name('tbm.dsbienban.store');
+        Route::get('/dsbienban/edit/{id}', [DSBienBanHopBMController::class, 'edit'])->name('tbm.dsbienban.edit');
+        Route::put('/dsbienban/update/{id}', [DSBienBanHopBMController::class, 'update'])->name('tbm.dsbienban.update');
+        Route::delete('/dsbienban/destroy/{id}', [DSBienBanHopBMController::class, 'destroy'])->name('tbm.dsbienban.destroy');
+        Route::post('/dsbienban/{id}/upload-noi-dung', [DSBienBanHopBMController::class, 'uploadNoiDung'])->name('tbm.dsbienban.upload-noi-dung');
+        Route::get('/dsbienban/{id}/edit-so-gio', [DSBienBanHopBMController::class, 'editSoGio'])->name('tbm.dsbienban.edit-so-gio');
+        Route::put('/dsbienban/{id}/update-so-gio', [DSBienBanHopBMController::class, 'updateSoGio'])->name('tbm.dsbienban.update-so-gio');
+        Route::get('/dsbienban/{id}/download', [DSBienBanHopBMController::class, 'download'])->name('tbm.dsbienban.download');
+        
     });
     Route::middleware('auth')->group(function () {
         Route::get('/admin/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');

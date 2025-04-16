@@ -138,7 +138,7 @@ const handleEdit = (id) => {
                                     <tr v-for="(ds, index) in danhsachs.data" :key="ds.id">
                                         <td>{{ index + 1 }}</td>
                                         <td>{{ ds.hoc_ki }}</td>
-                                        <td>{{ ds.thoi_gian }}</td>
+                                        <td>{{ ds.nam_hoc }}</td>
                                         <td>
                                             <Link 
                                                 :href="route('tbm.ctdsdangky.index', ds.id)"

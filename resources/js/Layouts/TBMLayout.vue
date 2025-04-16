@@ -41,7 +41,8 @@ onUnmounted(() => {
         </button>
       </div>
       <ul class="sidebar-menu">
-        <li><i class="fas fa-users"></i> <Link :href="route('tbm.dsdangky.create')">Đăng ký xây dựng ngân hàng câu hỏi/đề thi</Link></li>
+        <li><i class="fas fa-users"></i> <Link :href="route('tbm.dsdangky.index')">Đăng ký xây dựng ngân hàng câu hỏi/đề thi</Link></li>
+        <li><i class="fas fa-users"></i> <Link :href="route('tbm.dsbienban.index')">Danh sách biên bản họp</Link></li>
         
       </ul>
       <div class="sidebar-footer">

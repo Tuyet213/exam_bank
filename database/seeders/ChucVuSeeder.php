@@ -35,5 +35,19 @@ class ChucVuSeeder extends Seeder
                 'ten' => 'Nhân viên phòng đảm bảo chất lượng',
             ],
         ]);
+        DB::table('nhiem_vus')->insert([
+            [
+                
+                'ten' => 'Chủ tịch',
+            ],
+            [
+               
+                'ten' => 'Thư ký',
+            ],
+            [
+                
+                'ten' => 'Cán bộ phản biện',
+            ],
+        ]);
     }
 }

@@ -1,7 +1,7 @@
 <script setup>
 import TBMLayout from "@/Layouts/TBMLayout.vue";
 import { Link, router } from "@inertiajs/vue3";
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 const props = defineProps({
     dsdangky: {
@@ -12,13 +12,9 @@ const props = defineProps({
         type: Array,
         required: true
     },
-    hoc_ki: {
-        type: String,
-        required: true
-    },
-    nam_hoc: {
-        type: String,
-        required: true
+    ct_da_co_bien_ban: {
+        type: Array,
+        default: () => []
     },
     can_create: {
         type: Boolean,
@@ -26,11 +22,15 @@ const props = defineProps({
     },
     success: {
         type: String,
-        required: true
+        default: ''
     },
     error: {
         type: String,
-        required: true
+        default: ''
+    },
+    selected_ct_ids: {
+        type: Array,
+        default: () => []
     }
 });
 
@@ -39,6 +39,32 @@ const showImportModal = ref(false);
 const form = useForm({
     file: null
 });
+
+// Thêm state cho checkbox
+const selectedCTs = ref(props.selected_ct_ids || []);
+
+// Computed property để kiểm tra có thể tạo biên bản không
+const canCreateBienBan = computed(() => {
+    return selectedCTs.value.length > 0;
+});
+
+// Hàm kiểm tra chi tiết đã có biên bản chưa
+const hasBienBan = (ctId) => {
+    return props.ct_da_co_bien_ban.includes(ctId);
+};
+
+// Hàm xử lý chọn/bỏ chọn tất cả
+const selectAll = ref(false);
+const toggleSelectAll = () => {
+    if (selectAll.value) {
+        // Chỉ chọn những mục chưa có biên bản họp
+        selectedCTs.value = props.chitiet
+            .filter(ct => !hasBienBan(ct.id))
+            .map(ct => ct.id);
+    } else {
+        selectedCTs.value = [];
+    }
+};
 
 const handleEdit = (id) => {
     router.get(route('tbm.ctdsdangky.edit', id), {}, {
@@ -83,6 +109,22 @@ const handleImport = () => {
     });
 };
 
+// Hàm xử lý tạo biên bản
+const handleCreateBienBan = () => {
+    if (selectedCTs.value.length === 0) {
+        alert('Vui lòng chọn ít nhất một chi tiết để tạo biên bản!');
+        return;
+    }
+    
+    router.get(route('tbm.dsbienban.create'), {
+        ct_ds_dang_ky_ids: selectedCTs.value
+    }, {
+        onError: () => {
+            alert('Có lỗi xảy ra khi chuyển trang!');
+        }
+    });
+};
+
 </script>
 
 <template>
@@ -91,7 +133,7 @@ const handleImport = () => {
             <li class="breadcrumb-item">
                 <Link :href="route('tbm.dsdangky.index')">Danh sách đăng ký</Link>
             </li>
-            <li class="breadcrumb-item active">Học kì {{ dsdangky.hoc_ki }}-{{ nam_hoc }}</li>
+            <li class="breadcrumb-item active">Học kì {{dsdangky.hoc_ki }} - {{dsdangky.nam_hoc}}</li>
         </template>
 
         <template v-slot:content>
@@ -135,12 +177,39 @@ const handleImport = () => {
                     </div>
 
                     <div class="card-body">
-                       
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input 
+                                    type="checkbox" 
+                                    class="form-check-input" 
+                                    id="selectAll"
+                                    v-model="selectAll"
+                                    @change="toggleSelectAll"
+                                >
+                                <label class="form-check-label" for="selectAll">
+                                    Chọn tất cả
+                                </label>
+                            </div>
+                            <button 
+                                class="btn btn-primary"
+                                :disabled="!canCreateBienBan"
+                                @click="handleCreateBienBan"
+                            >
+                                <i class="fas fa-file-alt"></i> Tạo biên bản họp
+                            </button>
+                        </div>
 
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
+                                        <th>
+                                            <input 
+                                                type="checkbox" 
+                                                v-model="selectAll"
+                                                @change="toggleSelectAll"
+                                            >
+                                        </th>
                                         <th>STT</th>
                                         <th>Học phần</th>
                                         <th>Viên chức</th>
@@ -148,16 +217,24 @@ const handleImport = () => {
                                         <th>Loại ngân hàng</th>
                                         <th>Số giờ</th>
                                         <th>Trạng thái</th>
-                                        <th>Actions</th>
+                                        <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-if="chitiet.length === 0">
-                                        <td colspan="7" class="text-center">
+                                        <td colspan="9" class="text-center">
                                             Không có dữ liệu
                                         </td>
                                     </tr>
                                     <tr v-for="(ct, index) in chitiet" :key="ct.id">
+                                        <td>
+                                            <input 
+                                                type="checkbox" 
+                                                v-model="selectedCTs"
+                                                :value="ct.id"
+                                                :disabled="hasBienBan(ct.id)"
+                                            >
+                                        </td>
                                         <td>{{ index + 1 }}</td>
                                         <td>{{ ct.hoc_phan }}</td>
                                         <td>{{ ct.vien_chuc }}</td>
@@ -193,6 +270,7 @@ const handleImport = () => {
                                             >
                                                 <i class="fas fa-trash"></i>
                                             </button>
+                                           
                                         </td>
                                     </tr>
                                 </tbody>
@@ -293,5 +371,25 @@ const handleImport = () => {
 
 .modal-backdrop {
     background-color: rgba(0, 0, 0, 0.5);
+}
+
+.form-check-input:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-primary:disabled {
+    background-color: #ccc;
+    border-color: #ccc;
 }
 </style>
