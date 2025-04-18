@@ -1,10 +1,10 @@
 <script setup>
-import TBMLayout from "@/Layouts/TBMLayout.vue";
+import TKLayout from "@/Layouts/TKLayout.vue";
 import { Link, useForm } from "@inertiajs/vue3";
 import { ref, computed } from 'vue';
 
 const props = defineProps({
-    ct_ds_dang_kies: {
+    ds_dang_kies: {
         type: Array,
         required: true
     },
@@ -15,9 +15,12 @@ const props = defineProps({
     nhiem_vus: {
         type: Array,
         required: true
+    },
+    vien_chucs_dbcl: {
+        type: Array,
+        required: true
     }
 });
-
 // Tìm ID của từng nhiệm vụ từ danh sách được truyền xuống
 const chuTichId = computed(() => {
     return props.nhiem_vus.find(nv => nv.ten === 'Chủ tịch')?.id;
@@ -27,67 +30,78 @@ const thuKyId = computed(() => {
     return props.nhiem_vus.find(nv => nv.ten === 'Thư ký')?.id;
 });
 
-const phanBienId = computed(() => {
-    return props.nhiem_vus.find(nv => nv.ten === 'Cán bộ phản biện')?.id;
+const uyVienId = computed(() => {
+    return props.nhiem_vus.find(nv => nv.ten === 'Ủy viên')?.id;
 });
 
-// Tạo form cho mỗi CTDSDangKy
-const forms = ref(props.ct_ds_dang_kies.map(ct => useForm({
-    id_ct_ds_dang_ky: ct.id,
+// Tạo form cho mỗi DSDangKy
+const forms = ref(props.ds_dang_kies.map(dk => useForm({
+    id_ds_dang_ky: dk.id,
     dia_diem: '',
     thoi_gian: null,
     ds_hop: [
-        { id_vien_chuc: '', id_nhiem_vu: chuTichId.value },
-        { id_vien_chuc: '', id_nhiem_vu: thuKyId.value },
-        { id_vien_chuc: '', id_nhiem_vu: phanBienId.value },
-        { id_vien_chuc: '', id_nhiem_vu: phanBienId.value }
+        { id_vien_chuc: '', id_nhiem_vu: chuTichId.value, from: 'khoa' },
+        { id_vien_chuc: '', id_nhiem_vu: thuKyId.value, from: 'khoa' },
+        { id_vien_chuc: '', id_nhiem_vu: uyVienId.value, from: 'khoa' },
+        { id_vien_chuc: '', id_nhiem_vu: uyVienId.value, from: 'khoa' },
+        { id_vien_chuc: '', id_nhiem_vu: uyVienId.value, from: 'dbcl' }
     ]
 })));
 
-// Thêm người tham gia họp cho một form cụ thể
-const addThanhVien = (form) => {
-    form.ds_hop.push({
-        id_vien_chuc: '',
-        id_nhiem_vu: '',
-        so_gio: 0
+// Xử lý khi chọn viên chức
+const handleVienChucChange = (form, index, value) => {
+    console.log('Changing viên chức:', {
+        formIndex: index,
+        oldValue: form.ds_hop[index].id_vien_chuc,
+        newValue: value,
+        valueType: typeof value
     });
-};
-
-// Xóa người tham gia họp của một form cụ thể
-const removeThanhVien = (form, index) => {
-    form.ds_hop.splice(index, 1);
+    // Chuyển đổi value thành số nguyên
+    form.ds_hop[index].id_vien_chuc = parseInt(value) || '';
 };
 
 // Submit tất cả các form
 const submitAll = () => {
     let results = [];
     
+    // Kiểm tra dữ liệu trước khi submit
+    const invalidForms = forms.value.filter(form => {
+        const hasEmptyFields = !form.dia_diem || !form.thoi_gian;
+        const hasEmptyMembers = form.ds_hop.some(member => !member.id_vien_chuc);
+        return hasEmptyFields || hasEmptyMembers;
+    });
+
+    if (invalidForms.length > 0) {
+        alert('Vui lòng điền đầy đủ thông tin cho tất cả các biên bản!');
+        return;
+    }
+
     const promises = forms.value.map(form => 
-        form.post(route('tbm.dsbienban.store'), {
+        form.post(route('tk.dsbienban.store'), {
             preserveScroll: true,
             onSuccess: (page) => {
                 console.log('Response từ server:', page);
                 if (page.props?.flash?.type === 'success') {
                     results.push({
                         status: 'success',
-                        id: form.id_ct_ds_dang_ky,
+                        id: form.id_ds_dang_ky,
                         message: page.props.flash.message
                     });
                 } else {
                     results.push({
                         status: 'error',
-                        id: form.id_ct_ds_dang_ky,
+                        id: form.id_ds_dang_ky,
                         message: page.props.flash.message || 'Có lỗi xảy ra'
                     });
                 }
                 alert('Tạo biên bản họp thành công!');
-                window.location = route('tbm.dsdangky.index');
+                window.location = route('tk.dsdangky.index');
             },
             onError: (errors) => {
-                console.error('Lỗi khi tạo biên bản cho CT:', form.id_ct_ds_dang_ky, errors);
+                console.error('Lỗi khi tạo biên bản cho CT:', form.id_ds_dang_ky, errors);
                 results.push({
                     status: 'error',
-                    id: form.id_ct_ds_dang_ky,
+                    id: form.id_ds_dang_ky,
                     message: Object.values(errors).flat().join(', ')
                 });
                 alert('Hãy điền tất cả thông tin!');
@@ -103,19 +117,18 @@ const submitAll = () => {
                 alert(`Có ${failedResults.length} biên bản tạo thất bại:\n${messages}`);
             } else if (results.length === forms.value.length) {
                 alert('Tạo tất cả biên bản thành công!');
-                window.location = route('tbm.dsbienban.index');
+                window.location = route('tk.dsbienban.index');
             }
         });
 };
 </script>
 
 <template>
-    <TBMLayout>
+    <TKLayout>
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
-                <Link :href="route('tbm.dsdangky.index')">Danh sách đăng ký</Link>
+                <Link :href="route('tk.dsdangky.index')">Danh sách đăng ký</Link>
             </li>
-            
             <li class="breadcrumb-item active">Tạo biên bản họp</li>
         </template>
 
@@ -133,43 +146,64 @@ const submitAll = () => {
                     </div>
 
                     <div class="card-body">
-                        <!-- Một form riêng cho mỗi CTDSDangKy -->
+                        <!-- Một form riêng cho mỗi DSDangKy -->
                         <div 
                             v-for="(form, formIndex) in forms" 
                             :key="formIndex"
                             class="border rounded p-4 mb-4"
                         >
-                            <!-- <h5 class="mb-3">Chi tiết #{{ formIndex + 1 }}</h5> -->
-                            
-                            <!-- Thông tin chi tiết đăng ký -->
+                            <!-- Thông tin đăng ký -->
                             <div class="mb-3">
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <strong>Học phần:</strong> 
-                                        {{ ct_ds_dang_kies[formIndex].hoc_phan.ten }}
+                                        <strong>Bộ môn:</strong> 
+                                        {{ ds_dang_kies[formIndex].bo_mon.ten }}
                                     </div>
                                     <div class="col-md-4">
-                                        <strong>Viên chức:</strong>
-                                        {{ ct_ds_dang_kies[formIndex].vien_chuc.name }}
+                                        <strong>Học kỳ:</strong>
+                                        {{ ds_dang_kies[formIndex].hoc_ki }}
                                     </div>
                                     <div class="col-md-4">
-                                        <strong>Loại ngân hàng:</strong>
-                                        {{ ct_ds_dang_kies[formIndex].loai_ngan_hang == 1 ? 'Ngân hàng câu hỏi' : 'Ngân hàng đề thi' }}
+                                        <strong>Năm học:</strong>
+                                        {{ ds_dang_kies[formIndex].nam_hoc }}
                                     </div>
-                                    <div class="col-md-4">
-                                        <strong>Số lượng:</strong>
-                                        {{ ct_ds_dang_kies[formIndex].so_luong }}
-                                    </div>
-                                    <div class="col-md-4">
-                                        <strong>Hình thức thi:</strong>
-                                        {{ ct_ds_dang_kies[formIndex].hinh_thuc_thi }}
-                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bảng chi tiết đăng ký -->
+                            <div class="mb-3">
+                                <h6 class="mb-2">Danh sách đăng ký biên soạn:</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="text-center" style="width: 5%">STT</th>
+                                                <th style="width: 25%">Học phần</th>
+                                                <th style="width: 20%">Giảng viên</th>
+                                                <th class="text-center" style="width: 10%">Số lượng</th>
+                                                <th style="width: 20%">Loại ngân hàng</th>
+                                                <th style="width: 20%">Hình thức thi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(ct, ctIndex) in ds_dang_kies[formIndex].ct_d_s_dang_kies" :key="ctIndex">
+                                                <td class="text-center">{{ ctIndex + 1 }}</td>
+                                                <td>{{ ct.hoc_phan?.ten }}</td>
+                                                <td>{{ ct.vien_chuc?.name }}</td>
+                                                <td class="text-center">{{ ct.so_luong }}</td>
+                                                <td>{{ ct.loai_ngan_hang===1?'Ngân hàng câu hỏi':'Ngân hàng đề thi' }}</td>
+                                                <td>{{ ct.hinh_thuc_thi }}</td>
+                                            </tr>
+                                            <tr v-if="ds_dang_kies[formIndex].ct_d_s_dang_kies.length === 0">
+                                                <td colspan="6" class="text-center">Không có dữ liệu</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
 
                             <!-- Form nhập thông tin biên bản -->
                             <form @submit.prevent>
-                                
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Thời gian <span class="text-danger">*</span></label>
@@ -204,13 +238,6 @@ const submitAll = () => {
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <h6>Danh sách người tham gia:</h6>
-                                        <!-- <button 
-                                            type="button"
-                                            class="btn btn-success btn-sm"
-                                            @click="addThanhVien(form)"
-                                        >
-                                            <i class="fas fa-plus"></i> Thêm người tham gia
-                                        </button> -->
                                     </div>
 
                                     <div 
@@ -219,7 +246,10 @@ const submitAll = () => {
                                         class="border rounded p-3 mb-2"
                                     >
                                         <div class="d-flex justify-content-between mb-2">
-                                            <span>{{ nhiem_vus.find(nv => nv.id === thanhVien.id_nhiem_vu)?.ten }}</span>
+                                            <span>
+                                                {{ nhiem_vus.find(nv => nv.id === thanhVien.id_nhiem_vu)?.ten }}
+                                                {{ thanhVien.from === 'dbcl' ? '(P.ĐBCL)' : '' }}
+                                            </span>
                                         </div>
 
                                         <div class="row">
@@ -228,30 +258,46 @@ const submitAll = () => {
                                                 <select 
                                                     v-model="thanhVien.id_vien_chuc"
                                                     class="form-select"
+                                                    :class="{ 'is-invalid': form.errors[`ds_hop.${index}.id_vien_chuc`] }"
                                                     required
                                                 >
                                                     <option value="">Chọn viên chức</option>
-                                                    <option 
-                                                        v-for="vc in vien_chucs" 
-                                                        :key="vc.id"
-                                                        :value="vc.id"
-                                                    >
-                                                        {{ vc.name }}
-                                                    </option>
+                                                    <template v-if="thanhVien.from === 'dbcl'">
+                                                        <option 
+                                                            v-for="vc in vien_chucs_dbcl" 
+                                                            :key="vc.id"
+                                                            :value="vc.id"
+                                                        >
+                                                            {{ vc.name }} - {{ vc.bo_mon.ten }}
+                                                        </option>
+                                                    </template>
+                                                    <template v-else>
+                                                        <option 
+                                                            v-for="vc in vien_chucs" 
+                                                            :key="vc.id"
+                                                            :value="vc.id"
+                                                        >
+                                                            {{ vc.name }} - {{ vc.bo_mon.ten }}
+                                                        </option>
+                                                    </template>
                                                 </select>
+                                                <div 
+                                                    class="invalid-feedback" 
+                                                    v-if="form.errors[`ds_hop.${index}.id_vien_chuc`]"
+                                                >
+                                                    {{ form.errors[`ds_hop.${index}.id_vien_chuc`] }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </form>
                         </div>
-
-                        
                     </div>
                 </div>
             </div>
         </template>
-    </TBMLayout>
+    </TKLayout>
 </template>
 
 <style scoped>

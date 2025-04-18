@@ -21,18 +21,19 @@ const form = useForm({
     id_ds_dang_ky: props.dsdangky.id,
     id_hoc_phan: '',
     id_vien_chuc: '',
-    so_gio: '',
+    hinh_thuc_thi: '',
+    so_luong: '',
     trang_thai: 'Draft'
 });
 
 const submit = () => {
     form.post(route('tbm.ctdsdangky.store'), {
         onSuccess: () => {
-            alert("Thêm mới người đăng ký thành công!");
+            alert("Thêm mới thành công!");
             form.reset();
         },
         onError: () => {
-            alert("Thêm mới người đăng ký thất bại!");
+            alert("Thêm mới thất bại!");
         }
     });
 };
@@ -54,7 +55,12 @@ const submit = () => {
             <div class="content">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="mb-0">THÊM MỚI PHÂN CÔNG</h3>
+                        <h3 class="mb-0">THÊM GIẢNG VIÊN BIÊN SOẠN <div
+                            class="col-4      "
+                        >
+                            
+                        </div>
+                        </h3>
                     </div>
 
                     <div class="card-body">
@@ -103,15 +109,35 @@ const submit = () => {
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Số giờ <span class="text-danger">*</span></label>
+                                    <label class="form-label">Hình thức thi <span class="text-danger">*</span></label>
+                                    <select 
+                                        class="form-select"
+                                        v-model="form.hinh_thuc_thi"
+                                        :class="{ 'is-invalid': form.errors.hinh_thuc_thi }"
+                                    >
+                                        <option value="">Chọn hình thức thi</option>
+                                        <option value="Trắc nghiệm">Trắc nghiệm</option>
+                                        <option value="Tự luận">Tự luận</option>
+                                        <option value="Trắc nghiệm và tự luận">Trắc nghiệm và tự luận</option>
+                                    </select>
+                                    <div class="invalid-feedback" v-if="form.errors.hinh_thuc_thi">
+                                        {{ form.errors.hinh_thuc_thi }}
+                                    </div>
+                                   
+                                    <div class="invalid-feedback" v-if="form.errors.hinh_thuc_thi">
+                                        {{ form.errors.hinh_thuc_thi }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Số lượng <span class="text-danger">*</span></label>
                                     <input 
                                         type="number"
                                         class="form-control"
-                                        v-model="form.so_gio"
-                                        :class="{ 'is-invalid': form.errors.so_gio }"
+                                        v-model="form.so_luong"
+                                        :class="{ 'is-invalid': form.errors.so_luong }"
                                     >
-                                    <div class="invalid-feedback" v-if="form.errors.so_gio">
-                                        {{ form.errors.so_gio }}
+                                    <div class="invalid-feedback" v-if="form.errors.so_luong">
+                                        {{ form.errors.so_luong }}
                                     </div>
                                 </div>
                             </div>

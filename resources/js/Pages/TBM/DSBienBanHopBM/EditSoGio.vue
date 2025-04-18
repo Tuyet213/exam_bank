@@ -48,14 +48,14 @@ const submit = () => {
             <li class="breadcrumb-item">
                 <Link :href="route('tbm.dsbienban.index')">Danh sách biên bản họp</Link>
             </li>
-            <li class="breadcrumb-item active">Chỉnh sửa số giờ</li>
+            <li class="breadcrumb-item active">Thêm giờ</li>
         </template>
 
         <template v-slot:content>
             <div class="content">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">CHỈNH SỬA SỐ GIỜ</h3>
+                        <h3 class="mb-0">THÊM GIỜ</h3>
                     </div>
 
                     <div class="card-body">
@@ -74,6 +74,14 @@ const submit = () => {
                                     <strong>Loại ngân hàng:</strong>
                                     {{ bien_ban.ct_d_s_dang_ky.loai_ngan_hang == 1 ? 'Ngân hàng câu hỏi' : 'Ngân hàng đề thi' }}
                                 </div>
+                                <div class="col-md-4">
+                                            <strong>Số lượng:</strong>
+                                            {{ bien_ban.ct_d_s_dang_ky.so_luong }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>Hình thức thi:</strong>
+                                            {{ bien_ban.ct_d_s_dang_ky.hinh_thuc_thi }}
+                                        </div>
                             </div>
                         </div>
 
@@ -104,6 +112,8 @@ const submit = () => {
                                                 {{ form.errors.so_gio_bien_soan }}
                                             </div>
                                         </div>
+                                       
+                                        
                                     </div>
                                 </div>
                             </div>

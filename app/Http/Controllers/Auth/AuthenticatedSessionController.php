@@ -41,6 +41,9 @@ class AuthenticatedSessionController extends Controller
         if($role->contains('Trưởng Bộ Môn')){
             return redirect(route('tbm.dsdangky.index'));
         }
+        if($role->contains('Trưởng Khoa')){
+            return redirect(route('tk.dsbienban.index'));
+        }
        // return redirect()->intended(route('dashboard', absolute: false));
     }
 

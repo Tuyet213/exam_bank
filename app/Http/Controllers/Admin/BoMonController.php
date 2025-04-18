@@ -44,7 +44,7 @@ class BoMonController extends Controller
 
     public function create()
     {
-        $khoas = Khoa::where('able', true)->get();
+        $khoas = Khoa::where('able', operator: 1)->get();
         return Inertia::render('Admin/BoMon/Create', compact('khoas'));
     }
 

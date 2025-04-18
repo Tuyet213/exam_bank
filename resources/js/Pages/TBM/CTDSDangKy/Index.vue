@@ -215,7 +215,7 @@ const handleCreateBienBan = () => {
                                         <th>Viên chức</th>
                                         <th>Số lượng</th>
                                         <th>Loại ngân hàng</th>
-                                        <th>Số giờ</th>
+                                        <th>Hình thức thi</th>
                                         <th>Trạng thái</th>
                                         <th>Thao tác</th>
                                     </tr>
@@ -241,7 +241,7 @@ const handleCreateBienBan = () => {
                                         <td>{{ ct.so_luong }}</td>
                                         <td>{{ ct.loai_ngan_hang }}</td>
 
-                                        <td>{{ ct.so_gio }}</td>
+                                        <td>{{ ct.hinh_thuc_thi }}</td>
                                         <td>
                                             <span 
                                                 class="badge"

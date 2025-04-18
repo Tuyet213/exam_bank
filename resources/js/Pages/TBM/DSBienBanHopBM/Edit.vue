@@ -89,6 +89,14 @@ const submit = () => {
                                     <strong>Loại ngân hàng:</strong>
                                     {{ bien_ban.ct_d_s_dang_ky.loai_ngan_hang == 1 ? 'Ngân hàng câu hỏi' : 'Ngân hàng đề thi' }}
                                 </div>
+                                <div class="col-md-4">
+                                    <strong>Số lượng:</strong>
+                                    {{ bien_ban.ct_d_s_dang_ky.so_luong }}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Hình thức thi:</strong>
+                                    {{ bien_ban.ct_d_s_dang_ky.hinh_thuc_thi }}
+                                </div>
                             </div>
                         </div>
 

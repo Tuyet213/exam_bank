@@ -82,14 +82,7 @@ const uploadNoiDung = (bienBan) => {
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h3 class="mb-0">DANH SÁCH BIÊN BẢN HỌP BỘ MÔN</h3>
-                        <div class="d-flex gap-2">
-                            <Link 
-                                :href="route('tbm.dsbienban.create')"
-                                class="btn btn-success-add"
-                            >
-                                <i class="fas fa-plus"></i> Tạo biên bản mới
-                            </Link>
-                        </div>
+                        
                     </div>
 
                     <div class="card-body">

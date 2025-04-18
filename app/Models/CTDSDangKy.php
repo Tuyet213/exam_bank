@@ -18,7 +18,8 @@ class CTDSDangKy extends Model
         'trang_thai',
         'able',
         'loai_ngan_hang',
-        'so_luong'
+        'so_luong',
+        'hinh_thuc_thi'
     ];
 
     public function dsDangKy()

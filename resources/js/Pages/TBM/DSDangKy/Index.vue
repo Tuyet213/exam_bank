@@ -4,7 +4,7 @@ import { Link } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 
-const { danhsachs, message, success, bo_mon } = defineProps({
+const { danhsachs, message, success, bo_mon, ds_hoc_ki, ds_nam_hoc, filters } = defineProps({
     danhsachs: {
         type: Object,
         required: true,
@@ -28,9 +28,23 @@ const { danhsachs, message, success, bo_mon } = defineProps({
         type: String,
         default: "",
     },
+    ds_hoc_ki: {
+        type: Array,
+        required: true
+    },
+    ds_nam_hoc: {
+        type: Array,
+        required: true
+    },
+    filters: {
+        type: Object,
+        required: true
+    }
 });
 
-const searchTerm = ref("");
+const searchTerm = ref(filters.search || "");
+const hocKi = ref(filters.hoc_ki || "");
+const namHoc = ref(filters.nam_hoc || "");
 const debounceTimeout = ref(null);
 
 const performSearch = () => {
@@ -42,6 +56,8 @@ const performSearch = () => {
             route('tbm.dsdangky.index'),
             { 
                 search: searchTerm.value,
+                hoc_ki: hocKi.value,
+                nam_hoc: namHoc.value
             },
             { 
                 preserveState: true,
@@ -51,7 +67,7 @@ const performSearch = () => {
     }, 300);
 };
 
-watch([searchTerm], () => {
+watch([searchTerm, hocKi, namHoc], () => {
     performSearch();
 });
 
@@ -92,33 +108,54 @@ const handleEdit = (id) => {
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h3 class="mb-0">DANH SÁCH ĐĂNG KÝ (Bộ Môn {{ bo_mon }})</h3>
                         <div class="d-flex gap-2">
-                            <div class="input-group" style="width: 300px;">
-                                <input
-                                    v-model="searchTerm"
-                                    type="text"
-                                    class="form-control"
-                                    placeholder="Tìm kiếm..."
-                                    @keyup="handleSearch"
-                                />
-                                <button
-                                    class="btn btn-success-add"
-                                    @click="performSearch"
-                                >
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                            <!-- Nút thêm mới -->
                             <Link 
                                 :href="route('tbm.dsdangky.create')"
                                 class="btn btn-success-add"
                             >
                                 <i class="fas fa-plus"></i> Tạo danh sách đăng ký
                             </Link>
-                            
                         </div>
                     </div>
 
                     <div class="card-body">
+                        <!-- Form tìm kiếm -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label for="hoc_ki" class="form-label">Học kỳ</label>
+                                <select 
+                                    id="hoc_ki" 
+                                    class="form-select" 
+                                    v-model="hocKi"
+                                >
+                                    <option value="">Tất cả học kỳ</option>
+                                    <option v-for="hk in ds_hoc_ki" :key="hk" :value="hk">
+                                        Học kỳ {{ hk }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="nam_hoc" class="form-label">Năm học</label>
+                                <select 
+                                    id="nam_hoc" 
+                                    class="form-select" 
+                                    v-model="namHoc"
+                                >
+                                    <option value="">Tất cả năm học</option>
+                                    <option v-for="nam in ds_nam_hoc" :key="nam" :value="nam">
+                                        {{ nam }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button 
+                                    class="btn btn-primary w-100" 
+                                    @click="performSearch"
+                                >
+                                    <i class="fas fa-search"></i> Tìm kiếm
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>

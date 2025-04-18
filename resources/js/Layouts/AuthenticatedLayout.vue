@@ -37,11 +37,12 @@ const showingNavigationDropdown = ref(false);
                                 >
                                     Dashboard
                                 </NavLink>
+                               
                                 <NavLink
-                                    :href="route('products.index')"
-                                    :active="route().current('products.index')"
+                                    :href="route('tk.dsbienban.index')"
+                                    :active="route().current('tk.dsbienban.*')"
                                 >
-                                    Products
+                                    Danh sách biên bản họp
                                 </NavLink>
                             </div>
                         </div>
@@ -75,11 +76,7 @@ const showingNavigationDropdown = ref(false);
                                     </template>
 
                                     <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
-                                            Profile
-                                        </DropdownLink>
+                                       
                                         <DropdownLink
                                             :href="route('logout')"
                                             method="post"
@@ -168,9 +165,7 @@ const showingNavigationDropdown = ref(false);
                         </div>
 
                         <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
-                                Profile
-                            </ResponsiveNavLink>
+                          
                             <ResponsiveNavLink
                                 :href="route('logout')"
                                 method="post"

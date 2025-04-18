@@ -23,8 +23,14 @@ class DSDangKyController extends Controller
             ->where('id_bo_mon', Auth::user()->id_bo_mon)
             ->orderBy('created_at', 'desc');
 
-        if ($request->has('search')) {
-            $query->where('ten', 'like', '%' . $request->input('search') . '%');
+        // Tìm kiếm theo học kỳ
+        if ($request->has('hoc_ki') && $request->hoc_ki != '') {
+            $query->where('hoc_ki', $request->hoc_ki);
+        }
+
+        // Tìm kiếm theo năm học
+        if ($request->has('nam_hoc') && $request->nam_hoc != '') {
+            $query->where('nam_hoc', $request->nam_hoc);
         }
 
         $danhsachs = $query->paginate(10)->through(function ($ds) {
@@ -32,7 +38,6 @@ class DSDangKyController extends Controller
                        $ds->ctDSDangKies->where('trang_thai', 'Draft')->count() > 0;
             return [
                 'id' => $ds->id,
-                'ten' => $ds->ten,
                 'bo_mon' => $ds->boMon->ten,
                 'hoc_ki' => 'Học kỳ ' . $ds->hoc_ki,
                 'nam_hoc' => $ds->nam_hoc,
@@ -40,9 +45,31 @@ class DSDangKyController extends Controller
             ];
         });
 
+        // Lấy danh sách học kỳ và năm học để hiển thị trong select
+        $dsHocKi = DSDangKy::select('hoc_ki')
+            ->where('id_bo_mon', Auth::user()->id_bo_mon)
+            ->distinct()
+            ->orderBy('hoc_ki')
+            ->pluck('hoc_ki');
+
+        $dsNamHoc = DSDangKy::select('nam_hoc')
+            ->where('id_bo_mon', Auth::user()->id_bo_mon)
+            ->distinct()
+            ->orderBy('nam_hoc', 'desc')
+            ->pluck('nam_hoc');
+
         $bo_mon = Auth::user()->boMon->ten;
 
-        return Inertia::render('TBM/DSDangKy/Index', compact('danhsachs', 'bo_mon'));
+        return Inertia::render('TBM/DSDangKy/Index', [
+            'danhsachs' => $danhsachs,
+            'bo_mon' => $bo_mon,
+            'ds_hoc_ki' => $dsHocKi,
+            'ds_nam_hoc' => $dsNamHoc,
+            'filters' => [
+                'hoc_ki' => $request->hoc_ki,
+                'nam_hoc' => $request->nam_hoc
+            ]
+        ]);
     }
 
     public function send($id)

@@ -36,7 +36,9 @@ const props = defineProps({
 const form = useForm({
     id_hoc_phan: props.ctdsdangky.id_hoc_phan,
     id_vien_chuc: props.ctdsdangky.id_vien_chuc,
-    trang_thai: props.ctdsdangky.trang_thai
+    trang_thai: props.ctdsdangky.trang_thai,
+    hinh_thuc_thi: props.ctdsdangky.hinh_thuc_thi,
+    so_luong: props.ctdsdangky.so_luong
 });
 
  console.log(props.ctdsdangky);
@@ -44,11 +46,11 @@ const form = useForm({
 const submit = () => {
     form.put(route('tbm.ctdsdangky.update', props.ctdsdangky.id), {
         onSuccess: () => {
-            alert("Cập nhật phân công thành công!");
+            alert("Cập nhật thành công!");
             // window.location.href = route('tbm.ctdsdangky.index', props.ctdsdangky.id_ds_dang_ky);
         },
         onError: (errors) => {
-            alert("Có lỗi xảy ra khi cập nhật phân công!");
+            alert("Có lỗi xảy ra khi cập nhật!");
             console.error(errors);
         }
     });
@@ -105,7 +107,7 @@ const submit = () => {
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Viên chức <span class="text-danger">*</span></label>
+                                    <label class="form-label">Giảng viên biên soạn <span class="text-danger">*</span></label>
                                     <select 
                                         class="form-select"
                                         v-model="form.id_vien_chuc"
@@ -125,6 +127,30 @@ const submit = () => {
                                     </div>
                                 </div>
 
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Hình thức thi <span class="text-danger">*</span></label>
+                                    <select 
+                                        class="form-select"
+                                        v-model="form.hinh_thuc_thi"
+                                        :class="{ 'is-invalid': form.errors.hinh_thuc_thi }"
+                                    >
+                                        <option value="">Chọn hình thức thi</option>
+                                        <option value="Trắc nghiệm">Trắc nghiệm</option>
+                                        <option value="Tự luận">Tự luận</option>
+                                        <option value="Trắc nghiệm và tự luận">Trắc nghiệm và tự luận</option>
+                                    </select>
+                                    <div class="invalid-feedback" v-if="form.errors.hinh_thuc_thi">
+                                        {{ form.errors.hinh_thuc_thi }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Số lượng</label>
+                                    <input 
+                                        type="number"
+                                        class="form-control"
+                                        v-model="form.so_luong"
+                                    >
+                                </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Trạng thái</label>
                                     <input 

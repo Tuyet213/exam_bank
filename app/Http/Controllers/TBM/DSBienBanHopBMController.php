@@ -36,7 +36,7 @@ class DSBienBanHopBMController extends Controller
         ->join('d_s_dang_kies', 'c_t_d_s_dang_kies.id_ds_dang_ky', '=', 'd_s_dang_kies.id')
         ->orderBy('d_s_dang_kies.created_at', 'desc')
         ->orderBy('d_s_dang_kies.id', 'desc')
-        ->select('bien_ban_hops.*');
+        ->select('bien_ban_hops.*')->where('cap', 'Bộ môn');
 
         // Lọc theo học kỳ nếu có
         if ($request->has('hoc_ki') && $request->hoc_ki != '') {

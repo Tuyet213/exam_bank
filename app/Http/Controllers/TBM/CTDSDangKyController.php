@@ -40,6 +40,7 @@ class CTDSDangKyController extends Controller
                     'so_gio' => $ct->so_gio,
                     'so_luong' => $ct->so_luong,
                     'loai_ngan_hang' => $ct->loai_ngan_hang==1?'Ngân hàng câu hỏi':'Ngân hàng đề thi',
+                    'hinh_thuc_thi' => $ct->hinh_thuc_thi,
                     'trang_thai' => $ct->trang_thai
                 ];
             });
@@ -73,16 +74,19 @@ class CTDSDangKyController extends Controller
             'id_ds_dang_ky' => 'required|exists:d_s_dang_kies,id',
             'id_hoc_phan' => 'required|exists:hoc_phans,id',
             'id_vien_chuc' => 'required|exists:users,id',
-            'so_gio' => 'required|numeric|min:1'
+            'hinh_thuc_thi' => 'required|in:Trắc nghiệm,Tự luận,Trắc nghiệm và tự luận',
+            'so_luong' => 'required|numeric|min:1'
         ]);
 
         CTDSDangKy::create([
             'id_ds_dang_ky' => $request->id_ds_dang_ky,
             'id_hoc_phan' => $request->id_hoc_phan,
             'id_vien_chuc' => $request->id_vien_chuc,
-            'so_gio' => $request->so_gio,
+            'hinh_thuc_thi' => $request->hinh_thuc_thi,
+            'so_luong' => $request->so_luong,
             'trang_thai' => 'Draft',
-            'able' => true
+            'able' => true,
+            'so_gio' => 0,
         ]);
 
         return redirect()->route('tbm.ctdsdangky.index', $request->id_ds_dang_ky);
@@ -93,26 +97,32 @@ class CTDSDangKyController extends Controller
         
         $ctdsdangky = CTDSDangKy::with(['hocPhan', 'vienChuc'])->findOrFail($id);
         $dsdangky = DSDangKy::findOrFail($ctdsdangky->id_ds_dang_ky);
-        $nam_hoc = $dsdangky->namHoc();
+        $nam_hoc = $dsdangky->nam_hoc;
         $hocphans = HocPhan::where('able', true)->where('id_bo_mon', $dsdangky->id_bo_mon)->get();
         $vienchucs = User::where('able', true)->where('id_bo_mon', $dsdangky->id_bo_mon)->get();
-        
-        return Inertia::render('TBM/CTDSDangKy/Edit', compact('ctdsdangky', 'hocphans', 'vienchucs', 'nam_hoc', 'dsdangky'));
+        $hinh_thuc_thi = $ctdsdangky->hinh_thuc_thi;
+        return Inertia::render('TBM/CTDSDangKy/Edit', compact('ctdsdangky', 'hocphans', 'vienchucs', 'nam_hoc', 'dsdangky', 'hinh_thuc_thi'));
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        Log::info($request->all());
+        $validated = $request->validate([
             'id_hoc_phan' => 'required|exists:hoc_phans,id',
             'id_vien_chuc' => 'required|exists:users,id',
+            'hinh_thuc_thi' => 'required|in:Trắc nghiệm,Tự luận,Trắc nghiệm và tự luận',
+            'so_luong' => 'required|numeric|min:1'
         ]);
-
+        Log::info($validated);
         $ctdsdangky = CTDSDangKy::findOrFail($id);
         $ctdsdangky->update([
             'id_hoc_phan' => $request->id_hoc_phan,
             'id_vien_chuc' => $request->id_vien_chuc,
+            'hinh_thuc_thi' => $request->hinh_thuc_thi,
+            'so_luong' => $request->so_luong,
+            'so_gio' => 0,
         ]);
-
+        Log::info($ctdsdangky);
         return redirect()->route('tbm.ctdsdangky.index', $ctdsdangky->id_ds_dang_ky);
     }
 

@@ -20,6 +20,8 @@
     use Illuminate\Support\Facades\Route;
     use Inertia\Inertia;
     use Illuminate\Support\Facades\Http;
+    use App\Http\Controllers\TK\DSBienBanHopKhoaController;
+    use App\Http\Controllers\TK\DSDangKyKhoaController;
 
     // chỉ trả về component hoặc page vì nó tự import vào app.blade.php
 
@@ -223,5 +225,29 @@
             ->name('ctdsdangky.updateStatusAll');
     });
 
-    
+    // Routes cho Trưởng Khoa
+    Route::middleware(['auth', 'role:Trưởng Khoa'])->prefix('tk')->name('tk.')->group(function () {
+        Route::controller(DSBienBanHopKhoaController::class)->prefix('dsbienban')->name('dsbienban.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/{id}', 'show')->name('show');
+            Route::get('/dsbienban/{id}/download', [DSBienBanHopKhoaController::class, 'download'])->name('download');
+            Route::get('/dsbienban/edit/{id}', [DSBienBanHopKhoaController::class, 'edit'])->name('edit');
+            Route::put('/dsbienban/update/{id}', [DSBienBanHopBMController::class, 'update'])->name('update');
+
+            Route::post('/{id}/upload-noi-dung', [DSBienBanHopKhoaController::class, 'uploadNoiDung'])->name('upload-noi-dung');
+            Route::get('/{id}/edit-so-gio', [DSBienBanHopKhoaController::class, 'editSoGio'])->name('edit-so-gio');
+            Route::put('/{id}/update-so-gio', [DSBienBanHopKhoaController::class, 'updateSoGio'])->name('update-so-gio');
+            Route::get('/{id}/download', [DSBienBanHopKhoaController::class, 'download'])->name('download');
+        });
+
+        // Route cho danh sách đăng ký khoa
+        Route::controller(DSDangKyKhoaController::class)->prefix('dsdangky')->name('dsdangky.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            
+           
+        });
+    });
+
     require __DIR__.'/auth.php';
