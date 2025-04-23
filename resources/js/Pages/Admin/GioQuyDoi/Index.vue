@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
@@ -90,7 +90,7 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">
                 <a :href="route('admin.gioquydoi.index')">Giờ Quy Đổi</a>
@@ -295,7 +295,7 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>
 
 <style scoped>

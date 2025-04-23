@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from '@/Layouts/AdminLayout.vue';
+import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
@@ -126,7 +126,7 @@ const exportExcel = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <template #sub-link>
             <li class="breadcrumb-item active">
                 <a :href="route('admin.thongke.index')">Thống kê biên soạn</a>
@@ -334,7 +334,7 @@ const exportExcel = () => {
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>
 
 <style scoped>
