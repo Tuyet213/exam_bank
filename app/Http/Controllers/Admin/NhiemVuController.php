@@ -29,6 +29,12 @@ class NhiemVuController extends Controller
         }
 
         $nhiemvus = $query->paginate(10)->withQueryString();
+        
+        // Thêm filters để lưu trạng thái tìm kiếm
+        $nhiemvus->filters = [
+            'search' => $request->input('search'),
+            'filter' => $request->input('filter', 'all'),
+        ];
 
         return Inertia::render('Admin/NhiemVu/Index', compact('nhiemvus'));
     }

@@ -1,5 +1,5 @@
 <script setup>
-import TBMLayout from "@/Layouts/TBMLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, useForm } from "@inertiajs/vue3";
 
 const props = defineProps({
@@ -43,7 +43,7 @@ const submit = () => {
 </script>
 
 <template>
-    <TBMLayout>
+    <AppLayout role="tbm">
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
                 <Link :href="route('tbm.dsbienban.index')">Danh sách biên bản họp</Link>
@@ -173,7 +173,7 @@ const submit = () => {
                 </div>
             </div>
         </template>
-    </TBMLayout>
+    </AppLayout>
 </template>
 
 <style scoped>

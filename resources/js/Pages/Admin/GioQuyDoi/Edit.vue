@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 
 const {     gioQuyDoi } = defineProps({
@@ -32,11 +32,11 @@ const submit = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item"><a :href="route('admin.gioquydoi.index')">Giờ quy đổi</a></li>
-            <li class="breadcrumb-item active">Update</li>
+            <li class="breadcrumb-item active">Cập nhật</li>
         </template>
 
         <!-- Nội dung chính -->
@@ -69,7 +69,6 @@ const submit = () => {
                                         <select class="form-control" id="loai_hanh_dong" v-model="form.loai_hanh_dong" required>
                                             <option value="0">Biên soạn</option>
                                             <option value="1">Họp phản biện cấp Bộ môn</option>
-                                            <option value="2">Họp thẩm định cấp Khoa</option>
                                         </select>
                                         <small v-if="form.errors.loai_hanh_dong" class="text-danger">
                                             {{ form.errors.loai_hanh_dong }}
@@ -95,12 +94,12 @@ const submit = () => {
                                 </div>
                             </div>
                             <div class="text-end">
-                                <button type="submit" class="btn btn-success shadow-lg font-weight-bold">UPDATE</button>
+                                <button type="submit" class="btn btn-success shadow-lg font-weight-bold">Lưu</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>

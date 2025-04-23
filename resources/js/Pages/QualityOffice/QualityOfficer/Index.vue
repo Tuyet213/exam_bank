@@ -1,5 +1,5 @@
 <script setup>
-import QualityLayout from "@/Layouts/QualityLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 import { Link } from "@inertiajs/vue3";
 
@@ -12,7 +12,7 @@ const { thongbaos } = defineProps({
 </script>
 
 <template>
-    <QualityLayout>
+    <AppLayout role="dbcl">
         <template #sub-link>
             <li class="breadcrumb-item active">
                 <a :href="route('qlo.notice.index')">Thông báo quy định</a>
@@ -143,5 +143,5 @@ const { thongbaos } = defineProps({
                 </div>
             </div>
         </template>
-    </QualityLayout>
+    </AppLayout>
 </template>

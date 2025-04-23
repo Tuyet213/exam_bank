@@ -1,7 +1,7 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { Link } from "@inertiajs/vue3";
-import { router } from '@inertiajs/vue3';
+import { router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 
 const { gioQuyDois, message, success } = defineProps({
@@ -26,7 +26,7 @@ const { gioQuyDois, message, success } = defineProps({
     },
 });
 
-
+console.log(gioQuyDois);
 
 // Biến cho chức năng tìm kiếm
 const searchTerm = ref("");
@@ -35,24 +35,24 @@ const selectedLoaiHanhDong = ref("");
 const debounceTimeout = ref(null);
 
 const deleteGioQuyDoi = (id) => {
-    console.log('Bắt đầu xử lý xóa, ID:', id);
-    const confirmed = confirm('Bạn có chắc chắn muốn xóa Giờ Quy Đổi này?');
-    console.log('Kết quả confirm:', confirmed);
+    console.log("Bắt đầu xử lý xóa, ID:", id);
+    const confirmed = confirm("Bạn có chắc chắn muốn xóa Giờ Quy Đổi này?");
+    console.log("Kết quả confirm:", confirmed);
     if (confirmed) {
-        console.log('Gửi yêu cầu xóa cho ID:', id);
-        router.delete(route('admin.gioquydoi.destroy', id), {
+        console.log("Gửi yêu cầu xóa cho ID:", id);
+        router.delete(route("admin.gioquydoi.destroy", id), {
             onSuccess: () => {
-                console.log('Xóa thành công');
-                alert('Giờ Quy Đổi đã được xóa thành công!');
+                console.log("Xóa thành công");
+                alert("Giờ Quy Đổi đã được xóa thành công!");
             },
             onError: (errors) => {
-                console.log('Xóa thất bại', errors);
-                alert('Có lỗi xảy ra khi xóa Giờ Quy Đổi!');
+                console.log("Xóa thất bại", errors);
+                alert("Có lỗi xảy ra khi xóa Giờ Quy Đổi!");
                 console.error(errors);
             },
         });
     } else {
-        console.log('Hủy xóa, không gửi yêu cầu');
+        console.log("Hủy xóa, không gửi yêu cầu");
     }
 };
 
@@ -99,37 +99,62 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
         <template v-slot:content>
             <div class="content">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">Giờ quy đổi</h3>
-                        <div class="d-flex flex-column gap-2 w-md-auto my-2 my-md-0 mr-2" style="width: 50%;">
-                            <!-- Hàng 1: Ô tìm kiếm -->
-                            <div>
-                                <input
-                                    type="text"
-                                    v-model="searchTerm"
-                                    placeholder="Tìm theo ID"
-                                    class="form-control"
-                                >
+                    <div class="card-header bg-success-tb text-white p-4">
+                        <div
+                            class="row justify-content-between align-items-center"
+                        >
+                            <div class="col-md-8">
+                                <h3 class="mb-0 font-weight-bolder">
+                                    DANH SÁCH GIỜ QUY ĐỔI
+                                </h3>
                             </div>
-                            <!-- Hàng 2: Loại đề thi và Loại hành động -->
-                            <div class="d-flex flex-column flex-md-row gap-2">
-                                <select v-model="selectedLoaiDeThi" class="form-control">
-                                    <option value="">Tất cả Loại đề thi</option>
-                                    <option value="0">Trắc nghiệm</option>
-                                    <option value="1">Tự luận</option>
-                                    <option value="2">Trắc nghiệm + Tự luận</option>
-                                </select>
+                            <div class="col-md-4 text-end">
+                                <Link
+                                    :href="route('admin.gioquydoi.create')"
+                                    class="btn btn-light"
+                                >
+                                    <i class="fas fa-plus"></i> Thêm mới
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body pb-0">
+                        <div class="row mb-4">
+                            <div class="col-md-4 col-sm-12 mb-3">
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        v-model="searchTerm"
+                                        placeholder="Tìm theo ID"
+                                        class="form-control"
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-sm-12 mb-3">
+                                <select
+                                    v-model="selectedLoaiDeThi"
+                                        class="form-control"
+                                    >
+                                        <option value="">
+                                            Tất cả Loại đề thi
+                                        </option>
+                                        <option value="0">Trắc nghiệm</option>
+                                        <option value="1">Tự luận</option>
+                                        <option value="2">
+                                            Trắc nghiệm + Tự luận
+                                        </option>
+                                    </select>
+                                </div>
+                            <div class="col-md-4 col-sm-12 mb-3">
                                 <select v-model="selectedLoaiHanhDong" class="form-control">
                                     <option value="">Tất cả Loại hành động</option>
                                     <option value="0">Biên soạn</option>
                                     <option value="1">Họp phản biện cấp Bộ môn</option>
-                                    <option value="2">Họp thẩm định cấp Khoa</option>
+                                    
                                 </select>
                             </div>
+                           
                         </div>
-                        <Link :href="route('admin.gioquydoi.create')" class="btn btn-success-add">
-                            <i class="fas fa-user-plus"></i> Add Giờ Quy Đổi
-                        </Link>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -150,22 +175,49 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
                                             Không có dữ liệu
                                         </td>
                                     </tr>
-                                    <tr v-for="gioQuyDoi in gioQuyDois.data" :key="gioQuyDoi.id">
+                                    <tr
+                                        v-for="gioQuyDoi in gioQuyDois.data"
+                                        :key="gioQuyDoi.id"
+                                    >
                                         <td>{{ gioQuyDoi?.id }}</td>
-                                        <td>{{ gioQuyDoi?.loai_de_thi === 0 ? 'Trắc nghiệm' : gioQuyDoi?.loai_de_thi === 1 ? 'Tự luận' : 'Trắc nghiệm + Tự luận' }}</td>
-                                        <td>{{ gioQuyDoi?.loai_hanh_dong === 0 ? 'Biên soạn' : gioQuyDoi?.loai_hanh_dong === 1 ? 'Họp phản biện cấp Bộ môn' : 'Họp thẩm định cấp Khoa'}}</td>
+                                        <td>
+                                            {{
+                                                gioQuyDoi?.loai_de_thi == 0
+                                                    ? "Trắc nghiệm"
+                                                    : gioQuyDoi?.loai_de_thi ==
+                                                      1
+                                                    ? "Tự luận"
+                                                    : "Trắc nghiệm + Tự luận"
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                gioQuyDoi?.loai_hanh_dong == 0
+                                                    ? "Biên soạn"
+                                                    : "Họp phản biện cấp Bộ môn"
+                                            }}
+                                        </td>
                                         <td>{{ gioQuyDoi?.gio }}</td>
                                         <td>{{ gioQuyDoi?.so_luong }}</td>
                                         <td>
                                             <Link
-                                                :href="route('admin.gioquydoi.edit', gioQuyDoi.id)"
+                                                :href="
+                                                    route(
+                                                        'admin.gioquydoi.edit',
+                                                        gioQuyDoi.id
+                                                    )
+                                                "
                                                 class="btn btn-sm btn-success-edit me-2"
                                             >
                                                 <i class="fas fa-edit"></i>
                                             </Link>
                                             <button
                                                 class="btn btn-sm btn-danger-delete"
-                                                @click="deleteGioQuyDoi(gioQuyDoi.id)"
+                                                @click="
+                                                    deleteGioQuyDoi(
+                                                        gioQuyDoi.id
+                                                    )
+                                                "
                                             >
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -178,17 +230,28 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
                         <!-- Phân trang -->
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center mt-3">
-                                <li class="page-item" :class="{ disabled: gioQuyDois.current_page === 1 }">
+                                <li
+                                    class="page-item"
+                                    :class="{
+                                        disabled: gioQuyDois.current_page === 1,
+                                    }"
+                                >
                                     <Link
                                         :href="gioQuyDois.links[0]?.url || '#'"
                                         class="page-link rounded-circle"
-                                        :class="{ 'disabled-link': !gioQuyDois.links[0]?.url }"
+                                        :class="{
+                                            'disabled-link':
+                                                !gioQuyDois.links[0]?.url,
+                                        }"
                                     >
                                         <i class="fas fa-chevron-left"></i>
                                     </Link>
                                 </li>
                                 <li
-                                    v-for="link in gioQuyDois.links.slice(1, -1)"
+                                    v-for="link in gioQuyDois.links.slice(
+                                        1,
+                                        -1
+                                    )"
                                     :key="link.label"
                                     class="page-item"
                                     :class="{ active: link.active }"
@@ -203,12 +266,25 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
                                 </li>
                                 <li
                                     class="page-item"
-                                    :class="{ disabled: gioQuyDois.current_page === gioQuyDois.last_page }"
+                                    :class="{
+                                        disabled:
+                                            gioQuyDois.current_page ===
+                                            gioQuyDois.last_page,
+                                    }"
                                 >
                                     <Link
-                                        :href="gioQuyDois.links[gioQuyDois.links.length - 1]?.url || '#'"
+                                        :href="
+                                            gioQuyDois.links[
+                                                gioQuyDois.links.length - 1
+                                            ]?.url || '#'
+                                        "
                                         class="page-link rounded-circle"
-                                        :class="{ 'disabled-link': !gioQuyDois.links[gioQuyDois.links.length - 1]?.url }"
+                                        :class="{
+                                            'disabled-link':
+                                                !gioQuyDois.links[
+                                                    gioQuyDois.links.length - 1
+                                                ]?.url,
+                                        }"
                                     >
                                         <i class="fas fa-chevron-right"></i>
                                     </Link>
@@ -221,3 +297,19 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
         </template>
     </AdminLayout>
 </template>
+
+<style scoped>
+.btn-success-edit {
+    background-color: #f0ad4e;
+    color: white;
+    border-radius: 0;
+}
+
+.btn-danger-delete {
+    background-color: #d9534f;
+    color: white;
+    border-radius: 0;
+}
+
+</style>
+

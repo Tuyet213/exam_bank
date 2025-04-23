@@ -14,6 +14,11 @@ class BoMonController extends Controller
     {
         $query = BoMon::where('able', true)->with('khoa');
 
+        // Lọc theo khoa
+        if ($request->has('khoa_id') && !empty($request->input('khoa_id'))) {
+            $query->where('id_khoa', $request->input('khoa_id'));
+        }
+
         if ($request->has('search') && !empty($request->input('search'))) {
             $searchTerm = $request->input('search');
             $filterBy = $request->input('filter', 'all');
@@ -38,8 +43,18 @@ class BoMonController extends Controller
         }
 
         $bomons = $query->paginate(10)->withQueryString();
+        
+        // Lấy danh sách khoa để hiển thị trong bộ lọc
+        $khoas = Khoa::where('able', true)->get();
+        
+        // Thêm thông tin filters vào dữ liệu phân trang
+        $bomons->filters = [
+            'search' => $request->input('search'),
+            'filter' => $request->input('filter', 'all'),
+            'khoa_id' => $request->input('khoa_id')
+        ];
 
-        return Inertia::render('Admin/BoMon/Index', compact('bomons'));
+        return Inertia::render('Admin/BoMon/Index', compact('bomons', 'khoas'));
     }
 
     public function create()

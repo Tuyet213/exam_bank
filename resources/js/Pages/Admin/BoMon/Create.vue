@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import {useForm } from "@inertiajs/vue3";
 
 
@@ -32,11 +32,11 @@ const submit = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item"><a :href="route('admin.bomon.index')">Bộ môn</a></li>
-            <li class="breadcrumb-item active">Create</li>
+            <li class="breadcrumb-item active">Thêm</li>
         </template>
 
         <!-- Nội dung chính -->
@@ -45,7 +45,7 @@ const submit = () => {
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
                     <!-- Card Header -->
                     <div class="card-header bg-success-tb text-white p-4">
-                        <h3 class="mb-0 font-weight-bolder">TẠO BỘ MÔN MỚI</h3>
+                        <h3 class="mb-0 font-weight-bolder">BỘ MÔN</h3>
                     </div>
 
                     <!-- Card Body -->
@@ -74,12 +74,12 @@ const submit = () => {
                            
                             <!-- Nút Create -->
                             <div class="text-end">
-                                <button type="submit" class="btn btn-success font-weight-bold">ADD</button>
+                                <button type="submit" class="btn btn-success font-weight-bold">Lưu</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>

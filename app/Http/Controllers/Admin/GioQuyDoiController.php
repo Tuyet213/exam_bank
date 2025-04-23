@@ -6,27 +6,41 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\GioQuyDoi;   
 use Inertia\Inertia;
+
 class GioQuyDoiController extends Controller
 {
     public function index(Request $request)
     {
         $query = GioQuyDoi::where('able', true);
 
-        if ($request->has('loai_de_thi') && $request->input('loai_de_thi') !== '') {
+        // Xử lý filter loại đề thi
+        if ($request->has('loai_de_thi') && $request->input('loai_de_thi') != '') {
             $query->where('loai_de_thi', $request->input('loai_de_thi'));
         }
 
-        if ($request->has('loai_hanh_dong') && $request->input('loai_hanh_dong') !== '') {
+        // Xử lý filter loại hành động
+        if ($request->has('loai_hanh_dong') && $request->input('loai_hanh_dong') != '') {
             $query->where('loai_hanh_dong', $request->input('loai_hanh_dong'));
         }
 
+        // Xử lý tìm kiếm theo ID
         if ($request->has('search') && !empty($request->input('search'))) {
             $query->where('id', 'like', "%{$request->input('search')}%");
         }
 
-        $gioQuyDois = $query->paginate(10)->withQueryString();
+        $gioQuyDois = $query->orderBy('id', 'desc')->paginate(10)->withQueryString();
 
-        return Inertia::render('Admin/GioQuyDoi/Index', compact('gioQuyDois'));
+        // Trả về filters để duy trì trạng thái
+        $filters = [
+            'search' => $request->input('search'),
+            'loai_de_thi' => $request->input('loai_de_thi'),
+            'loai_hanh_dong' => $request->input('loai_hanh_dong')
+        ];
+
+        return Inertia::render('Admin/GioQuyDoi/Index', [
+            'gioQuyDois' => $gioQuyDois,
+            'filters' => $filters
+        ]);
     }
 
     public function create()
@@ -60,5 +74,4 @@ class GioQuyDoiController extends Controller
         $gioQuyDoi->save();
         return redirect()->route('admin.gioquydoi.index');
     }
-
 }

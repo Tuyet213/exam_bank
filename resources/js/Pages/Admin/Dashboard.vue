@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from '@/Layouts/AdminLayout.vue';
+import AppLayout from '@/Layouts/AppLayout.vue';
 import { ref } from 'vue';
 
 const khoas = ref([]);
@@ -9,8 +9,8 @@ const khoas = ref([]);
 </script>
 
     <template>
-        <AdminLayout>
+        <AppLayout role="admin">
             <h1>Dashboard</h1>
-        </AdminLayout>
+        </AppLayout>
     </template>
 

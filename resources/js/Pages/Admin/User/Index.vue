@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import { router } from '@inertiajs/vue3';
@@ -89,7 +89,7 @@ const handleSearch = (event) => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">
                 <a :href="route('admin.user.index')">Người dùng</a>
@@ -97,61 +97,80 @@ const handleSearch = (event) => {
         </template>
         <template v-slot:content>
             <div class="content">
-                <div class="card">
-                    <div
-                        class="card-header d-flex justify-content-between align-items-center"
-                    >
-                        <h3 class="mb-0">Người dùng</h3>
-                        <Link
-                            :href="route('admin.user.create')"
-                            class="btn btn-success-add"
-                        >
-                            <i class="fas fa-user-plus"></i> Add Người dùng
-                        </Link>
+                <div class="card border-radius-lg shadow-lg animated-fade-in">
+                    <!-- Card Header -->
+                    <div class="card-header bg-success-tb text-white p-4">
+                        <div class="row justify-content-between align-items-center">
+                            <div class="col-md-8">
+                                <h3 class="mb-0 font-weight-bolder">
+                                    DANH SÁCH NGƯỜI DÙNG
+                                </h3>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <Link
+                                    :href="route('admin.user.create')"
+                                    class="btn btn-light"
+                                >
+                                    <i class="fas fa-user-plus"></i> Thêm mới
+                                </Link>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="search-form mb-4">
-                            <div class="row justify-content-between">
-                                <div class="col-md-4 col-sm-12">
-                                        <input
-                                            v-model="searchTerm"
-                                            type="text"
-                                            class="form-control"
-                                            placeholder="Tìm theo ID, tên, email, sdt"
-                                            @keyup="handleSearch"
-                                        />
-                                    </div>
-                                    <select
-                                        v-model="selectedBoMon"
-                                        class="form-control col-md-4 col-sm-12"
-                                        style="width: 200px"
+
+                    <!-- Bộ lọc -->
+                    <div class="card-body pb-0">
+                        <div class="row mb-4">
+                            <div class="col-md-4 mb-3">
+                                <div class="input-group">
+                                    <input
+                                        v-model="searchTerm"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Tìm theo ID, tên, email, sdt"
+                                        @keyup="handleSearch"
                                     >
-                                        <option value="">Tất cả Bộ môn</option>
-                                        <option
-                                            v-for="bomon in bomons"
-                                            :key="bomon.id"
-                                            :value="bomon.id"
-                                        >
-                                            {{ bomon.ten }}
-                                        </option>
-                                    </select>
-                                    <select
-                                        v-model="selectedChucVu"
-                                        class="form-control col-md-4 col-sm-12"
-                                        style="width: 200px"
+                                    <button
+                                        class="btn btn-success-add"
+                                        @click="performSearch"
                                     >
-                                        <option value="">Tất cả Chức vụ</option>
-                                        <option
-                                            v-for="chucvu in chucvus"
-                                            :key="chucvu.id"
-                                            :value="chucvu.id"
-                                        >
-                                            {{ chucvu.ten }}
-                                        </option>
-                                    </select>
+                                        <i class="fas fa-search"></i>
+                                    </button>
                                 </div>
                             </div>
-                        
+                            <div class="col-md-4 mb-3">
+                                <select
+                                    v-model="selectedBoMon"
+                                    class="form-select"
+                                >
+                                    <option value="">Tất cả Bộ môn</option>
+                                    <option
+                                        v-for="bomon in bomons"
+                                        :key="bomon.id"
+                                        :value="bomon.id"
+                                    >
+                                        {{ bomon.ten }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <select
+                                    v-model="selectedChucVu"
+                                    class="form-select"
+                                >
+                                    <option value="">Tất cả Chức vụ</option>
+                                    <option
+                                        v-for="chucvu in chucvus"
+                                        :key="chucvu.id"
+                                        :value="chucvu.id"
+                                    >
+                                        {{ chucvu.ten }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
                         <!-- Bảng hiển thị danh sách người dùng -->
                         <div class="table-responsive">
                             <table class="table table-hover">
@@ -168,7 +187,7 @@ const handleSearch = (event) => {
                                 </thead>
                                 <tbody>
                                     <tr v-if="users.data.length === 0">
-                                        <td colspan="4" class="text-center">
+                                        <td colspan="7" class="text-center">
                                             Không có dữ liệu
                                         </td>
                                     </tr>
@@ -210,43 +229,29 @@ const handleSearch = (event) => {
                                         >
                                             {{ user?.bomon?.ten }}
                                         </td>
-                                        <td>
+                                        <td class="d-flex" style="word-wrap: break-word;
+                                                max-width: 150px;">
                                             <Link
-                                                :href="
-                                                    route(
-                                                        'admin.user.edit',
-                                                        user.id
-                                                    )
-                                                "
+                                                :href="route('admin.user.edit', user.id)"
                                                 class="btn btn-sm btn-success-edit me-2"
                                             >
                                                 <i class="fas fa-edit"></i>
                                             </Link>
                                             <Link
-                                                :href="
-                                                    route(
-                                                        'admin.user.show',
-                                                        user.id
-                                                    )
-                                                "
-                                                class="btn btn-sm btn-primary me-2"
-                                                style="border-radius: 50%"
-                                            >
-                                                <i class="fas fa-eye"></i>
-                                            </Link>
-                                            <Link
-                                                :href="
-                                                    route(
-                                                        'admin.user.destroy',
-                                                        user.id
-                                                    )
-                                                "
+                                                :href="route('admin.user.destroy', user.id)"
                                                 method="delete"
                                                 as="button"
+                                                type="button"
+                                                :data="{
+                                                    id: user.id,
+                                                    _method: 'delete',
+                                                }"
                                                 class="btn btn-sm btn-danger-delete"
-                                                @click.prevent="
-                                                    deleteUser(user.id) ||
-                                                        $event.preventDefault()
+                                                @click="
+                                                    (e) => {
+                                                        if (!deleteUser(user.id))
+                                                            e.preventDefault();
+                                                    }
                                                 "
                                             >
                                                 <i class="fas fa-trash"></i>
@@ -260,7 +265,6 @@ const handleSearch = (event) => {
                         <!-- Phân trang -->
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center mt-3">
-                                <!-- Nút Previous -->
                                 <li
                                     class="page-item"
                                     :class="{
@@ -278,30 +282,27 @@ const handleSearch = (event) => {
                                         <i class="fas fa-chevron-left"></i>
                                     </Link>
                                 </li>
-
-                                <!-- Các số trang -->
                                 <li
                                     v-for="link in users.links.slice(1, -1)"
                                     :key="link.label"
                                     class="page-item"
-                                    :class="{ active: link.active }"
+                                    :class="{
+                                        active:
+                                            link.active ||
+                                            link.label == users.current_page,
+                                    }"
                                 >
                                     <Link
-                                        :href="link.url || '#'"
+                                        :href="link.url"
                                         class="page-link rounded-circle"
-                                        :class="{ 'active-page': link.active }"
-                                    >
-                                        {{ link.label }}
-                                    </Link>
+                                        v-html="link.label"
+                                    ></Link>
                                 </li>
-
-                                <!-- Nút Next -->
                                 <li
                                     class="page-item"
                                     :class="{
                                         disabled:
-                                            users.current_page ===
-                                            users.last_page,
+                                            users.current_page === users.last_page,
                                     }"
                                 >
                                     <Link
@@ -326,5 +327,55 @@ const handleSearch = (event) => {
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>
+
+<style scoped>
+.bg-success-tb {
+    background-color: #5cb85c;
+}
+
+.btn-success-add {
+    background-color: #5cb85c;
+    color: white;
+}
+
+.btn-success-edit {
+    background-color: #f0ad4e;
+    color: white;
+    border-radius: 0;
+}
+
+.btn-danger-delete {
+    background-color: #d9534f;
+    color: white;
+    border-radius: 0;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.animated-fade-in {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.border-radius-lg {
+    border-radius: 0.5rem;
+}
+
+.shadow-lg {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: #5cb85c;
+    box-shadow: 0 0 0 0.25rem rgba(92, 184, 92, 0.25);
+}
+</style>

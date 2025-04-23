@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
 
 const props = defineProps({
@@ -11,7 +11,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
                 <Link :href="route('admin.user.index')">Người dùng</Link>
@@ -134,7 +134,7 @@ const props = defineProps({
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>
 
 <style scoped>

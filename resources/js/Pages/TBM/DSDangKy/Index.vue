@@ -1,5 +1,5 @@
 <script setup>
-import TBMLayout from "@/Layouts/TBMLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
@@ -92,10 +92,28 @@ const handleSend = (id) => {
 const handleEdit = (id) => {
     router.get(route('tbm.dsdangky.edit', id));
 };
+
+const getStatusBadgeClass = (status) => {
+    const classes = 'badge ';
+    switch (status) {
+        case 'Approved':
+            return classes + 'bg-success';
+        case 'Rejected':
+            return classes + 'bg-danger';
+        case 'Pending':
+            return classes + 'bg-warning';
+        case 'Sent':
+            return classes + 'bg-info';
+        case 'Draft':
+            return classes + 'bg-secondary';
+        default:
+            return classes + 'bg-secondary';
+    }
+};
 </script>
 
 <template>
-    <TBMLayout>
+    <AppLayout role="tbm">
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">
                 <a :href="route('tbm.dsdangky.index')">Danh sách đăng ký</a>
@@ -163,6 +181,7 @@ const handleEdit = (id) => {
                                         <th>STT</th>
                                         <th>Học kỳ</th>
                                         <th>Năm học</th>
+                                        <th>Trạng thái</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -176,6 +195,11 @@ const handleEdit = (id) => {
                                         <td>{{ index + 1 }}</td>
                                         <td>{{ ds.hoc_ki }}</td>
                                         <td>{{ ds.nam_hoc }}</td>
+                                        <td>
+                                            <span :class="getStatusBadgeClass(ds.trang_thai)" class="badge">
+                                                {{ ds.trang_thai || 'Draft' }}
+                                            </span>
+                                        </td>
                                         <td>
                                             <Link 
                                                 :href="route('tbm.ctdsdangky.index', ds.id)"
@@ -204,13 +228,12 @@ const handleEdit = (id) => {
                                     </tr>
                                 </tbody>
                             </table>
-                            
                         </div>
                     </div>
                 </div>
             </div>
         </template>
-    </TBMLayout>
+    </AppLayout>
 </template>
 
 <style scoped>
@@ -292,5 +315,36 @@ const handleEdit = (id) => {
 
 .me-2 {
     margin-right: 0.5rem !important;
+}
+
+.badge {
+    font-size: 0.85em;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+}
+
+.badge.bg-success {
+    background-color: #198754 !important;
+    color: white;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+    color: white;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: black;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+    color: white;
+}
+
+.badge.bg-info {
+    background-color: #0dcaf0 !important;
+    color: black;
 }
 </style>

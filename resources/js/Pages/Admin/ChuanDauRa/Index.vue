@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
@@ -78,7 +78,7 @@ const handleSearch = (event) => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">
                 <a :href="route('admin.chuandaura.index')">Chuẩn đầu ra</a>
@@ -86,45 +86,59 @@ const handleSearch = (event) => {
         </template>
         <template v-slot:content>
             <div class="content">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">Chuẩn đầu ra</h3>
-                        <div class="d-flex gap-2">
-                            <!-- Ô tìm kiếm -->
-                            <div class="input-group" style="width: 300px;">
-                                <input
-                                    v-model="searchTerm"
-                                    type="text"
-                                    class="form-control"
-                                    placeholder="Tìm theo ID hoặc tên Chuẩn đầu ra..."
-                                    @keyup="handleSearch"
-                                />
-                                <button
-                                    class="btn btn-success-add"
-                                    @click="performSearch"
-                                >
-                                    <i class="fas fa-search"></i>
-                                </button>
+                <div class="card border-radius-lg shadow-lg animated-fade-in">
+                    <!-- Card Header -->
+                    <div class="card-header bg-success-tb text-white p-4">
+                        <div class="row justify-content-between align-items-center">
+                            <div class="col-md-8">
+                                <h3 class="mb-0 font-weight-bolder">
+                                    DANH SÁCH CHUẨN ĐẦU RA
+                                </h3>
                             </div>
-                            <!-- Bộ lọc -->
-                            <select
-                                v-model="filterBy"
-                                class="form-control"
-                                style="width: 150px;"
-                            >
-                                <option value="all">Tất cả</option>
-                                <option value="id">Theo ID</option>
-                                <option value="ten">Theo tên hoặc nội dung</option>
-                            </select>
+                            <div class="col-md-4 text-end">
+                                <Link
+                                    :href="route('admin.chuandaura.create')"
+                                    class="btn btn-light"
+                                >
+                                    <i class="fas fa-plus"></i> Thêm mới
+                                </Link>
+                            </div>
                         </div>
-                        <!-- Nút thêm Chuẩn đầu ra -->
-                        <Link
-                            :href="route('admin.chuandaura.create')"
-                            class="btn btn-success-add"
-                        >
-                            <i class="fas fa-user-plus"></i> Add Chuẩn đầu ra
-                        </Link>
                     </div>
+
+                    <!-- Bộ lọc -->
+                    <div class="card-body pb-0">
+                        <div class="row mb-4">
+                            <div class="col-md-9 mb-3">
+                                <div class="input-group">
+                                    <input
+                                        v-model="searchTerm"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Tìm kiếm chuẩn đầu ra..."
+                                        @keyup="handleSearch"
+                                    >
+                                    <button
+                                        class="btn btn-success-add"
+                                        @click="performSearch"
+                                    >
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <select
+                                    v-model="filterBy"
+                                    class="form-select"
+                                >
+                                    <option value="all">Tất cả</option>
+                                    <option value="id">Theo ID</option>
+                                    <option value="ten">Theo tên hoặc nội dung</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-hover">
@@ -147,18 +161,20 @@ const handleSearch = (event) => {
                                         <td>{{ chuanDauRa?.ten }}</td>
                                         <td>{{ chuanDauRa?.noi_dung }}</td>
                                         <td>
-                                            <Link
-                                                :href="route('admin.chuandaura.edit', chuanDauRa.id)"
-                                                class="btn btn-sm btn-success-edit me-2"
-                                            >
-                                                <i class="fas fa-edit"></i>
-                                            </Link>
-                                            <button
-                                                class="btn btn-sm btn-danger-delete"
-                                                @click="deleteChuanDauRa(chuanDauRa.id)"
-                                            >
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <div class="d-flex">
+                                                <Link
+                                                    :href="route('admin.chuandaura.edit', chuanDauRa.id)"
+                                                    class="btn btn-sm btn-success-edit me-2"
+                                                >
+                                                    <i class="far fa-edit"></i>
+                                                </Link>
+                                                <button
+                                                    class="btn btn-sm btn-danger-delete"
+                                                    @click="deleteChuanDauRa(chuanDauRa.id)"
+                                                >
+                                                    <i class="far fa-trash-alt"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -209,5 +225,5 @@ const handleSearch = (event) => {
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>

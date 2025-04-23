@@ -1,6 +1,7 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import {useForm } from "@inertiajs/vue3";
+import { computed } from 'vue';
 
 const { khoas, hoc_phans, vien_chucs } = defineProps({
     khoas: {
@@ -27,6 +28,19 @@ const form = useForm({
     id_vien_chuc: "",
 });
 
+// Tạo mảng năm học theo định dạng "năm - năm+1"
+const schoolYears = computed(() => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 10 }, (_, i) => {
+        const startYear = currentYear - i;
+        const endYear = startYear + 1;
+        return {
+            value: `${startYear}-${endYear}`,
+            label: `${startYear} - ${endYear}`
+        };
+    });
+});
+
 const submit = () => {
         form.post(route("admin.lophocphan.store"), {
         onSuccess: () => {
@@ -42,11 +56,11 @@ const submit = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item"><a :href="route('admin.lophocphan.index')">Lớp học phần</a></li>
-            <li class="breadcrumb-item active">Create</li>
+            <li class="breadcrumb-item active">Thêm</li>
         </template>
 
         <!-- Nội dung chính -->
@@ -55,7 +69,7 @@ const submit = () => {
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
                     <!-- Card Header -->
                     <div class="card-header bg-success-tb text-white p-4">
-                        <h3 class="mb-0 font-weight-bolder">THÊM LỚP HỌC PHẦN</h3>
+                        <h3 class="mb-0 font-weight-bolder">LỚP HỌC PHẦN</h3>
                     </div>
 
                     <!-- Card Body -->
@@ -72,17 +86,21 @@ const submit = () => {
                             <div class="row">
                                 <div class="mb-3 col-md-6 col-sm-12">
                                 <label for="nam_hoc" class="form-label">Năm học</label>
-                                    <input type="text" class="form-control" id="nam_hoc" v-model="form.nam_hoc" required>
+                                    <select v-model="form.nam_hoc" id="nam_hoc" class="form-select" required>
+                                        <option v-for="year in schoolYears" :key="year.value" :value="year.value">
+                                            {{ year.label }}
+                                        </option>
+                                    </select>
                                     <small v-if="form.errors.nam_hoc" class="text-danger">
                                         {{ form.errors.nam_hoc }}
                                     </small>
                                 </div>
                                 <div class="mb-3 col-md-6 col-sm-12">
                                     <label for="ky_hoc" class="form-label">Kỳ học</label>
-                                    <select v-model="form.ky_hoc" id="ky_hoc" class="form-control" :class="{ 'has-value': form.ky_hoc }" required>
+                                    <select v-model="form.ky_hoc" id="ky_hoc" class="form-select" :class="{ 'has-value': form.ky_hoc }" required>
                                         <option value="1">Học kỳ 1</option>
                                         <option value="2">Học kỳ 2</option>
-                                        <option value="3">Học kỳ 3</option>
+                                        <option value="Hè">Học kỳ Hè</option>
                                     </select>
                                     <small v-if="form.errors.ky_hoc" class="text-danger">
                                         {{ form.errors.ky_hoc }}
@@ -121,13 +139,13 @@ const submit = () => {
                                     </small>
                             </div>
                             <div class="text-end">
-                                <button type="submit" class="btn btn-success font-weight-bold">ADD</button>
+                                <button type="submit" class="btn btn-success font-weight-bold">Lưu</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>
 

@@ -1,5 +1,5 @@
 <script setup>
-import QualityLayout from "@/Layouts/QualityLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 
 const form = useForm({
@@ -24,7 +24,7 @@ const handleFileChange = (event) => {
 </script>
 
 <template>
-    <QualityLayout>
+    <AppLayout role="dbcl">
         <template #sub-link>
             <li class="breadcrumb-item">
                 <a :href="route('qlo.notice.index')">Thông báo quy định</a>
@@ -126,5 +126,5 @@ const handleFileChange = (event) => {
                 </div>
             </div>
         </template>
-    </QualityLayout>
+    </AppLayout>
 </template>

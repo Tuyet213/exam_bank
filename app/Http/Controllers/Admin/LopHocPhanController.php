@@ -29,14 +29,24 @@ class LopHocPhanController extends Controller
             $query->where('id_hoc_phan', $request->input('id_hoc_phan'));
         }
         if ($request->has('search') && !empty($request->input('search'))) {
-            $query->where('ten', 'like', "%{$request->input('search')}%")
-            ->orWhere('id', 'like', "%{$request->input('search')}%")
-            ->orWhereHas('vienChuc', function ($query) use ($request) {
-                $query->where('name', 'like', "%{$request->input('search')}%");
-            })
-            ->where('able', true);
+            $query->where(function($q) use ($request) {
+                $q->where('ten', 'like', "%{$request->input('search')}%")
+                  ->orWhere('id', 'like', "%{$request->input('search')}%")
+                  ->orWhereHas('vienChuc', function ($query) use ($request) {
+                      $query->where('name', 'like', "%{$request->input('search')}%");
+                  });
+            })->where('able', true);
         }
         $lophocphans = $query->paginate(10)->withQueryString();
+
+        // Thêm filtters để lưu trạng thái tìm kiếm
+        $lophocphans->filters = [
+            'search' => $request->input('search'),
+            'ky_hoc' => $request->input('ky_hoc'),
+            'nam_hoc' => $request->input('nam_hoc'),
+            'id_khoa' => $request->input('id_khoa'),
+            'id_hoc_phan' => $request->input('id_hoc_phan'),
+        ];
 
         $khoas = Khoa::where('able', true)->get(['id', 'ten']);
         $hoc_phans = HocPhan::where('able', true)->get(['id', 'ten']);

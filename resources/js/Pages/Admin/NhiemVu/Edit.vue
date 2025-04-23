@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 
 const { nhiemvu } = defineProps({
@@ -29,11 +29,11 @@ const submit = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item"><a :href="route('admin.nhiemvu.index')">Nhiệm vụ</a></li>
-            <li class="breadcrumb-item active">Update</li>
+            <li class="breadcrumb-item active">Cập nhật</li>
         </template>
 
         <!-- Nội dung chính -->
@@ -63,12 +63,12 @@ const submit = () => {
                                 </small>
                             </div>
                             <div class="text-end">
-                                <button type="submit" class="btn btn-success shadow-lg font-weight-bold">UPDATE</button>
+                                <button type="submit" class="btn btn-success shadow-lg font-weight-bold">Lưu</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>

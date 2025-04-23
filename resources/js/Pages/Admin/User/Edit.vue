@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import axios from "axios";
@@ -184,13 +184,13 @@ const loadInitialData = async () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
                 <a :href="route('admin.user.index')">Người dùng</a>
             </li>
-            <li class="breadcrumb-item active">Cập nhật tài khoản</li>
+            <li class="breadcrumb-item active">Cập nhật</li>
         </template>
 
         <!-- Nội dung chính -->
@@ -509,7 +509,7 @@ const loadInitialData = async () => {
                             <!-- Nút Update -->
                             <div class="text-end mt-4">
                                 <button type="submit" class="btn btn-success font-weight-bold">
-                                    UPDATE
+                                    Lưu
                                 </button>
                             </div>
                         </form>
@@ -517,7 +517,7 @@ const loadInitialData = async () => {
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>
 
 <style scoped>

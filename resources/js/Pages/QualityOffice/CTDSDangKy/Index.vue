@@ -1,5 +1,5 @@
 <script setup>
-import QualityLayout from '@/Layouts/QualityLayout.vue';
+import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -38,13 +38,15 @@ const getStatusBadgeClass = (status) => {
 
 const approve = (id) => {
     router.put(route('quality.ctdsdangky.updateStatus', id), {
-        trang_thai: 'Approved'
+        trang_thai: 'Approved',
+        dsdangky_id: props.dsdangky.id
     });
 };
 
 const reject = (id) => {
     router.put(route('quality.ctdsdangky.updateStatus', id), {
-        trang_thai: 'Rejected'
+        trang_thai: 'Rejected',
+        dsdangky_id: props.dsdangky.id
     });
 };
 
@@ -73,7 +75,7 @@ const handleSubmit = () => {
 </script>
 
 <template>
-    <QualityLayout>
+    <AppLayout role="dbcl">
         <template #sub-link>
             <li class="breadcrumb-item">
                 <a :href="route('quality.dsdangky.index')">Danh sách đăng ký</a>
@@ -177,7 +179,7 @@ const handleSubmit = () => {
                 </div>
             </div>
         </template>
-    </QualityLayout>
+    </AppLayout>
 </template>
 
 <style scoped>

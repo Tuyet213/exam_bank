@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { useForm } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import axios from "axios";
@@ -156,7 +156,7 @@ const submit = () => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <!-- Breadcrumb -->
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
@@ -172,7 +172,7 @@ const submit = () => {
                     <!-- Card Header -->
                     <div class="card-header bg-success-tb text-white p-4">
                         <h3 class="mb-0 font-weight-bolder">
-                            TẠO TÀI KHOẢN MỚI
+                            TÀI KHOẢN
                         </h3>
                     </div>
 
@@ -634,7 +634,7 @@ const submit = () => {
                                     type="submit"
                                     class="btn btn-success font-weight-bold"
                                 >
-                                    ADD
+                                    Lưu
                                 </button>
                             </div>
                         </form>
@@ -642,7 +642,7 @@ const submit = () => {
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>
 <style scoped>
 .role-list,

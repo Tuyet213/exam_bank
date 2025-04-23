@@ -11,7 +11,9 @@
     use App\Http\Controllers\Admin\LopHocPhanController;
     use App\Http\Controllers\Admin\NhiemVuController;
     use App\Http\Controllers\Admin\GioQuyDoiController;
+    use App\Http\Controllers\Admin\ThongKeController as AdminThongKeController;
     use App\Http\Controllers\QualityOffice\QualityOfficerController;
+    use App\Http\Controllers\QualityOffice\ThongKeController as QualityThongKeController;
     use App\Http\Controllers\TBM\DSBienBanHopBMController;
     
     use App\Http\Controllers\TBM\DSDangKyController;
@@ -119,7 +121,10 @@
         Route::get('/gioquydoi/edit/{id}', [GioQuyDoiController::class, 'edit'])->name('admin.gioquydoi.edit');
         Route::put('/gioquydoi/update/{id}', [GioQuyDoiController::class, 'update'])->name('admin.gioquydoi.update');
         Route::delete('/gioquydoi/destroy/{id}', [GioQuyDoiController::class, 'destroy'])->name('admin.gioquydoi.destroy');
-
+        
+        // Thống kê
+        Route::get('/thongke', [AdminThongKeController::class, 'index'])->name('admin.thongke.index');
+        Route::get('/thongke/excel', [AdminThongKeController::class, 'exportExcel'])->name('admin.thongke.excel');
     });
 
 
@@ -209,7 +214,7 @@
         Route::get('/notice/show/{id}', [QualityOfficerController::class, 'show'])->name('qlo.notice.show');
         Route::get('/notice/index', [QualityOfficerController::class, 'index'])->name('qlo.notice.index');
     });
-    Route::prefix('quality')->name('quality.')->middleware(['auth', 'role:Nhân viên P.ĐBCL'])->group(function () {
+    Route::prefix('quality')->name('quality.')->middleware(['auth', 'role:Nhân viên P.ĐBCL||Admin'])->group(function () {
         Route::get('/dsdangky', [App\Http\Controllers\QualityOffice\DSDangKyController::class, 'index'])->name('dsdangky.index');
         
         Route::get('/ctdsdangky/{id_ds_dang_ky}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'index'])->name('ctdsdangky.index');
@@ -223,6 +228,10 @@
             
         Route::put('/ctdsdangky/{dsdangky_id}/update-status-all', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'updateStatusAll'])
             ->name('ctdsdangky.updateStatusAll');
+            
+        // Thống kê
+        Route::get('/thongke', [QualityThongKeController::class, 'index'])->name('thongke.index');
+        Route::get('/thongke/excel', [QualityThongKeController::class, 'exportExcel'])->name('thongke.excel');
     });
 
     // Routes cho Trưởng Khoa

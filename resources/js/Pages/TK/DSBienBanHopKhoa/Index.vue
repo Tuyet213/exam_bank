@@ -1,5 +1,5 @@
 <script setup>
-import TKLayout from "@/Layouts/TKLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
@@ -86,7 +86,7 @@ watch([boMon, hocKi, namHoc], () => {
 </script>
 
 <template>
-    <TKLayout>
+    <AppLayout role="tk">
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">Danh sách biên bản họp</li>
         </template>
@@ -217,7 +217,7 @@ watch([boMon, hocKi, namHoc], () => {
                 </div>
             </div>
         </template>
-    </TKLayout>
+    </AppLayout>
 </template>
 
 <style scoped>

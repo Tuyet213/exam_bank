@@ -33,7 +33,7 @@ class CTDSDangKyController extends Controller
             'trang_thai' => $request->trang_thai
         ]);
 
-        return redirect()->back()->with('success', 'Cập nhật trạng thái thành công!');
+        return redirect()->route('quality.ctdsdangky.index', $request->dsdangky_id)->with('success', 'Cập nhật trạng thái thành công!');
     }
 
     public function updateStatusAll($dsdangky_id, Request $request)

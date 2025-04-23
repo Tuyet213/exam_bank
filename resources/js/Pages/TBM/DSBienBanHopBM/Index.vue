@@ -1,5 +1,5 @@
 <script setup>
-import TBMLayout from "@/Layouts/TBMLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, useForm, router } from "@inertiajs/vue3";
 import { ref, watch } from 'vue';
 
@@ -70,7 +70,7 @@ const uploadNoiDung = (bienBan) => {
 </script>
 
 <template>
-    <TBMLayout>
+    <AppLayout role="tbm">
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">
                 <a :href="route('tbm.dsbienban.index')">Danh sách biên bản họp</a>
@@ -200,7 +200,7 @@ const uploadNoiDung = (bienBan) => {
                 </div>
             </div>
         </template>
-    </TBMLayout>
+    </AppLayout>
 </template>
 
 <style scoped>

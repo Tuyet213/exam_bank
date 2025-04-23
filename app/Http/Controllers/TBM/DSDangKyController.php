@@ -18,57 +18,79 @@ class DSDangKyController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DSDangKy::with(['boMon', 'ctDSDangKies'])
-            ->where('able', true)
-            ->where('id_bo_mon', Auth::user()->id_bo_mon)
-            ->orderBy('created_at', 'desc');
+        // Lấy bộ môn của trưởng bộ môn đang đăng nhập
+        $user = Auth::user();
+        $boMon = $user->boMon;
 
-        // Tìm kiếm theo học kỳ
-        if ($request->has('hoc_ki') && $request->hoc_ki != '') {
+        if (!$boMon) {
+            return redirect()->back()->with('error', 'Bạn chưa được phân công quản lý bộ môn nào!');
+        }
+
+        $query = DSDangKy::with(['boMon', 'ctDSDangKies'])
+            ->where('id_bo_mon', $boMon->id);
+
+        // Lọc theo học kỳ
+        if ($request->has('hoc_ki') && !empty($request->hoc_ki)) {
             $query->where('hoc_ki', $request->hoc_ki);
         }
 
-        // Tìm kiếm theo năm học
-        if ($request->has('nam_hoc') && $request->nam_hoc != '') {
+        // Lọc theo năm học
+        if ($request->has('nam_hoc') && !empty($request->nam_hoc)) {
             $query->where('nam_hoc', $request->nam_hoc);
         }
 
-        $danhsachs = $query->paginate(10)->through(function ($ds) {
-            $canSend = !$ds->ctDSDangKies->count() || 
-                       $ds->ctDSDangKies->where('trang_thai', 'Draft')->count() > 0;
-            return [
-                'id' => $ds->id,
-                'bo_mon' => $ds->boMon->ten,
-                'hoc_ki' => 'Học kỳ ' . $ds->hoc_ki,
-                'nam_hoc' => $ds->nam_hoc,
-                'can_send' => $canSend
-            ];
+        // Tìm kiếm theo từ khóa
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('ten', 'like', "%{$search}%")
+                  ->orWhere('nam_hoc', 'like', "%{$search}%")
+                  ->orWhere('hoc_ki', 'like', "%{$search}%");
+            });
+        }
+
+        $danhSachDangKy = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Xử lý trạng thái và quyền chỉnh sửa
+        $danhSachDangKy->getCollection()->transform(function ($item) {
+            // Thêm trạng thái
+            if ($item->da_gui) {
+                $item->trang_thai = 'Sent';
+            } else if ($item->ctDSDangKies->isEmpty()) {
+                $item->trang_thai = 'Draft';
+            } else if ($item->ctDSDangKies->contains('trang_thai', 'Rejected')) {
+                $item->trang_thai = 'Rejected';
+            } else if ($item->ctDSDangKies->every(function ($ct) {
+                return $ct->trang_thai === 'Approved';
+            })) {
+                $item->trang_thai = 'Approved';
+            } else {
+                $item->trang_thai = 'Draft';
+            }
+
+            // Có thể gửi nếu chưa gửi và có ít nhất 1 chi tiết
+            $item->can_send = !$item->da_gui && $item->ctDSDangKies->count() > 0;
+            
+            return $item;
         });
 
-        // Lấy danh sách học kỳ và năm học để hiển thị trong select
-        $dsHocKi = DSDangKy::select('hoc_ki')
-            ->where('id_bo_mon', Auth::user()->id_bo_mon)
-            ->distinct()
-            ->orderBy('hoc_ki')
-            ->pluck('hoc_ki');
-
-        $dsNamHoc = DSDangKy::select('nam_hoc')
-            ->where('id_bo_mon', Auth::user()->id_bo_mon)
-            ->distinct()
-            ->orderBy('nam_hoc', 'desc')
-            ->pluck('nam_hoc');
-
-        $bo_mon = Auth::user()->boMon->ten;
+        // Lọc danh sách học kỳ và năm học
+        $dsHocKi = ['1', '2', '3'];
+        
+        $currentYear = date('Y');
+        $dsNamHoc = [];
+        for ($i = $currentYear - 5; $i <= $currentYear + 1; $i++) {
+            $dsNamHoc[] = $i . '-' . ($i + 1);
+        }
 
         return Inertia::render('TBM/DSDangKy/Index', [
-            'danhsachs' => $danhsachs,
-            'bo_mon' => $bo_mon,
+            'danhsachs' => $danhSachDangKy,
+            'bo_mon' => $boMon->ten,
             'ds_hoc_ki' => $dsHocKi,
             'ds_nam_hoc' => $dsNamHoc,
-            'filters' => [
-                'hoc_ki' => $request->hoc_ki,
-                'nam_hoc' => $request->nam_hoc
-            ]
+            'filters' => $request->only(['search', 'hoc_ki', 'nam_hoc']),
         ]);
     }
 

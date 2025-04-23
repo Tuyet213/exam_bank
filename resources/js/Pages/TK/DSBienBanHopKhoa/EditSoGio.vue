@@ -1,5 +1,5 @@
 <script setup>
-import TKLayout from "@/Layouts/TKLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, useForm } from "@inertiajs/vue3";
 import { ref } from 'vue';
 
@@ -31,7 +31,7 @@ const formatSoGio = (value) => {
 
 // Submit form
 const submit = () => {
-    form.post(route('tk.dsbienban.update-so-gio', props.bien_ban.id), {
+    form.put(route('tk.dsbienban.update-so-gio', props.bien_ban.id), {
         preserveScroll: true,
         onSuccess: () => {
             alert('Cập nhật số giờ thành công!');
@@ -41,7 +41,7 @@ const submit = () => {
 </script>
 
 <template>
-    <TKLayout>
+    <AppLayout role="tk">
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
                 <Link :href="route('tk.dsbienban.index')">Danh sách biên bản họp</Link>
@@ -122,7 +122,7 @@ const submit = () => {
                 </div>
             </div>
         </template>
-    </TKLayout>
+    </AppLayout>
 </template>
 
 <style scoped>

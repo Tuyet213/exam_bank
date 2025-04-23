@@ -1,5 +1,5 @@
 <script setup>
-import TBMLayout from "@/Layouts/TBMLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, router } from "@inertiajs/vue3";
 import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
@@ -128,7 +128,7 @@ const handleCreateBienBan = () => {
 </script>
 
 <template>
-    <TBMLayout>
+    <AppLayout role="tbm">
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
                 <Link :href="route('tbm.dsdangky.index')">Danh sách đăng ký</Link>
@@ -280,7 +280,7 @@ const handleCreateBienBan = () => {
                 </div>
             </div>
         </template>
-    </TBMLayout>
+    </AppLayout>
 
     <!-- Import Modal -->
     <div class="modal fade" :class="{ 'show d-block': showImportModal }" tabindex="-1" v-if="showImportModal">

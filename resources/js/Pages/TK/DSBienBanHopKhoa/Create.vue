@@ -1,5 +1,5 @@
 <script setup>
-import TKLayout from "@/Layouts/TKLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, useForm } from "@inertiajs/vue3";
 import { ref, computed } from 'vue';
 
@@ -124,7 +124,7 @@ const submitAll = () => {
 </script>
 
 <template>
-    <TKLayout>
+    <AppLayout role="tk">
         <template v-slot:sub-link>
             <li class="breadcrumb-item">
                 <Link :href="route('tk.dsdangky.index')">Danh sách đăng ký</Link>
@@ -297,7 +297,7 @@ const submitAll = () => {
                 </div>
             </div>
         </template>
-    </TKLayout>
+    </AppLayout>
 </template>
 
 <style scoped>

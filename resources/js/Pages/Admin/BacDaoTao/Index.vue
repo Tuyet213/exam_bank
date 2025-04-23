@@ -1,5 +1,5 @@
 <script setup>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from "vue";
@@ -80,7 +80,7 @@ const handleSearch = (event) => {
 </script>
 
 <template>
-    <AdminLayout>
+    <AppLayout role="admin">
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">
                 <a :href="route('admin.bacdaotao.index')">Bậc đào tạo</a>
@@ -88,46 +88,59 @@ const handleSearch = (event) => {
         </template>
         <template v-slot:content>
             <div class="content">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">Bậc đào tạo</h3>
-                        <div class="d-flex gap-2">
-                            <!-- Ô tìm kiếm -->
-                            <div class="input-group" style="width: 300px;">
-                                <input
-                                    v-model="searchTerm"
-                                    type="text"
-                                    class="form-control"
-                                    placeholder="Tìm theo ID hoặc tên Bậc đào tạo..."
-                                    @keyup="handleSearch"
-                                />
-                                <button
-                                    class="btn btn-success-add"
-                                    @click="performSearch"
-                                >
-                                    <i class="fas fa-search"></i>
-                                </button>
+                <div class="card border-radius-lg shadow-lg animated-fade-in">
+                    <!-- Card Header -->
+                    <div class="card-header bg-success-tb text-white p-4">
+                        <div class="row justify-content-between align-items-center">
+                            <div class="col-md-8">
+                                <h3 class="mb-0 font-weight-bolder">
+                                    DANH SÁCH BẬC ĐÀO TẠO
+                                </h3>
                             </div>
-                            <!-- Bộ lọc -->
-                            <select
-                                v-model="filterBy"
-                                class="form-control"
-                                style="width: 150px;"
-                            >
-                                <option value="all">Tất cả</option>
-                                <option value="id">Theo ID</option>
-                                <option value="ten">Theo tên</option>
-                            </select>
-                          
+                            <div class="col-md-4 text-end">
+                                <Link
+                                    :href="route('admin.bacdaotao.create')"
+                                    class="btn btn-light"
+                                >
+                                    <i class="fas fa-plus"></i> Thêm mới
+                                </Link>
+                            </div>
                         </div>
-                          <!-- Nút thêm Bậc đào tạo -->
-                          <Link
-                                :href="route('admin.bacdaotao.create')"
-                                class="btn btn-success-add"
-                            >
-                                <i class="fas fa-user-plus"></i> Add Bậc đào tạo
-                            </Link>
                     </div>
+
+                    <!-- Bộ lọc -->
+                    <div class="card-body pb-0">
+                        <div class="row mb-4">
+                            <div class="col-md-8 mb-3">
+                                <div class="input-group">
+                                    <input
+                                        v-model="searchTerm"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Tìm kiếm theo ID hoặc tên Bậc đào tạo..."
+                                        @keyup="handleSearch"
+                                    >
+                                    <button
+                                        class="btn btn-success-add"
+                                        @click="performSearch"
+                                    >
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <select
+                                    v-model="filterBy"
+                                    class="form-select"
+                                >
+                                    <option value="all">Tất cả</option>
+                                    <option value="id">Theo ID</option>
+                                    <option value="ten">Theo tên</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-hover">
@@ -148,18 +161,20 @@ const handleSearch = (event) => {
                                         <td>{{ bacdaotao?.id }}</td>
                                         <td>{{ bacdaotao?.ten }}</td>
                                         <td>
-                                            <Link
-                                                :href="route('admin.bacdaotao.edit', bacdaotao.id)"
-                                                class="btn btn-sm btn-success-edit me-2"
-                                            >
-                                                <i class="fas fa-edit"></i>
-                                            </Link>
-                                            <button
-                                                class="btn btn-sm btn-danger-delete"
-                                                @click="deleteBacDaoTao(bacdaotao.id)"
-                                            >
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <div class="d-flex">
+                                                <Link
+                                                    :href="route('admin.bacdaotao.edit', bacdaotao.id)"
+                                                    class="btn btn-sm btn-success-edit me-2"
+                                                >
+                                                    <i class="far fa-edit"></i>
+                                                </Link>
+                                                <button
+                                                    class="btn btn-sm btn-danger-delete"
+                                                    @click="deleteBacDaoTao(bacdaotao.id)"
+                                                >
+                                                    <i class="far fa-trash-alt"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -185,15 +200,17 @@ const handleSearch = (event) => {
                                     v-for="link in bacdaotaos.links.slice(1, -1)"
                                     :key="link.label"
                                     class="page-item"
-                                    :class="{ active: link.active }"
+                                    :class="{
+                                        active:
+                                            link.active ||
+                                            link.label == bacdaotaos.current_page,
+                                    }"
                                 >
                                     <Link
-                                        :href="link.url || '#'"
+                                        :href="link.url"
                                         class="page-link rounded-circle"
-                                        :class="{ 'active-page': link.active }"
-                                    >
-                                        {{ link.label }}
-                                    </Link>
+                                        v-html="link.label"
+                                    ></Link>
                                 </li>
                                 <li
                                     class="page-item"
@@ -213,5 +230,55 @@ const handleSearch = (event) => {
                 </div>
             </div>
         </template>
-    </AdminLayout>
+    </AppLayout>
 </template>
+
+<style scoped>
+.bg-success-tb {
+    background-color: #5cb85c;
+}
+
+.btn-success-add {
+    background-color: #5cb85c;
+    color: white;
+}
+
+.btn-success-edit {
+    background-color: #f0ad4e;
+    color: white;
+    border-radius: 0;
+}
+
+.btn-danger-delete {
+    background-color: #d9534f;
+    color: white;
+    border-radius: 0;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.animated-fade-in {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.border-radius-lg {
+    border-radius: 0.5rem;
+}
+
+.shadow-lg {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: #5cb85c;
+    box-shadow: 0 0 0 0.25rem rgba(92, 184, 92, 0.25);
+}
+</style>

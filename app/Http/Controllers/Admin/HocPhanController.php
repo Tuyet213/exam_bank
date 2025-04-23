@@ -12,7 +12,13 @@ class HocPhanController extends Controller
 {
     public function index(Request $request)
     {
-        $query = HocPhan::where('able', true)->with('bomon', 'bacdaotao');
+        $query = HocPhan::where('able', true)->with('bomon', 'bacdaotao', 'bomon.khoa');
+
+        if ($request->has('khoa_id') && !empty($request->input('khoa_id'))) {
+            $query->whereHas('bomon', function ($q) use ($request) {
+                $q->where('id_khoa', $request->input('khoa_id'));
+            });
+        }
 
         if ($request->has('search') && !empty($request->input('search'))) {
             $searchTerm = $request->input('search');
@@ -31,11 +37,19 @@ class HocPhanController extends Controller
         }
 
         $hocphans = $query->paginate(10)->withQueryString();
+        
+        $hocphans->filters = [
+            'search' => $request->input('search'),
+            'id_bo_mon' => $request->input('id_bo_mon'),
+            'id_bac_dao_tao' => $request->input('id_bac_dao_tao'),
+            'khoa_id' => $request->input('khoa_id')
+        ];
 
-        $bomons = BoMon::where('able', true)->get(['id', 'ten']);
+        $khoas = \App\Models\Khoa::where('able', true)->get(['id', 'ten']);
+        $bomons = BoMon::where('able', true)->with('khoa')->get(['id', 'ten', 'id_khoa']);
         $bacdaotaos = BacDaoTao::where('able', true)->get(['id', 'ten']);
 
-        return Inertia::render('Admin/HocPhan/Index', compact('hocphans', 'bomons', 'bacdaotaos'));
+        return Inertia::render('Admin/HocPhan/Index', compact('hocphans', 'bomons', 'bacdaotaos', 'khoas'));
     }
 
     public function create()
