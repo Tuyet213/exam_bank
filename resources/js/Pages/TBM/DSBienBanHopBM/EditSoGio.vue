@@ -1,34 +1,109 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, useForm } from "@inertiajs/vue3";
+import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
     bien_ban: {
         type: Object,
         required: true
+    },
+    gio_quy_doi_phan_bien: {
+        type: Object,
+        required: true
+    },
+    gio_quy_doi_bien_soan: {
+        type: Object,
+        required: true
     }
 });
+
+const loai_ngan_hang = computed(() => {
+    return props.bien_ban.ct_d_s_dang_ky.loai_ngan_hang === 1 ? 'câu' : 'đề';
+});
+
+// Refs cho dropdown selection
+const selectedGioQuyDoiBienSoanId = ref(null);
+const selectedGioQuyDoiPhanBienId = ref(null);
+const tongSoGioError = ref('');
 
 // Form để cập nhật số giờ
 const form = useForm({
     so_gio_bien_soan: props.bien_ban.ct_d_s_dang_ky.so_gio ? parseFloat(props.bien_ban.ct_d_s_dang_ky.so_gio) : 0,
     ds_hop: props.bien_ban.ds_hop.map(hop => ({
         id: hop.id,
-        so_gio: hop.so_gio ? parseFloat(hop.so_gio) : 0
-    }))
+        so_gio: hop.so_gio ? parseFloat(hop.so_gio) : 0,
+        vien_chuc: hop.vien_chuc,
+        nhiem_vu: hop.nhiem_vu
+    })),
+    id_gio_quy_doi_bien_soan: null,
+    id_gio_quy_doi_phan_bien: null
 });
 
 // Hàm format số giờ
 const formatSoGio = (value) => {
     const num = parseFloat(value);
-    // Nếu số không có phần thập phân (số nguyên), hiển thị nguyên số
-// Nếu có phần thập phân, chỉ hiển thị 1 số sau dấu phẩy
-    return num % 1 === 0 ? num.toString() : num.toFixed(1);
+    return isNaN(num) ? 0 : (num % 1 === 0 ? num : parseFloat(num.toFixed(1)));
 };
 
-console.log(props.bien_ban);
+// Xử lý khi chọn giờ quy đổi cho người biên soạn
+const handleChonGioQuyDoiBienSoan = () => {
+    const selectedItem = props.gio_quy_doi_bien_soan.find(
+        item => item.id === selectedGioQuyDoiBienSoanId.value
+    );
+    
+    if (selectedItem) {
+        // Tính giờ: (số lượng câu / số lượng câu quy đổi) * giờ quy đổi
+        const soLuong = props.bien_ban.ct_d_s_dang_ky.so_luong || 0;
+        const gioQuyDoi = selectedItem.gio || 0;
+        const soLuongCauQuyDoi = selectedItem.so_luong || 1;
+        
+        const soGio = (soLuong / soLuongCauQuyDoi) * gioQuyDoi;
+        form.so_gio_bien_soan = formatSoGio(soGio);
+        form.id_gio_quy_doi_bien_soan = selectedItem.id;
+    }
+};
+
+// Xử lý khi chọn giờ quy đổi cho người phản biện
+const handleChonGioQuyDoiPhanBien = () => {
+    const selectedItem = props.gio_quy_doi_phan_bien.find(
+        item => item.id === selectedGioQuyDoiPhanBienId.value
+    );
+    
+    if (selectedItem) {
+        form.id_gio_quy_doi_phan_bien = selectedItem.id;
+    }
+};
+
+// Tính tổng số giờ của người phản biện
+const tongSoGioPhanBien = computed(() => {
+    return form.ds_hop.reduce((total, hop) => total + (hop.so_gio || 0), 0);
+});
+
 // Xử lý submit form
 const submit = () => {
+    tongSoGioError.value = '';
+    
+    // Kiểm tra giờ phản biện nếu đã chọn giờ quy đổi phản biện
+    if (form.id_gio_quy_doi_phan_bien) {
+        const selectedItem = props.gio_quy_doi_phan_bien.find(
+            item => item.id === form.id_gio_quy_doi_phan_bien
+        );
+        
+        if (selectedItem) {
+            const soLuong = props.bien_ban.ct_d_s_dang_ky.so_luong || 0;
+            const gioQuyDoi = selectedItem.gio || 0;
+            const soLuongCauQuyDoi = selectedItem.so_luong || 1;
+            
+            const tongSoGioDuKien = formatSoGio((soLuong / soLuongCauQuyDoi) * gioQuyDoi);
+            
+            if (Math.abs(tongSoGioPhanBien.value - tongSoGioDuKien) > 0.1) {
+                tongSoGioError.value = `Tổng số giờ phản biện (${tongSoGioPhanBien.value}) khác với số giờ quy định (${tongSoGioDuKien})`;
+                return;
+            }
+        }
+    }
+    
     form.put(route('tbm.dsbienban.update-so-gio', props.bien_ban.id), {
         preserveScroll: true,
         onSuccess: () => {
@@ -75,21 +150,37 @@ const submit = () => {
                                     {{ bien_ban.ct_d_s_dang_ky.loai_ngan_hang == 1 ? 'Ngân hàng câu hỏi' : 'Ngân hàng đề thi' }}
                                 </div>
                                 <div class="col-md-4">
-                                            <strong>Số lượng:</strong>
-                                            {{ bien_ban.ct_d_s_dang_ky.so_luong }}
-                                        </div>
-                                        <div class="col-md-4">
-                                            <strong>Hình thức thi:</strong>
-                                            {{ bien_ban.ct_d_s_dang_ky.hinh_thuc_thi }}
-                                        </div>
+                                    <strong>Số lượng:</strong>
+                                    {{ bien_ban.ct_d_s_dang_ky.so_luong }}
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Hình thức thi:</strong>
+                                    {{ bien_ban.ct_d_s_dang_ky.hinh_thuc_thi }}
+                                </div>
                             </div>
                         </div>
 
                         <form @submit.prevent="submit">
                             <!-- Số giờ người biên soạn -->
                             <div class="mb-3">
-                                
                                 <div class="border rounded p-3 mb-2">
+                                    <div class="mb-3">
+                                        <label class="form-label">Chọn giờ quy đổi cho người biên soạn <span class="text-danger">*</span></label>
+                                        <select 
+                                            class="form-select"
+                                            v-model="selectedGioQuyDoiBienSoanId"
+                                            @change="handleChonGioQuyDoiBienSoan"
+                                        >
+                                            <option value="">Chọn giờ quy đổi</option>
+                                            <option 
+                                                v-for="gqd in gio_quy_doi_bien_soan" 
+                                                :key="gqd.id" 
+                                                :value="gqd.id"
+                                            >
+                                                {{ gqd.gio }} giờ / {{ gqd.so_luong }} {{ loai_ngan_hang }}
+                                            </option>
+                                        </select>
+                                    </div>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <strong>{{ bien_ban.ct_d_s_dang_ky.vien_chuc.name }}</strong>
@@ -112,14 +203,38 @@ const submit = () => {
                                                 {{ form.errors.so_gio_bien_soan }}
                                             </div>
                                         </div>
-                                       
-                                        
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Danh sách người tham gia -->
                             <div class="mb-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Chọn giờ quy đổi cho người phản biện <span class="text-danger">*</span></label>
+                                    <select 
+                                        class="form-select"
+                                        v-model="selectedGioQuyDoiPhanBienId"
+                                        @change="handleChonGioQuyDoiPhanBien"
+                                    >
+                                        <option value="">Chọn giờ quy đổi</option>
+                                        <option 
+                                            v-for="gqd in gio_quy_doi_phan_bien" 
+                                            :key="gqd.id" 
+                                            :value="gqd.id"
+                                        >
+                                            {{ gqd.gio }} giờ / {{ gqd.so_luong }} {{ loai_ngan_hang }}
+                                        </option>
+                                    </select>
+                                </div>
+                                
+                                <div v-if="tongSoGioError" class="alert alert-danger">
+                                    {{ tongSoGioError }}
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h5>Danh sách người tham gia phản biện</h5>
+                                    <div>Tổng số giờ: <strong>{{ tongSoGioPhanBien }}</strong></div>
+                                </div>
                                 
                                 <div 
                                     v-for="(thanhVien, index) in form.ds_hop" 
@@ -128,9 +243,9 @@ const submit = () => {
                                 >
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <strong>{{ bien_ban.ds_hop[index].vien_chuc?.name }}</strong>
+                                            <strong>{{ thanhVien.vien_chuc?.name }}</strong>
                                             <br>
-                                            <small class="text-muted">{{ bien_ban.ds_hop[index].nhiem_vu?.ten }}</small>
+                                            <small class="text-muted">{{ thanhVien.nhiem_vu?.ten }}</small>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Số giờ <span class="text-danger">*</span></label>

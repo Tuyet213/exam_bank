@@ -16,6 +16,8 @@ use App\Models\NhiemVu;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Models\GioQuyDoi;
+use App\Models\BoMon;
 
 class DSBienBanHopBMController extends Controller
 {
@@ -395,59 +397,97 @@ class DSBienBanHopBMController extends Controller
 
     public function editSoGio($id)
     {
-        $bienBan = BienBanHop::with([
-            'ctDSDangKy.hocPhan',
-            'ctDSDangKy.vienChuc',
-            'dsHop' => function($query) {
-                $query->with(['vienChuc', 'nhiemVu'])->where('able', true);
-            }
-        ])->findOrFail($id);
+        $truongBoMon = Auth::user();
+        
+        // Kiểm tra xem người dùng có phải là trưởng bộ môn không
+        if (!$truongBoMon->id_bo_mon) {
+            return redirect()->route('dashboard')->with('error', 'Bạn không có quyền truy cập trang này');
+        }
+        
+        $bienBan = BienBanHop::with(['dsHop.vienChuc', 'dsHop.nhiemVu', 'ctDSDangKy.vienChuc', 'ctDSDangKy.hocPhan'])
+            ->where('id', $id)
+            ->first();
+
+        // Kiểm tra xem biên bản có thuộc bộ môn của trưởng bộ môn không
+        if ($bienBan->ctDSDangKy->hocPhan->id_bo_mon != $truongBoMon->id_bo_mon) {
+            return redirect()->route('tbm.dsbienban.index')->with('error', 'Biên bản không thuộc bộ môn của bạn');
+        }
+
+        // Lấy giờ quy đổi
+        $gioQuyDoiBienSoan = GioQuyDoi::where('able', true)
+            ->where('loai_hanh_dong', 0)
+            ->get();
+        
+        $gioQuyDoiPhanBien = GioQuyDoi::where('able', true)
+            ->where('loai_hanh_dong', 1)
+            ->get();
 
         return Inertia::render('TBM/DSBienBanHopBM/EditSoGio', [
-            'bien_ban' => $bienBan
+            'bien_ban' => $bienBan,
+            'gio_quy_doi_bien_soan' => $gioQuyDoiBienSoan,
+            'gio_quy_doi_phan_bien' => $gioQuyDoiPhanBien
         ]);
     }
 
     public function updateSoGio(Request $request, $id)
     {
-        try {
-            $validated = $request->validate([
-                'so_gio_bien_soan' => 'required|numeric|min:0',
-                'ds_hop.*.so_gio' => 'required|numeric|min:0'
-            ]);
-            Log::info('Request data:', $validated);
-
-            DB::beginTransaction();
-
-            // Cập nhật số giờ cho người biên soạn
-            $bienBan = BienBanHop::with('ctDSDangKy')->findOrFail($id);
-            $bienBan->ctDSDangKy->update([
-                'so_gio' => $request->so_gio_bien_soan
-            ]);
-            Log::info('Đã cập nhật số giờ cho người biên soạn:', $bienBan->toArray());
-
-            // Cập nhật số giờ cho thành viên tham gia họp
-            foreach ($request->ds_hop as $thanhVien) {
-                DSHop::where('id', $thanhVien['id'])->update([
-                    'so_gio' => $thanhVien['so_gio']
-                ]);
-                Log::info('Đã cập nhật số giờ cho thành viên:', $thanhVien);
-            }
-
-            DB::commit();
-
-            return redirect()->route('tbm.dsbienban.index')->with([
-                'type' => 'success',
-                'message' => 'Cập nhật số giờ thành công!'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with([
-                'type' => 'error',
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
-            ]);
+        $truongBoMon = Auth::user();
+        
+        // Kiểm tra xem người dùng có phải là trưởng bộ môn không
+        if (!$truongBoMon->id_bo_mon) {
+            return redirect()->route('dashboard')->with('error', 'Bạn không có quyền truy cập trang này');
         }
+        
+        $bienBan = BienBanHop::with(['dsHop', 'ctDSDangKy.hocPhan'])
+            ->where('id', $id)
+            ->first();
+
+        // Kiểm tra xem biên bản có thuộc bộ môn của trưởng bộ môn không
+        if ($bienBan->ctDSDangKy->hocPhan->id_bo_mon != $truongBoMon->id_bo_mon) {
+            return redirect()->route('tbm.dsbienban.index')->with('error', 'Biên bản không thuộc bộ môn của bạn');
+        }
+
+        // Validate request
+        $validated = $request->validate([
+            'so_gio_bien_soan' => 'required|numeric|min:0',
+            'ds_hop.*.id' => 'required|exists:d_s_hops,id',
+            'ds_hop.*.so_gio' => 'required|numeric|min:0',
+            'id_gio_quy_doi_bien_soan' => 'nullable|exists:gio_quy_dois,id',
+            'id_gio_quy_doi_phan_bien' => 'nullable|exists:gio_quy_dois,id',
+        ]);
+
+        // Kiểm tra tổng số giờ phản biện nếu đã chọn giờ quy đổi phản biện
+        if ($request->id_gio_quy_doi_phan_bien) {
+            $gioQuyDoiPhanBien = GioQuyDoi::find($request->id_gio_quy_doi_phan_bien);
+            $soLuong = $bienBan->ctDSDangKy->so_luong;
+            $gioQuyDoi = $gioQuyDoiPhanBien->gio;
+            $soLuongCauQuyDoi = $gioQuyDoiPhanBien->so_luong;
+            
+            $tongSoGioDuKien = ($soLuong / $soLuongCauQuyDoi) * $gioQuyDoi;
+            $tongSoGioThucTe = collect($request->ds_hop)->sum('so_gio');
+            
+            // Cho phép sai số 0.1
+            if (abs($tongSoGioThucTe - $tongSoGioDuKien) > 0.1) {
+                return redirect()->back()->withErrors([
+                    'tong_so_gio' => 'Tổng số giờ phản biện (' . $tongSoGioThucTe . ') không khớp với số giờ quy định (' . round($tongSoGioDuKien, 1) . ')'
+                ]);
+            }
+        }
+
+        // Cập nhật số giờ cho người biên soạn
+        $bienBan->ctDSDangKy->so_gio = $request->so_gio_bien_soan;
+        $bienBan->ctDSDangKy->save();
+
+        // Cập nhật số giờ cho từng người tham gia
+        foreach ($request->ds_hop as $hopData) {
+            $hop = DSHop::find($hopData['id']);
+            if ($hop && $hop->id_bien_ban_hop === $bienBan->id) {
+                $hop->so_gio = $hopData['so_gio'];
+                $hop->save();
+            }
+        }
+
+        return redirect()->route('tbm.dsbienban.index')->with('success', 'Cập nhật số giờ thành công');
     }
 
     public function download($id)
