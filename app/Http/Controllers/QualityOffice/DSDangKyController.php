@@ -49,7 +49,9 @@ class DSDangKyController extends Controller
             $query->where('nam_hoc', $request->nam_hoc);
         }
 
-        $danhSachDangKy = $query->orderBy('created_at', 'desc')->get();
+        $danhSachDangKy = $query->orderBy('nam_hoc', 'desc')
+            ->orderBy('hoc_ki', 'asc')
+            ->get();
         
         // Xử lý trạng thái cho từng DSDangKy
         $danhSachDangKy->each(function ($ds) {
@@ -65,6 +67,36 @@ class DSDangKyController extends Controller
                 $ds->status = 'Pending';
             }
         });
+
+        // Tổ chức dữ liệu theo cấu trúc phân cấp: năm học -> học kỳ -> danh sách đăng ký
+        $danhSachHierarchy = [];
+        
+        foreach ($danhSachDangKy as $dsDangKy) {
+            $namHoc = $dsDangKy->nam_hoc;
+            $hocKi = $dsDangKy->hoc_ki;
+            
+            // Tạo năm học nếu chưa tồn tại
+            if (!isset($danhSachHierarchy[$namHoc])) {
+                $danhSachHierarchy[$namHoc] = [
+                    'ten' => $namHoc,
+                    'hoc_ki' => []
+                ];
+            }
+            
+            // Tạo học kỳ nếu chưa tồn tại
+            if (!isset($danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi])) {
+                $danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi] = [
+                    'ten' => 'Học kỳ ' . $hocKi,
+                    'danh_sach' => []
+                ];
+            }
+            
+            // Thêm danh sách đăng ký vào học kỳ tương ứng
+            $danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi]['danh_sach'][] = $dsDangKy;
+        }
+        
+        // Sắp xếp theo năm học mới nhất trước
+        krsort($danhSachHierarchy);
         
         // Lấy danh sách khoa (loại trừ admin và DBCL)
         $khoas = Khoa::whereNotIn('id', ['admin', 'DBCL'])
@@ -94,6 +126,7 @@ class DSDangKyController extends Controller
 
         return Inertia::render('QualityOffice/DSDangKy/Index', [
             'dsdangky' => $danhSachDangKy,
+            'dsdangky_hierarchy' => $danhSachHierarchy,
             'khoas' => $khoas,
             'bomons' => $boMons,
             'ds_hoc_ki' => $dsHocKi,

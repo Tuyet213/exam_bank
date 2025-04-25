@@ -26,20 +26,21 @@ class DSDangKyController extends Controller
             return redirect()->back()->with('error', 'Bạn chưa được phân công quản lý bộ môn nào!');
         }
 
+        // Lấy tất cả danh sách đăng ký của bộ môn
         $query = DSDangKy::with(['boMon', 'ctDSDangKies'])
             ->where('id_bo_mon', $boMon->id);
 
-        // Lọc theo học kỳ
+        // Lọc theo học kỳ nếu có
         if ($request->has('hoc_ki') && !empty($request->hoc_ki)) {
             $query->where('hoc_ki', $request->hoc_ki);
         }
 
-        // Lọc theo năm học
+        // Lọc theo năm học nếu có
         if ($request->has('nam_hoc') && !empty($request->nam_hoc)) {
             $query->where('nam_hoc', $request->nam_hoc);
         }
 
-        // Tìm kiếm theo từ khóa
+        // Tìm kiếm theo từ khóa nếu có
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -49,12 +50,12 @@ class DSDangKyController extends Controller
             });
         }
 
-        $danhSachDangKy = $query->orderBy('created_at', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        $danhSachDangKy = $query->orderBy('nam_hoc', 'desc')
+            ->orderBy('hoc_ki', 'asc')
+            ->get();
 
         // Xử lý trạng thái và quyền chỉnh sửa
-        $danhSachDangKy->getCollection()->transform(function ($item) {
+        $danhSachDangKy->transform(function ($item) {
             // Thêm trạng thái
             if ($item->da_gui) {
                 $item->trang_thai = 'Sent';
@@ -76,6 +77,36 @@ class DSDangKyController extends Controller
             return $item;
         });
 
+        // Tổ chức dữ liệu theo cấu trúc phân cấp: năm học -> học kỳ -> danh sách đăng ký
+        $danhSachPhierarchy = [];
+        
+        foreach ($danhSachDangKy as $dsDangKy) {
+            $namHoc = $dsDangKy->nam_hoc;
+            $hocKi = $dsDangKy->hoc_ki;
+            
+            // Tạo năm học nếu chưa tồn tại
+            if (!isset($danhSachPhierarchy[$namHoc])) {
+                $danhSachPhierarchy[$namHoc] = [
+                    'ten' => $namHoc,
+                    'hoc_ki' => []
+                ];
+            }
+            
+            // Tạo học kỳ nếu chưa tồn tại
+            if (!isset($danhSachPhierarchy[$namHoc]['hoc_ki'][$hocKi])) {
+                $danhSachPhierarchy[$namHoc]['hoc_ki'][$hocKi] = [
+                    'ten' => 'Học kỳ ' . $hocKi,
+                    'danh_sach' => []
+                ];
+            }
+            
+            // Thêm danh sách đăng ký vào học kỳ tương ứng
+            $danhSachPhierarchy[$namHoc]['hoc_ki'][$hocKi]['danh_sach'][] = $dsDangKy;
+        }
+        
+        // Sắp xếp theo năm học mới nhất trước
+        krsort($danhSachPhierarchy);
+
         // Lọc danh sách học kỳ và năm học
         $dsHocKi = ['1', '2', '3'];
         
@@ -86,7 +117,7 @@ class DSDangKyController extends Controller
         }
 
         return Inertia::render('TBM/DSDangKy/Index', [
-            'danhsachs' => $danhSachDangKy,
+            'danhsachs_hierarchy' => $danhSachPhierarchy,
             'bo_mon' => $boMon->ten,
             'ds_hoc_ki' => $dsHocKi,
             'ds_nam_hoc' => $dsNamHoc,
@@ -108,7 +139,7 @@ class DSDangKyController extends Controller
         // Gửi mail
         $receivers = User::where('able', true)
             ->whereHas('roles', function ($query) {
-                $query->where('name', 'quality');
+                $query->where('name', 'Nhân viên P.ĐBCL');
             })
             ->get();
 
