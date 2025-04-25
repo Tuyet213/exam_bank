@@ -257,14 +257,14 @@ const handleCreateBienBan = () => {
                                         </td>
                                         <td>
                                             <button 
-                                                :disabled="ct.trang_thai !== 'Draft'"
+                                                :disabled="ct.trang_thai !== 'Draft' && ct.trang_thai !== 'Rejected'"
                                                 @click="handleEdit(ct.id)"
                                                 class="btn btn-sm btn-warning me-2"
                                             >
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <button 
-                                                :disabled="ct.trang_thai !== 'Draft'"
+                                                :disabled="ct.trang_thai !== 'Draft' && ct.trang_thai !== 'Rejected'"
                                                 @click="handleDelete(ct.id)"
                                                 class="btn btn-sm btn-danger me-2"
                                             >

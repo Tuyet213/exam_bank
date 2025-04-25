@@ -108,7 +108,7 @@ class DSDangKyController extends Controller
         krsort($danhSachPhierarchy);
 
         // Lọc danh sách học kỳ và năm học
-        $dsHocKi = ['1', '2', '3'];
+        $dsHocKi = ['1', '2', 'Hè'];
         
         $currentYear = date('Y');
         $dsNamHoc = [];

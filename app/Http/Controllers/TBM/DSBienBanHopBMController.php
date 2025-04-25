@@ -73,9 +73,40 @@ class DSBienBanHopBMController extends Controller
             })
             ->unique()
             ->values();
+        
+        // Tổ chức dữ liệu theo cấu trúc phân cấp: năm học -> học kỳ -> danh sách biên bản
+        $bienBanHierarchy = [];
+        
+        foreach ($dsBienBan as $bienBan) {
+            $namHoc = $bienBan->ctDSDangKy->dsDangKy->nam_hoc ?? 'Không xác định';
+            $hocKi = $bienBan->ctDSDangKy->dsDangKy->hoc_ki ?? 'Không xác định';
+            
+            // Tạo năm học nếu chưa tồn tại
+            if (!isset($bienBanHierarchy[$namHoc])) {
+                $bienBanHierarchy[$namHoc] = [
+                    'ten' => $namHoc,
+                    'hoc_ki' => []
+                ];
+            }
+            
+            // Tạo học kỳ nếu chưa tồn tại
+            if (!isset($bienBanHierarchy[$namHoc]['hoc_ki'][$hocKi])) {
+                $bienBanHierarchy[$namHoc]['hoc_ki'][$hocKi] = [
+                    'ten' => 'Học kỳ ' . $hocKi,
+                    'danh_sach' => []
+                ];
+            }
+            
+            // Thêm biên bản vào học kỳ tương ứng
+            $bienBanHierarchy[$namHoc]['hoc_ki'][$hocKi]['danh_sach'][] = $bienBan;
+        }
+        
+        // Sắp xếp theo năm học mới nhất trước
+        krsort($bienBanHierarchy);
 
         return Inertia::render('TBM/DSBienBanHopBM/Index', [
             'ds_bien_ban' => $dsBienBan,
+            'ds_bien_ban_hierarchy' => $bienBanHierarchy,
             'ds_hoc_ki' => $dsHocKi,
             'ds_nam_hoc' => $dsNamHoc,
             'filters' => [

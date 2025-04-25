@@ -5,83 +5,70 @@ import { ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-const props = defineProps({
-    dsdangky: {
+const {
+    danhsachs_hierarchy,
+    message,
+    success,
+    ds_hoc_ki,
+    ds_nam_hoc,
+    ds_bo_mon,
+    filters
+} = defineProps({
+    danhsachs_hierarchy: {
         type: Object,
-        default: () => ({
-            data: []
-        })
+        required: true,
+        default: () => ({}),
     },
-    dsdangky_hierarchy: {
-        type: Object,
-        default: () => ({})
+    message: {
+        type: String,
+        default: "",
     },
-    khoas: {
-        type: Array,
-        default: () => []
-    },
-    bomons: {
-        type: Array,
-        default: () => []
+    success: {
+        type: Boolean,
+        default: undefined,
     },
     ds_hoc_ki: {
         type: Array,
-        default: () => ['1', '2', 'Hè']
+        required: true
     },
     ds_nam_hoc: {
         type: Array,
-        default: () => []
+        required: true
+    },
+    ds_bo_mon: {
+        type: Array,
+        required: true
     },
     filters: {
         type: Object,
-        default: () => ({
-            khoa_id: '',
-            bomon_id: '',
-            hoc_ki: '',
-            nam_hoc: ''
-        })
+        required: true
     }
 });
+
+const searchTerm = ref(filters.search || "");
+const hocKi = ref(filters.hoc_ki || "");
+const namHoc = ref(filters.nam_hoc || "");
+const boMon = ref(filters.bo_mon || "");
+const debounceTimeout = ref(null);
 
 // State cho collapse/expand của các phần
 const expandedNamHoc = ref({});
 const expandedHocKi = ref({});
+const expandedBoMon = ref({});
 
-// Các biến cho bộ lọc
-const searchTerm = ref(props.filters.search || '');
-const selectedKhoa = ref(props.filters.khoa_id || '');
-const selectedBoMon = ref(props.filters.bomon_id || '');
-const selectedHocKi = ref(props.filters.hoc_ki || '');
-const selectedNamHoc = ref(props.filters.nam_hoc || '');
-const debounceTimeout = ref(null);
-
-// Lọc bộ môn theo khoa được chọn
-const filteredBoMons = computed(() => {
-    if (!selectedKhoa.value) return props.bomons;
-    return props.bomons.filter(bm => bm.id_khoa == selectedKhoa.value);
-});
-
-// Reset bộ môn khi thay đổi khoa
-watch(selectedKhoa, (newValue, oldValue) => {
-    if (newValue !== oldValue) {
-        selectedBoMon.value = '';
-    }
-});
-
-// Hàm tìm kiếm
 const performSearch = () => {
     if (debounceTimeout.value) {
         clearTimeout(debounceTimeout.value);
     }
+    
     debounceTimeout.value = setTimeout(() => {
         router.get(
-            route('quality.dsdangky.index'),
+            route('qo.dsdangky.index'),
             { 
                 search: searchTerm.value,
-                khoa_id: selectedKhoa.value,
-                bomon_id: selectedBoMon.value,
-                hoc_ki: selectedHocKi.value,
-                nam_hoc: selectedNamHoc.value
+                hoc_ki: hocKi.value,
+                nam_hoc: namHoc.value,
+                bo_mon: boMon.value
             },
             { 
                 preserveState: true,
@@ -91,8 +78,7 @@ const performSearch = () => {
     }, 300);
 };
 
-// Theo dõi sự thay đổi của các lọc và thực hiện tìm kiếm
-watch([searchTerm, selectedKhoa, selectedBoMon, selectedHocKi, selectedNamHoc], () => {
+watch([searchTerm, hocKi, namHoc, boMon], () => {
     performSearch();
 });
 
@@ -107,9 +93,10 @@ const toggleHocKi = (namHoc, hocKi) => {
     expandedHocKi.value[key] = !expandedHocKi.value[key];
 };
 
-const formatDate = (date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('vi-VN');
+// Toggle expand/collapse cho bộ môn
+const toggleBoMon = (namHoc, hocKi, boMon) => {
+    const key = `${namHoc}_${hocKi}_${boMon}`;
+    expandedBoMon.value[key] = !expandedBoMon.value[key];
 };
 
 const getStatusBadgeClass = (status) => {
@@ -121,6 +108,10 @@ const getStatusBadgeClass = (status) => {
             return classes + 'bg-danger';
         case 'Pending':
             return classes + 'bg-warning';
+        case 'Sent':
+            return classes + 'bg-info';
+        case 'Draft':
+            return classes + 'bg-secondary';
         default:
             return classes + 'bg-secondary';
     }
@@ -129,81 +120,29 @@ const getStatusBadgeClass = (status) => {
 
 
 <template>
-    <AppLayout role="dbcl">
-        <template #sub-link>
+    <AppLayout role="qo">
+        <template v-slot:sub-link>
             <li class="breadcrumb-item active">
-                <a :href="route('quality.dsdangky.index')">Danh sách đăng ký</a>
+                <a :href="route('qo.dsdangky.index')">Danh sách đăng ký</a>
             </li>
         </template>
 
-        <template #content>
+        <template v-slot:content>
             <div class="content">
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
-                    <!-- Card Header -->
-                    <div class="card-header bg-success-tb text-white p-4">
-                        <div class="row justify-content-between align-items-center">
-                            <div class="col-md-8">
-                                <h3 class="mb-0 font-weight-bolder">
-                                    DANH SÁCH ĐĂNG KÝ
-                                </h3>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="input-group">
-                                    <input 
-                                        type="text" 
-                                        class="form-control" 
-                                        placeholder="Tìm kiếm..." 
-                                        v-model="searchTerm"
-                                        @keyup.enter="performSearch"
-                                    >
-                                    <button 
-                                        class="btn btn-light" 
-                                        type="button"
-                                        @click="performSearch"
-                                    >
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="card-header d-flex justify-content-between align-items-center bg-info-qo text-white p-4">
+                        <h3 class="mb-0">DANH SÁCH ĐĂNG KÝ</h3>
                     </div>
 
-                    <!-- Bộ lọc -->
                     <div class="card-body pb-0">
+                        <!-- Form tìm kiếm -->
                         <div class="row mb-4">
-                            <div class="col-md-3 mb-3">
-                                <label for="khoa" class="form-label">Khoa</label>
-                                <select 
-                                    id="khoa" 
-                                    class="form-select" 
-                                    v-model="selectedKhoa"
-                                >
-                                    <option value="">Tất cả Khoa</option>
-                                    <option v-for="khoa in khoas" :key="khoa.id" :value="khoa.id">
-                                        {{ khoa.ten }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label for="bomon" class="form-label">Bộ môn</label>
-                                <select 
-                                    id="bomon" 
-                                    class="form-select" 
-                                    v-model="selectedBoMon"
-                                    :disabled="!selectedKhoa"
-                                >
-                                    <option value="">{{ selectedKhoa ? 'Tất cả Bộ môn của Khoa' : 'Vui lòng chọn Khoa trước' }}</option>
-                                    <option v-for="bm in filteredBoMons" :key="bm.id" :value="bm.id">
-                                        {{ bm.ten }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-6">
                                 <label for="hoc_ki" class="form-label">Học kỳ</label>
                                 <select 
                                     id="hoc_ki" 
                                     class="form-select" 
-                                    v-model="selectedHocKi"
+                                    v-model="hocKi"
                                 >
                                     <option value="">Tất cả học kỳ</option>
                                     <option v-for="hk in ds_hoc_ki" :key="hk" :value="hk">
@@ -211,16 +150,29 @@ const getStatusBadgeClass = (status) => {
                                     </option>
                                 </select>
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-6">
                                 <label for="nam_hoc" class="form-label">Năm học</label>
                                 <select 
                                     id="nam_hoc" 
                                     class="form-select" 
-                                    v-model="selectedNamHoc"
+                                    v-model="namHoc"
                                 >
                                     <option value="">Tất cả năm học</option>
                                     <option v-for="nam in ds_nam_hoc" :key="nam" :value="nam">
                                         {{ nam }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mt-3">
+                                <label for="bo_mon" class="form-label">Bộ môn</label>
+                                <select 
+                                    id="bo_mon" 
+                                    class="form-select" 
+                                    v-model="boMon"
+                                >
+                                    <option value="">Tất cả bộ môn</option>
+                                    <option v-for="bm in ds_bo_mon" :key="bm" :value="bm">
+                                        {{ bm }}
                                     </option>
                                 </select>
                             </div>
@@ -230,14 +182,14 @@ const getStatusBadgeClass = (status) => {
                     <div class="card-body">
                         <div class="thongke-content">
                             <!-- Danh sách trống -->
-                            <div v-if="Object.keys(dsdangky_hierarchy).length === 0" class="text-center py-5">
+                            <div v-if="Object.keys(danhsachs_hierarchy).length === 0" class="text-center py-5">
                                 <h5 class="text-muted">Không có dữ liệu đăng ký</h5>
-                                <p>Vui lòng chọn các tiêu chí lọc khác để xem danh sách</p>
+                                <p>Vui lòng chọn các tiêu chí lọc khác</p>
                             </div>
                             
-                            <!-- Danh sách phân cấp: năm học -> học kỳ -> danh sách -->
+                            <!-- Danh sách phân cấp: năm học -> học kỳ -> bộ môn -> danh sách -->
                             <div v-else class="accordion accordion-custom">
-                                <div v-for="(namData, namHoc) in dsdangky_hierarchy" :key="namHoc" class="accordion-item">
+                                <div v-for="(namData, namHoc) in danhsachs_hierarchy" :key="namHoc" class="accordion-item">
                                     <!-- Năm học -->
                                     <div class="accordion-header" @click="toggleNamHoc(namHoc)">
                                         <div class="accordion-button" :class="{ 'collapsed': !expandedNamHoc[namHoc] }">
@@ -262,42 +214,78 @@ const getStatusBadgeClass = (status) => {
                                                 <!-- Nội dung của học kỳ -->
                                                 <div class="accordion-collapse" :class="{ 'show': expandedHocKi[`${namHoc}_${hocKi}`] }">
                                                     <div class="accordion-body">
-                                                        <div class="table-responsive">
-                                                            <table class="table table-hover">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>STT</th>
-                                                                        <th>Bộ môn</th>
-                                                                        <th>Trạng thái</th>
-                                                                        <th>Thao tác</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <tr v-for="(ds, index) in hocKiData.danh_sach" :key="ds.id">
-                                                                        <td>{{ index + 1 }}</td>
-                                                                        <td>{{ ds.bo_mon?.ten }}</td>
-                                                                        <td>
-                                                                            <span :class="getStatusBadgeClass(ds.status)" class="badge">
-                                                                                {{ ds.status }}
-                                                                            </span>
-                                                                        </td>
-                                                                        <td>
-                                                                            <Link 
-                                                                                :href="route('quality.ctdsdangky.index', ds.id)"
-                                                                                class="btn btn-sm btn-primary"
-                                                                                title="Xem chi tiết"
-                                                                            >
-                                                                                <i class="fas fa-eye"></i>
-                                                                            </Link>
-                                                                        </td>
-                                                                    </tr>
-                                                                    <tr v-if="hocKiData.danh_sach.length === 0">
-                                                                        <td colspan="4" class="text-center">
-                                                                            Không có dữ liệu
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
+                                                        <!-- Danh sách bộ môn -->
+                                                        <div v-for="(boMonData, boMon) in hocKiData.bo_mon" :key="`${namHoc}_${hocKi}_${boMon}`" class="accordion-item ms-4 mt-2">
+                                                            <!-- Bộ môn -->
+                                                            <div class="accordion-header" @click="toggleBoMon(namHoc, hocKi, boMon)">
+                                                                <div class="accordion-button" :class="{ 'collapsed': !expandedBoMon[`${namHoc}_${hocKi}_${boMon}`] }">
+                                                                    <i class="fas" :class="expandedBoMon[`${namHoc}_${hocKi}_${boMon}`] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                                                                    <span class="ms-2">{{ boMonData.ten }}</span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <!-- Nội dung của bộ môn -->
+                                                            <div class="accordion-collapse" :class="{ 'show': expandedBoMon[`${namHoc}_${hocKi}_${boMon}`] }">
+                                                                <div class="accordion-body">
+                                                                    <div class="table-responsive">
+                                                                        <table class="table table-hover">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>STT</th>
+                                                                                    <th>Trạng thái</th>
+                                                                                    <th>Thao tác</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr v-for="(ds, index) in boMonData.danh_sach" :key="ds.id">
+                                                                                    <td>{{ index + 1 }}</td>
+                                                                                    <td>
+                                                                                        <span :class="getStatusBadgeClass(ds.trang_thai)" class="badge">
+                                                                                            {{ ds.trang_thai || 'Draft' }}
+                                                                                        </span>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <Link 
+                                                                                            :href="route('qo.ctdsdangky.index', ds.id)"
+                                                                                            class="btn btn-sm btn-info me-2"
+                                                                                            title="Xem chi tiết"
+                                                                                        >
+                                                                                            <i class="fas fa-eye"></i>
+                                                                                        </Link>
+                                                                                        
+                                                                                        <Link 
+                                                                                            v-if="ds.trang_thai === 'Sent'" 
+                                                                                            :href="route('qo.dsdangky.approve', { dsdangky: ds.id, status: 'Approved' })"
+                                                                                            class="btn btn-sm btn-success me-2"
+                                                                                            title="Duyệt"
+                                                                                        >
+                                                                                            <i class="fas fa-check"></i>
+                                                                                        </Link>
+                                                                                        
+                                                                                        <Link 
+                                                                                            v-if="ds.trang_thai === 'Sent'" 
+                                                                                            :href="route('qo.dsdangky.approve', { dsdangky: ds.id, status: 'Rejected' })"
+                                                                                            class="btn btn-sm btn-danger me-2"
+                                                                                            title="Từ chối"
+                                                                                        >
+                                                                                            <i class="fas fa-times"></i>
+                                                                                        </Link>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr v-if="boMonData.danh_sach.length === 0">
+                                                                                    <td colspan="3" class="text-center">
+                                                                                        Không có dữ liệu
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div v-if="Object.keys(hocKiData.bo_mon).length === 0" class="text-center py-3">
+                                                            <p class="text-muted">Không có bộ môn nào</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -314,7 +302,6 @@ const getStatusBadgeClass = (status) => {
                     </div>
                 </div>
             </div>
-            
         </template>
     </AppLayout>
 </template>

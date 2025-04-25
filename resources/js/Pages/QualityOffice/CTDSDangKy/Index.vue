@@ -111,10 +111,11 @@ const handleSubmit = () => {
                                     <i class="fas fa-times-circle me-1"></i>
                                     Từ chối tất cả
                                 </button>
+                                <!-- :disabled="ctdsdangky.some(ct => ct.trang_thai === 'Draft' || ct.trang_thai === 'Rejected')" -->
                                 <button 
                                     class="btn btn-primary col-12 " 
                                     @click="handleSubmit"
-                                    :disabled="ctdsdangky.some(ct => ct.trang_thai === 'Draft' || ct.trang_thai === 'Rejected')"
+                                    
                                     title="Hoàn tất và gửi danh sách"
                                 >
                                     <i class="fas fa-paper-plane me-1"></i>

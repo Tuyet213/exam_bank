@@ -55,8 +55,11 @@ class CTDSDangKyController extends Controller
         try {
             $dsDangKy = DSDangKy::with(['boMon'])->findOrFail($id_ds_dang_ky)->first();
             
+
             // Lấy email của trưởng bộ môn
-            $emailTBM = User::where('id_bo_mon', $dsDangKy->id_bo_mon)->where('role', 'Trưởng bộ môn')->first()->email;
+            $emailTBM = User::where('id_bo_mon', $dsDangKy->id_bo_mon)->where('able', true)->whereHas('roles', function($query) {
+                $query->where('name', 'Trưởng Bộ Môn');
+            })->first()->email;
             
             // Gửi mail
             Mail::to($emailTBM)->send(new NotifyTBMReview($dsDangKy));

@@ -69,12 +69,6 @@ watch([searchTerm, hocKi, namHoc], () => {
     performSearch();
 });
 
-const handleSearch = (event) => {
-    if (event.key === "Enter") {
-        performSearch();
-    }
-};
-
 // Toggle expand/collapse cho năm học
 const toggleNamHoc = (namHoc) => {
     expandedNamHoc.value[namHoc] = !expandedNamHoc.value[namHoc];
@@ -149,7 +143,7 @@ const getStatusBadgeClass = (status) => {
                     <div class="card-body pb-0">
                         <!-- Form tìm kiếm -->
                         <div class="row mb-4">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label for="hoc_ki" class="form-label">Học kỳ</label>
                                 <select 
                                     id="hoc_ki" 
@@ -162,7 +156,7 @@ const getStatusBadgeClass = (status) => {
                                     </option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label for="nam_hoc" class="form-label">Năm học</label>
                                 <select 
                                     id="nam_hoc" 
@@ -174,14 +168,6 @@ const getStatusBadgeClass = (status) => {
                                         {{ nam }}
                                     </option>
                                 </select>
-                            </div>
-                            <div class="col-md-4 d-flex align-items-end">
-                                <button 
-                                    class="btn btn-primary w-100" 
-                                    @click="performSearch"
-                                >
-                                    <i class="fas fa-search"></i> Tìm kiếm
-                                </button>
                             </div>
                         </div>
                     </div>

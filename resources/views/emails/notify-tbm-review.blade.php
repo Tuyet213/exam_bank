@@ -37,18 +37,8 @@
         </div>
         
         <div class="content">
-            <p>Kính gửi {{ $dsDangKy->boMon->truongBoMon->name }},</p>
-            
-            <p>Có một danh sách đăng ký mới cần được xem xét từ bộ môn {{ $dsDangKy->boMon->ten }}.</p>
-            
-            <p><strong>Chi tiết danh sách:</strong></p>
-            <ul>
-                <li>Tên danh sách: {{ $dsDangKy->ten }}</li>
-                <li>Thời gian: {{ $dsDangKy->thoi_gian }}</li>
-                <li>Bộ môn: {{ $dsDangKy->boMon->ten }}</li>
-            </ul>
-            
-            <p>Vui lòng đăng nhập vào hệ thống để xem xét và phê duyệt danh sách này.</p>
+            <p>Kính gửi {{ $dsDangKy->boMon->ten }},</p>
+            <p>Vui lòng đăng nhập vào hệ thống để xem xét lại kết quả đăng ký.</p>
             
             <p>Trân trọng,<br>
             Hệ thống quản lý đăng ký</p>
