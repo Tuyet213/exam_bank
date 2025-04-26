@@ -30,11 +30,8 @@ const props = defineProps({
 const expandedNamHoc = ref({});
 const expandedHocKi = ref({});
 
-const form = useForm({
-    hoc_ki: props.filters.hoc_ki || '',
-    nam_hoc: props.filters.nam_hoc || ''
-});
-
+const hocKi = ref(props.filters.hoc_ki || '');
+const namHoc = ref(props.filters.nam_hoc || '');
 const debounceTimeout = ref(null);
 
 const handleSearch = () => {
@@ -43,15 +40,22 @@ const handleSearch = () => {
     }
     
     debounceTimeout.value = setTimeout(() => {
-        form.get(route('tbm.dsbienban.index'), {
-            preserveState: true,
-            preserveScroll: true
-        });
+        router.get(
+            route('tbm.dsbienban.index'),
+            { 
+                hoc_ki: hocKi.value,
+                nam_hoc: namHoc.value
+            },
+            { 
+                preserveState: true,
+                replace: true
+            }
+        );
     }, 300);
 };
 
 // Theo dõi sự thay đổi của các trường lọc và tự động áp dụng
-watch([() => form.hoc_ki, () => form.nam_hoc], () => {
+watch([hocKi, namHoc], () => {
     handleSearch();
 });
 
@@ -136,7 +140,7 @@ const sendNotification = (bienBanId) => {
                                 <select 
                                     id="hoc_ki" 
                                     class="form-select" 
-                                    v-model="form.hoc_ki"
+                                    v-model="hocKi"
                                 >
                                     <option value="">Tất cả học kỳ</option>
                                     <option v-for="hk in ds_hoc_ki" :key="hk" :value="hk">
@@ -149,7 +153,7 @@ const sendNotification = (bienBanId) => {
                                 <select 
                                     id="nam_hoc" 
                                     class="form-select" 
-                                    v-model="form.nam_hoc"
+                                    v-model="namHoc"
                                 >
                                     <option value="">Tất cả năm học</option>
                                     <option v-for="nam in ds_nam_hoc" :key="nam" :value="nam">
@@ -216,7 +220,7 @@ const sendNotification = (bienBanId) => {
                                                                     <tr v-for="(bb, index) in hocKiData.danh_sach" :key="bb.id">
                                                                         <td>{{ index + 1 }}</td>
                                                                         <td>{{ bb.ct_d_s_dang_ky?.hoc_phan?.ten }}</td>
-                                                                        <td>{{ bb.ct_d_s_dang_ky?.vien_chuc?.name }}</td>
+                                                                        <td>{{ bb.ct_d_s_dang_ky?.ds_g_v_bien_soans?.map(gv => gv?.vien_chuc?.name || 'Không có tên').join(', ') || 'Chưa có giảng viên' }}</td>
                                                                         <td>{{ bb.dia_diem }}</td>
                                                                         <td class="text-center">
                                                                             <a 
@@ -255,7 +259,7 @@ const sendNotification = (bienBanId) => {
                                                                                     <i class="fas fa-file-pdf"></i>
                                                                                 </button>
                                                                                 <button 
-                                                                                    v-if="bb.noi_dung !='' && bb.ct_d_s_dang_ky.so_gio != null"
+                                                                                    v-if="bb.noi_dung !='' && bb.ct_d_s_dang_ky?.ds_g_v_bien_soans?.some(gv => gv.so_gio > 0)"
                                                                                     class="btn btn-sm btn-success me-2"
                                                                                     title="Gửi thông báo đến P.ĐBCL"
                                                                                     @click="sendNotification(bb.id)"

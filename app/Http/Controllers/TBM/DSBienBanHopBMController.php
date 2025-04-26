@@ -31,7 +31,7 @@ class DSBienBanHopBMController extends Controller
         $query = BienBanHop::with([
             'ctDSDangKy.dsDangKy.boMon',
             'ctDSDangKy.hocPhan',
-            'ctDSDangKy.vienChuc'
+            'ctDSDangKy.dsGVBienSoans.vienChuc'
         ])
         ->whereHas('ctDSDangKy.hocPhan', function($query) {
             $query->where('id_bo_mon', Auth::user()->id_bo_mon);
@@ -58,23 +58,16 @@ class DSBienBanHopBMController extends Controller
 
         $dsBienBan = $query->orderBy('created_at', 'desc')->get();
 
-        // Lấy danh sách học kỳ và năm học để hiển thị trong select
-        $dsHocKi = DSDangKy::select('hoc_ki')
-            ->where('id_bo_mon', Auth::user()->id_bo_mon)
-            ->distinct()
-            ->orderBy('hoc_ki')
-            ->pluck('hoc_ki');
+        // Cố định danh sách học kỳ (1, 2, Hè)
+        $dsHocKi = ['1', '2', 'Hè'];
 
-        $dsNamHoc = DSDangKy::select('nam_hoc', 'hoc_ki')
-            ->where('id_bo_mon', Auth::user()->id_bo_mon)
-            ->distinct()
-            ->orderBy('nam_hoc', 'desc')
-            ->get()
-            ->map(function($item) {
-                return $item->nam_hoc;
-            })
-            ->unique()
-            ->values();
+        // Tạo danh sách năm học dài hơn
+        $currentYear = date('Y');
+        $dsNamHoc = [];
+        for ($i = $currentYear - 5; $i <= $currentYear; $i++) {
+            $dsNamHoc[] = $i . '-' . ($i + 1);
+        }
+        $dsNamHoc = array_reverse($dsNamHoc);
         
         // Tổ chức dữ liệu theo cấu trúc phân cấp: năm học -> học kỳ -> danh sách biên bản
         $bienBanHierarchy = [];
@@ -127,7 +120,7 @@ class DSBienBanHopBMController extends Controller
         $ctDSDangKyIds = $request->input('ct_ds_dang_ky_ids', []);
         
         // Lấy thông tin chi tiết
-        $ctDSDangKies = CTDSDangKy::with(['hocPhan', 'vienChuc', 'dsDangKy'])
+        $ctDSDangKies = CTDSDangKy::with(['hocPhan', 'dsGVBienSoans.vienChuc', 'dsDangKy'])
             ->whereIn('id', $ctDSDangKyIds)
             ->get();
 
@@ -142,15 +135,23 @@ class DSBienBanHopBMController extends Controller
         $vienChucs = User::where('id_bo_mon', Auth::user()->id_bo_mon)
             ->where('able', 1)
             ->get();
+            
+        // Lấy danh sách nhân viên P.ĐBCL
+        $nhanVienDBCL = User::whereHas('roles', function($query) {
+                $query->where('name', 'Nhân viên P.ĐBCL');
+            })
+            ->where('able', 1)
+            ->get();
 
         // Lấy các nhiệm vụ cụ thể từ bảng NhiemVu
-        $nhiemVus = NhiemVu::whereIn('ten', ['Chủ tịch', 'Thư ký', 'Cán bộ phản biện'])
+        $nhiemVus = NhiemVu::whereIn('ten', ['Chủ tịch', 'Thư ký', 'Cán bộ phản biện', 'Ủy viên'])
             ->where('able', 1)
             ->get();
 
         return Inertia::render('TBM/DSBienBanHopBM/Create', [
             'ct_ds_dang_kies' => $ctDSDangKies,
             'vien_chucs' => $vienChucs,
+            'nhan_vien_dbcl' => $nhanVienDBCL,
             'nhiem_vus' => $nhiemVus
         ]);
     }
@@ -252,7 +253,7 @@ class DSBienBanHopBMController extends Controller
      */
     public function edit($id)
     {
-        $bienBan = BienBanHop::with(['ctDSDangKy.hocPhan', 'ctDSDangKy.vienChuc', 'ctDSDangKy.dsDangKy', 'dsHop'])
+        $bienBan = BienBanHop::with(['ctDSDangKy.hocPhan', 'ctDSDangKy.dsGVBienSoans.vienChuc', 'ctDSDangKy.dsDangKy', 'dsHop'])
             ->findOrFail($id);
 
         // Kiểm tra quyền truy cập
@@ -264,15 +265,23 @@ class DSBienBanHopBMController extends Controller
         $vienChucs = User::where('id_bo_mon', Auth::user()->id_bo_mon)
             ->where('able', 1)
             ->get();
+            
+        // Lấy danh sách nhân viên P.ĐBCL
+        $nhanVienDBCL = User::whereHas('roles', function($query) {
+                $query->where('name', 'Nhân viên P.ĐBCL');
+            })
+            ->where('able', 1)
+            ->get();
 
         // Lấy các nhiệm vụ cụ thể từ bảng NhiemVu
-        $nhiemVus = NhiemVu::whereIn('ten', ['Chủ tịch', 'Thư ký', 'Cán bộ phản biện'])
+        $nhiemVus = NhiemVu::whereIn('ten', ['Chủ tịch', 'Thư ký', 'Cán bộ phản biện', 'Ủy viên'])
             ->where('able', 1)
             ->get();
 
         return Inertia::render('TBM/DSBienBanHopBM/Edit', [
             'bien_ban' => $bienBan,
             'vien_chucs' => $vienChucs,
+            'nhan_vien_dbcl' => $nhanVienDBCL,
             'nhiem_vus' => $nhiemVus
         ]);
     }
@@ -388,13 +397,13 @@ class DSBienBanHopBMController extends Controller
                 'noi_dung' => 'required|mimes:pdf|max:10240', // max 10MB
             ]);
 
-            $bienBan = BienBanHop::with(['ctDSDangKy.hocPhan', 'ctDSDangKy.vienChuc', 'ctDSDangKy.dsDangKy'])
+            $bienBan = BienBanHop::with(['ctDSDangKy.hocPhan', 'ctDSDangKy.dsGVBienSoans.vienChuc', 'ctDSDangKy.dsDangKy'])
                 ->findOrFail($id);
 
             // Tạo tên file theo format: hoc_phan_giang_vien_hoc_ki_nam.pdf
             $fileName = Str::slug(
                 $bienBan->ctDSDangKy->hocPhan->ten . '_' . 
-                $bienBan->ctDSDangKy->vienChuc->name . '_' .
+                $bienBan->ctDSDangKy->dsGVBienSoans->first()->vienChuc->name . '_' .
                 $bienBan->ctDSDangKy->dsDangKy->hoc_ki . '_' .
                 $bienBan->ctDSDangKy->dsDangKy->nam_hoc
             ) . '.pdf';
@@ -410,10 +419,7 @@ class DSBienBanHopBMController extends Controller
                 'noi_dung' => 'storage/bien_ban_hop/' . $fileName
             ]);
 
-            return back()->with([
-                'type' => 'success',
-                'message' => 'Upload nội dung thành công!'
-            ]);
+            return redirect()->route('tbm.dsbienban.index')->with('success', 'Upload nội dung thành công!');
 
         } catch (\Exception $e) {
             Log::error('Lỗi upload file:', [
@@ -421,10 +427,7 @@ class DSBienBanHopBMController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ]);
-            return back()->with([
-                'type' => 'error',
-                'message' => 'Có lỗi xảy ra khi upload file: ' . $e->getMessage()
-            ]);
+            return redirect()->route('tbm.dsbienban.index')->with('error', 'Có lỗi xảy ra khi upload file: ' . $e->getMessage());
         }
     }
 
@@ -437,7 +440,7 @@ class DSBienBanHopBMController extends Controller
             return redirect()->route('dashboard')->with('error', 'Bạn không có quyền truy cập trang này');
         }
         
-        $bienBan = BienBanHop::with(['dsHop.vienChuc', 'dsHop.nhiemVu', 'ctDSDangKy.vienChuc', 'ctDSDangKy.hocPhan'])
+        $bienBan = BienBanHop::with(['dsHop.vienChuc', 'dsHop.nhiemVu', 'ctDSDangKy.dsGVBienSoans.vienChuc', 'ctDSDangKy.hocPhan'])
             ->where('id', $id)
             ->first();
 
@@ -471,7 +474,7 @@ class DSBienBanHopBMController extends Controller
             return redirect()->route('dashboard')->with('error', 'Bạn không có quyền truy cập trang này');
         }
         
-        $bienBan = BienBanHop::with(['dsHop', 'ctDSDangKy.hocPhan'])
+        $bienBan = BienBanHop::with(['dsHop', 'ctDSDangKy.hocPhan', 'ctDSDangKy.dsGVBienSoans'])
             ->where('id', $id)
             ->first();
 
@@ -482,12 +485,32 @@ class DSBienBanHopBMController extends Controller
 
         // Validate request
         $validated = $request->validate([
-            'so_gio_bien_soan' => 'required|numeric|min:0',
+            'ds_g_v_bien_soans' => 'required|array',
+            'ds_g_v_bien_soans.*.id' => 'required|exists:d_s_g_v_bien_soans,id',
+            'ds_g_v_bien_soans.*.so_gio' => 'required|numeric|min:0',
             'ds_hop.*.id' => 'required|exists:d_s_hops,id',
             'ds_hop.*.so_gio' => 'required|numeric|min:0',
             'id_gio_quy_doi_bien_soan' => 'nullable|exists:gio_quy_dois,id',
             'id_gio_quy_doi_phan_bien' => 'nullable|exists:gio_quy_dois,id',
         ]);
+
+        // Kiểm tra tổng số giờ biên soạn nếu đã chọn giờ quy đổi biên soạn
+        if ($request->id_gio_quy_doi_bien_soan) {
+            $gioQuyDoiBienSoan = GioQuyDoi::find($request->id_gio_quy_doi_bien_soan);
+            $soLuong = $bienBan->ctDSDangKy->so_luong;
+            $gioQuyDoi = $gioQuyDoiBienSoan->gio;
+            $soLuongCauQuyDoi = $gioQuyDoiBienSoan->so_luong;
+            
+            $tongSoGioDuKien = ($soLuong / $soLuongCauQuyDoi) * $gioQuyDoi;
+            $tongSoGioThucTe = collect($request->ds_g_v_bien_soans)->sum('so_gio');
+            
+            // Cho phép sai số 0.1
+            if (abs($tongSoGioThucTe - $tongSoGioDuKien) > 0.1) {
+                return redirect()->back()->withErrors([
+                    'tong_so_gio_bien_soan' => 'Tổng số giờ biên soạn (' . $tongSoGioThucTe . ') không khớp với số giờ quy định (' . round($tongSoGioDuKien, 1) . ')'
+                ]);
+            }
+        }
 
         // Kiểm tra tổng số giờ phản biện nếu đã chọn giờ quy đổi phản biện
         if ($request->id_gio_quy_doi_phan_bien) {
@@ -507,11 +530,16 @@ class DSBienBanHopBMController extends Controller
             }
         }
 
-        // Cập nhật số giờ cho người biên soạn
-        $bienBan->ctDSDangKy->so_gio = $request->so_gio_bien_soan;
-        $bienBan->ctDSDangKy->save();
+        // Cập nhật số giờ cho từng giảng viên biên soạn
+        foreach ($request->ds_g_v_bien_soans as $gvData) {
+            $gv = $bienBan->ctDSDangKy->dsGVBienSoans->find($gvData['id']);
+            if ($gv) {
+                $gv->so_gio = $gvData['so_gio'];
+                $gv->save();
+            }
+        }
 
-        // Cập nhật số giờ cho từng người tham gia
+        // Cập nhật số giờ cho từng người tham gia phản biện
         foreach ($request->ds_hop as $hopData) {
             $hop = DSHop::find($hopData['id']);
             if ($hop && $hop->id_bien_ban_hop === $bienBan->id) {
@@ -568,7 +596,7 @@ class DSBienBanHopBMController extends Controller
             // Lấy thông tin biên bản
             $bienBan = BienBanHop::with([
                 'ctDSDangKy.hocPhan.boMon',
-                'ctDSDangKy.vienChuc',
+                'ctDSDangKy.dsGVBienSoans.vienChuc',
                 'ctDSDangKy.dsDangKy'
             ])->findOrFail($id);
             Log::info('$bienBan======================================'.$bienBan);

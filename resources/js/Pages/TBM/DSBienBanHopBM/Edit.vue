@@ -12,6 +12,10 @@ const props = defineProps({
         type: Array,
         required: true
     },
+    nhan_vien_dbcl: {
+        type: Array,
+        required: true
+    },
     nhiem_vus: {
         type: Array,
         required: true
@@ -31,8 +35,18 @@ const phanBienId = computed(() => {
     return props.nhiem_vus.find(nv => nv.ten === 'Cán bộ phản biện')?.id;
 });
 
+const uyVienId = computed(() => {
+    return props.nhiem_vus.find(nv => nv.ten === 'Ủy viên')?.id;
+});
+
 // Form chính để cập nhật thông tin biên bản
 const form = useForm({
+    id: props.bien_ban.id,
+    noi_dung: props.bien_ban.noi_dung,
+    ds_g_v_bien_soans: props.bien_ban.ct_d_s_dang_ky?.ds_g_v_bien_soans?.map(gv => ({
+        vien_chuc_id: gv.vien_chuc?.id || null,
+        ten: gv.vien_chuc?.name || 'Không có tên',
+    })) || [],
     thoi_gian: props.bien_ban.thoi_gian ? props.bien_ban.thoi_gian.replace(' ', 'T').substring(0, 16) : '',
     dia_diem: props.bien_ban.dia_diem,
     ds_hop: props.bien_ban.ds_hop.map(hop => ({
@@ -83,7 +97,7 @@ const submit = () => {
                                 </div>
                                 <div class="col-md-4">
                                     <strong>Giảng viên:</strong>
-                                    {{ bien_ban.ct_d_s_dang_ky.vien_chuc.name }}
+                                    {{ (bien_ban.ct_d_s_dang_ky.ds_g_v_bien_soans || []).map(gv => gv?.vien_chuc?.name || 'Không có tên').join(', ') || 'Chưa có giảng viên' }}
                                 </div>
                                 <div class="col-md-4">
                                     <strong>Loại ngân hàng:</strong>
@@ -170,13 +184,24 @@ const submit = () => {
                                                 required
                                             >
                                                 <option value="">Chọn viên chức</option>
-                                                <option 
-                                                    v-for="vc in vien_chucs" 
-                                                    :key="vc.id"
-                                                    :value="vc.id"
-                                                >
-                                                    {{ vc.name }}
-                                                </option>
+                                                <template v-if="thanhVien.id_nhiem_vu === uyVienId">
+                                                    <option 
+                                                        v-for="vc in nhan_vien_dbcl" 
+                                                        :key="vc.id"
+                                                        :value="vc.id"
+                                                    >
+                                                        {{ vc.name }} (P.ĐBCL)
+                                                    </option>
+                                                </template>
+                                                <template v-else>
+                                                    <option 
+                                                        v-for="vc in vien_chucs" 
+                                                        :key="vc.id"
+                                                        :value="vc.id"
+                                                    >
+                                                        {{ vc.name }}
+                                                    </option>
+                                                </template>
                                             </select>
                                         </div>
                                     </div>

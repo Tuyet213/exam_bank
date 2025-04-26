@@ -49,7 +49,19 @@
             
             <div class="details">
                 <p><strong>Học phần:</strong> {{ $bien_ban->ctDSDangKy->hocPhan->ten }}</p>
-                <p><strong>Giảng viên biên soạn:</strong> {{ $bien_ban->ctDSDangKy->vienChuc->name }}</p>
+                <p><strong>Giảng viên biên soạn:</strong> 
+                @php
+                    $gvNames = [];
+                    if(isset($bien_ban->ctDSDangKy->dsGVBienSoans) && count($bien_ban->ctDSDangKy->dsGVBienSoans) > 0) {
+                        foreach($bien_ban->ctDSDangKy->dsGVBienSoans as $gv) {
+                            if(isset($gv->vienChuc->name)) {
+                                $gvNames[] = $gv->vienChuc->name;
+                            }
+                        }
+                    }
+                    echo !empty($gvNames) ? implode(', ', $gvNames) : 'Chưa có giảng viên';
+                @endphp
+                </p>
                 <p><strong>Bộ môn:</strong> {{ $bien_ban->ctDSDangKy->hocPhan->boMon->ten }}</p>
                 <p><strong>Học kỳ:</strong> {{ $bien_ban->ctDSDangKy->dsDangKy->hoc_ki }}</p>
                 <p><strong>Năm học:</strong> {{ $bien_ban->ctDSDangKy->dsDangKy->nam_hoc }}</p>

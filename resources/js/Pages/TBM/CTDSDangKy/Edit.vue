@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, useForm } from "@inertiajs/vue3";
+import { ref } from "vue";
 
 const props = defineProps({
     ctdsdangky: {
@@ -33,16 +34,44 @@ const props = defineProps({
     }
 });
 
+// Chuẩn bị dữ liệu viên chức, đảm bảo là mảng
+const initialVienChucs = Array.isArray(props.ctdsdangky.id_vien_chucs) ? 
+    props.ctdsdangky.id_vien_chucs : 
+    (props.ctdsdangky.id_vien_chuc ? [props.ctdsdangky.id_vien_chuc] : []);
+
 const form = useForm({
     id_hoc_phan: props.ctdsdangky.id_hoc_phan,
-    id_vien_chuc: props.ctdsdangky.id_vien_chuc,
+    id_vien_chuc: initialVienChucs,
     trang_thai: props.ctdsdangky.trang_thai,
     hinh_thuc_thi: props.ctdsdangky.hinh_thuc_thi,
-    so_luong: props.ctdsdangky.so_luong
+    so_luong: props.ctdsdangky.so_luong,
+    loai_ngan_hang: props.ctdsdangky.loai_ngan_hang
 });
 
- console.log(props.ctdsdangky);
- console.log(form);
+// Thêm một viên chức vào danh sách
+const addVienChuc = (vienChucId) => {
+    if (!form.id_vien_chuc.includes(vienChucId) && vienChucId) {
+        form.id_vien_chuc.push(vienChucId);
+    }
+};
+
+// Xóa một viên chức khỏi danh sách
+const removeVienChuc = (vienChucId) => {
+    const index = form.id_vien_chuc.indexOf(vienChucId);
+    if (index !== -1) {
+        form.id_vien_chuc.splice(index, 1);
+    }
+};
+
+// Tìm thông tin viên chức từ ID
+const getVienChucInfo = (vienChucId) => {
+    const vienChuc = props.vienchucs.find(vc => vc.id === vienChucId);
+    return vienChuc ? vienChuc : { id: vienChucId, name: 'Unknown' };
+};
+
+console.log(props.ctdsdangky);
+console.log(form);
+
 const submit = () => {
     form.put(route('tbm.ctdsdangky.update', props.ctdsdangky.id), {
         onSuccess: () => {
@@ -108,22 +137,54 @@ const submit = () => {
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Giảng viên biên soạn <span class="text-danger">*</span></label>
+                                    <div class="selected-vien-chuc-list mb-2">
+                                        <div v-if="form.id_vien_chuc.length === 0" class="text-muted">
+                                            Chưa chọn viên chức nào
+                                        </div>
+                                        <div v-else class="selected-items">
+                                            <div v-for="vcId in form.id_vien_chuc" :key="vcId" class="selected-item">
+                                                <span>{{ getVienChucInfo(vcId).name }}</span>
+                                                <button type="button" class="btn-remove" @click="removeVienChuc(vcId)">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="select-wrapper">
+                                        <select 
+                                            class="form-select"
+                                            :class="{ 'is-invalid': form.errors.id_vien_chuc }"
+                                            @change="addVienChuc($event.target.value); $event.target.value = ''"
+                                        >
+                                            <option value="">Chọn viên chức</option>
+                                            <option 
+                                                v-for="vc in vienchucs"
+                                                :key="vc.id"
+                                                :value="vc.id"
+                                                :disabled="form.id_vien_chuc.includes(vc.id)"
+                                            >
+                                                {{ vc.name }}
+                                            </option>
+                                        </select>
+                                        <div class="invalid-feedback" v-if="form.errors.id_vien_chuc">
+                                            {{ form.errors.id_vien_chuc }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Loại ngân hàng <span class="text-danger">*</span></label>
                                     <select 
                                         class="form-select"
-                                        v-model="form.id_vien_chuc"
-                                        :class="{ 'is-invalid': form.errors.id_vien_chuc }"
+                                        v-model="form.loai_ngan_hang"
+                                        :class="{ 'is-invalid': form.errors.loai_ngan_hang }"
                                     >
-                                        <option value="">Chọn viên chức</option>
-                                        <option 
-                                            v-for="vc in vienchucs"
-                                            :key="vc.id"
-                                            :value="vc.id"
-                                        >
-                                            {{ vc.name }}
-                                        </option>
+                                        <option value="1">Ngân hàng câu hỏi</option>
+                                        <option value="0">Ngân hàng đề thi</option>
                                     </select>
-                                    <div class="invalid-feedback" v-if="form.errors.id_vien_chuc">
-                                        {{ form.errors.id_vien_chuc }}
+                                    <div class="invalid-feedback" v-if="form.errors.loai_ngan_hang">
+                                        {{ form.errors.loai_ngan_hang }}
                                     </div>
                                 </div>
 
@@ -212,5 +273,43 @@ const submit = () => {
 
 .card-header {
     background-color: #f8f9fa;
+}
+
+.selected-vien-chuc-list {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    background-color: #f9f9f9;
+}
+
+.selected-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.selected-item {
+    display: flex;
+    align-items: center;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: #dc3545;
+    margin-left: 8px;
+    padding: 0;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-remove:hover {
+    color: #bd2130;
 }
 </style>

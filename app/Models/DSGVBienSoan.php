@@ -11,7 +11,8 @@ class DSGVBienSoan extends Model
     
     protected $fillable = [
         'id_ct_ds_dang_ky',
-        'id_vien_chuc'
+        'id_vien_chuc',
+        'so_gio'
     ];
     
     public function ctDSDangKy()

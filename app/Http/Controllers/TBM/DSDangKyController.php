@@ -57,23 +57,40 @@ class DSDangKyController extends Controller
 
         // Xử lý trạng thái và quyền chỉnh sửa
         $danhSachDangKy->transform(function ($item) {
-            // Thêm trạng thái
-            if ($item->da_gui) {
-                $item->trang_thai = 'Sent';
-            } else if ($item->ctDSDangKies->isEmpty()) {
+            // Kiểm tra nếu danh sách rỗng
+            if ($item->ctDSDangKies->isEmpty()) {
                 $item->trang_thai = 'Draft';
-            } else if ($item->ctDSDangKies->contains('trang_thai', 'Rejected')) {
+                $item->can_send = false;
+                return $item;
+            }
+            
+            // Kiểm tra nếu có bất kỳ chi tiết nào bị từ chối
+            if ($item->ctDSDangKies->contains('trang_thai', 'Rejected')) {
                 $item->trang_thai = 'Rejected';
-            } else if ($item->ctDSDangKies->every(function ($ct) {
+            }
+            // Kiểm tra nếu có bất kỳ chi tiết nào đang chờ xét duyệt
+            else if ($item->ctDSDangKies->contains('trang_thai', 'Pending')) {
+                $item->trang_thai = 'Pending';
+            }
+            // Kiểm tra nếu tất cả chi tiết đã được phê duyệt
+            else if ($item->ctDSDangKies->every(function ($ct) {
                 return $ct->trang_thai === 'Approved';
             })) {
                 $item->trang_thai = 'Approved';
-            } else {
+            }
+            // Kiểm tra nếu tất cả chi tiết đã hoàn thành
+            else if ($item->ctDSDangKies->every(function ($ct) {
+                return $ct->trang_thai === 'Completed';
+            })) {
+                $item->trang_thai = 'Completed';
+            }
+            // Trường hợp còn lại là tất cả chi tiết đều là Draft
+            else {
                 $item->trang_thai = 'Draft';
             }
 
-            // Có thể gửi nếu chưa gửi và có ít nhất 1 chi tiết
-            $item->can_send = !$item->da_gui && $item->ctDSDangKies->count() > 0;
+            // Có thể gửi nếu tất cả chi tiết đều là Draft và có ít nhất 1 chi tiết
+            $item->can_send = $item->trang_thai === 'Draft' && $item->ctDSDangKies->count() > 0;
             
             return $item;
         });
@@ -113,9 +130,10 @@ class DSDangKyController extends Controller
         
         $currentYear = date('Y');
         $dsNamHoc = [];
-        for ($i = $currentYear - 5; $i <= $currentYear + 1; $i++) {
+        for ($i = $currentYear - 5; $i <= $currentYear; $i++) {
             $dsNamHoc[] = $i . '-' . ($i + 1);
         }
+        $dsNamHoc = array_reverse($dsNamHoc);
 
         return Inertia::render('TBM/DSDangKy/Index', [
             'danhsachs_hierarchy' => $danhSachPhierarchy,
@@ -128,7 +146,7 @@ class DSDangKyController extends Controller
 
     public function send($id)
     {
-        $dsdangky = DSDangKy::with(['boMon', 'ctDSDangKies.vienChuc', 'ctDSDangKies.hocPhan'])
+        $dsdangky = DSDangKy::with(['boMon', 'ctDSDangKies.dsGVBienSoans.vienChuc', 'ctDSDangKies.hocPhan'])
             ->findOrFail($id);
 
         // Cập nhật trạng thái
@@ -176,10 +194,19 @@ class DSDangKyController extends Controller
             
         $vienChucs = User::where('id_bo_mon', Auth::user()->id_bo_mon)->orderBy('name')->get();
         
-
+        // Tạo danh sách các năm học
+        $currentYear = date('Y');
+        $dsNamHoc = [];
+        for ($i = $currentYear - 5; $i <= $currentYear; $i++) {
+            $dsNamHoc[] = $i . '-' . ($i + 1);
+        }
+        $dsNamHoc = array_reverse($dsNamHoc);
+        
         return Inertia::render('TBM/DSDangKy/Create', [
             'hoc_phans' => $hocPhans,
             'vien_chucs' => $vienChucs,
+            'ds_nam_hoc' => $dsNamHoc,
+            'bo_mon' => Auth::user()->boMon->ten,
         ]);
     }
 
@@ -187,22 +214,23 @@ class DSDangKyController extends Controller
     {
         $request->validate([
             'hoc_ki' => 'required|string|in:1,2,Hè',
+            'nam_hoc' => 'required|string|regex:/^\d{4}-\d{4}$/',
             'chi_tiet' => 'required|array|min:1',
             'chi_tiet.*.id_hoc_phan' => 'required|exists:hoc_phans,id',
             'chi_tiet.*.id_vien_chuc' => 'required|array|min:1',
             'chi_tiet.*.id_vien_chuc.*' => 'exists:users,id',
             'chi_tiet.*.loai_ngan_hang' => 'required|in:1, 0',
-            'chi_tiet.*.so_luong' => 'required|integer|min:0'
+            'chi_tiet.*.so_luong' => 'required|integer|min:0',
+            'chi_tiet.*.hinh_thuc_thi' => 'required|in:Trắc nghiệm,Tự luận,Trắc nghiệm và tự luận'
         ]);
 
         try {
             DB::beginTransaction();
 
             // Tạo danh sách đăng ký
-            $nam = now()->year;
             $dsDangKy = DSDangKy::create([
                 'hoc_ki' => $request->hoc_ki,
-                'nam_hoc' => $request->hoc_ki == '1' ? $nam . '-' . ($nam + 1) :  ($nam - 1) . '-' . $nam,
+                'nam_hoc' => $request->nam_hoc,
                 'id_bo_mon' => Auth::user()->id_bo_mon,
                 'trang_thai' => 'Draft'
             ]);
@@ -215,6 +243,7 @@ class DSDangKyController extends Controller
                     'id_hoc_phan' => $ct['id_hoc_phan'],
                     'loai_ngan_hang' => $ct['loai_ngan_hang'],
                     'so_luong' => $ct['so_luong'],
+                    'hinh_thuc_thi' => $ct['hinh_thuc_thi'],
                     'trang_thai' => 'Draft',
                     'so_gio' => 0
                 ]);
@@ -244,9 +273,21 @@ class DSDangKyController extends Controller
 
     public function edit($id)
     {
-        $dsdangky = DSDangKy::with(['boMon', 'ctDSDangKies.vienChuc', 'ctDSDangKies.hocPhan'])
+        $dsdangky = DSDangKy::with(['boMon', 'ctDSDangKies.dsGVBienSoans.vienChuc', 'ctDSDangKies.hocPhan'])
             ->findOrFail($id);
-        return Inertia::render('TBM/DSDangKy/Edit', compact('dsdangky'));
+        
+        // Tạo danh sách các năm học
+        $currentYear = date('Y');
+        $dsNamHoc = [];
+        for ($i = $currentYear - 5; $i <= $currentYear; $i++) {
+            $dsNamHoc[] = $i . '-' . ($i + 1);
+        }
+        $dsNamHoc = array_reverse($dsNamHoc);
+        
+        return Inertia::render('TBM/DSDangKy/Edit', [
+            'dsdangky' => $dsdangky,
+            'ds_nam_hoc' => $dsNamHoc
+        ]);
     }
 
     public function update(Request $request, $id)

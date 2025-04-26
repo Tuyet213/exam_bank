@@ -79,7 +79,7 @@
         </div>
 
         <div id="content" class="content">
-            <h3>Danh sách đăng ký: {{ $dsdangky->ten }}</h3>
+            <h3>Danh sách đăng ký: Học kỳ {{ $dsdangky->hoc_ki }}, năm học {{ $dsdangky->nam_hoc }}</h3>
             
             <table>
                 <thead>
@@ -87,7 +87,9 @@
                         <th>STT</th>
                         <th>Học phần</th>
                         <th>Viên chức</th>
-                        <th>Số giờ</th>
+                        <th>Loại ngân hàng</th>
+                        <th>Hình thức thi</th>
+                        <th>Số lượng</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -95,8 +97,14 @@
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $ct->hocPhan->ten }}</td>
-                            <td>{{ $ct->vienChuc->name }}</td>
-                            <td>{{ $ct->so_gio }}</td>
+                            <td>
+                                @foreach($ct->dsGVBienSoans as $gvbs)
+                                    {{ $gvbs->vienChuc->name }}@if(!$loop->last), @endif
+                                @endforeach
+                            </td>
+                            <td>{{ $ct->loai_ngan_hang == 1 ? 'Ngân hàng câu hỏi' : 'Ngân hàng đề thi' }}</td>
+                            <td>{{ $ct->hinh_thuc_thi }}</td>
+                            <td>{{ $ct->so_luong }}</td>
                         </tr>
                     @empty
                         <tr>

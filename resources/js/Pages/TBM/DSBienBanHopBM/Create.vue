@@ -12,6 +12,10 @@ const props = defineProps({
         type: Array,
         required: true
     },
+    nhan_vien_dbcl: {
+        type: Array,
+        required: true
+    },
     nhiem_vus: {
         type: Array,
         required: true
@@ -31,6 +35,10 @@ const phanBienId = computed(() => {
     return props.nhiem_vus.find(nv => nv.ten === 'Cán bộ phản biện')?.id;
 });
 
+const uyVienId = computed(() => {
+    return props.nhiem_vus.find(nv => nv.ten === 'Ủy viên')?.id;
+});
+
 // Tạo form cho mỗi CTDSDangKy
 const forms = ref(props.ct_ds_dang_kies.map(ct => useForm({
     id_ct_ds_dang_ky: ct.id,
@@ -40,7 +48,8 @@ const forms = ref(props.ct_ds_dang_kies.map(ct => useForm({
         { id_vien_chuc: '', id_nhiem_vu: chuTichId.value },
         { id_vien_chuc: '', id_nhiem_vu: thuKyId.value },
         { id_vien_chuc: '', id_nhiem_vu: phanBienId.value },
-        { id_vien_chuc: '', id_nhiem_vu: phanBienId.value }
+        { id_vien_chuc: '', id_nhiem_vu: phanBienId.value },
+        { id_vien_chuc: '', id_nhiem_vu: uyVienId.value }
     ]
 })));
 
@@ -149,8 +158,8 @@ const submitAll = () => {
                                         {{ ct_ds_dang_kies[formIndex].hoc_phan.ten }}
                                     </div>
                                     <div class="col-md-4">
-                                        <strong>Viên chức:</strong>
-                                        {{ ct_ds_dang_kies[formIndex].vien_chuc.name }}
+                                        <strong>Giảng viên:</strong>
+                                        {{ ct_ds_dang_kies[formIndex]?.ds_g_v_bien_soans?.map(gv => gv?.vien_chuc?.name || 'Không có tên').join(', ') || 'Chưa có giảng viên' }}
                                     </div>
                                     <div class="col-md-4">
                                         <strong>Loại ngân hàng:</strong>
@@ -231,13 +240,24 @@ const submitAll = () => {
                                                     required
                                                 >
                                                     <option value="">Chọn viên chức</option>
-                                                    <option 
-                                                        v-for="vc in vien_chucs" 
-                                                        :key="vc.id"
-                                                        :value="vc.id"
-                                                    >
-                                                        {{ vc.name }}
-                                                    </option>
+                                                    <template v-if="thanhVien.id_nhiem_vu === uyVienId">
+                                                        <option 
+                                                            v-for="vc in nhan_vien_dbcl" 
+                                                            :key="vc.id"
+                                                            :value="vc.id"
+                                                        >
+                                                            {{ vc.name }} (P.ĐBCL)
+                                                        </option>
+                                                    </template>
+                                                    <template v-else>
+                                                        <option 
+                                                            v-for="vc in vien_chucs" 
+                                                            :key="vc.id"
+                                                            :value="vc.id"
+                                                        >
+                                                            {{ vc.name }}
+                                                        </option>
+                                                    </template>
                                                 </select>
                                             </div>
                                         </div>

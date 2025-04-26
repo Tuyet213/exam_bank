@@ -3,17 +3,19 @@
 namespace App\Imports;
 
 use App\Models\CTDSDangKy;
+use App\Models\DSGVBienSoan;
 use App\Models\HocPhan;
 use App\Models\User;
-use Maatwebsite\Excel\Concerns\ToModel;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
-
-class CTDSDangKyImport implements ToModel, WithHeadingRow, WithValidation
+class CTDSDangKyImport implements ToCollection, WithHeadingRow
 {
-    private $id_ds_dang_ky;
-    private $id_bo_mon;
+    protected $id_ds_dang_ky;
+    protected $id_bo_mon;
 
     public function __construct($id_ds_dang_ky, $id_bo_mon)
     {
@@ -21,64 +23,73 @@ class CTDSDangKyImport implements ToModel, WithHeadingRow, WithValidation
         $this->id_bo_mon = $id_bo_mon;
     }
 
-    public function model(array $row)
+    public function collection(Collection $rows)
     {
-        // Kiểm tra học phần có thuộc bộ môn không
-        $hocPhan = HocPhan::find($row['id_hoc_phan']);
-        if (!$hocPhan || $hocPhan->id_bo_mon != $this->id_bo_mon) {
-            throw new \Exception("Học phần {$row['id_hoc_phan']} không thuộc bộ môn này");
+        foreach ($rows as $row) {
+            try {
+                DB::beginTransaction();
+                
+                // Xử lý dữ liệu từ file Excel
+                $ma_hoc_phan = $row['ma_hoc_phan'] ?? null;
+                $ten_vien_chuc = $row['ten_vien_chuc'] ?? null;
+                $hinh_thuc_thi = $row['hinh_thuc_thi'] ?? 'Trắc nghiệm';
+                $so_luong = $row['so_luong'] ?? 1;
+                
+                // Kiểm tra dữ liệu hợp lệ
+                if (!$ma_hoc_phan || !$ten_vien_chuc) {
+                    Log::warning('Import dữ liệu bị bỏ qua - thiếu thông tin', ['row' => $row]);
+                    continue;
+                }
+                
+                // Tìm học phần theo mã
+                $hoc_phan = HocPhan::where('id', $ma_hoc_phan)
+                    ->where('id_bo_mon', $this->id_bo_mon)
+                    ->first();
+                
+                if (!$hoc_phan) {
+                    Log::warning('Import dữ liệu bị bỏ qua - không tìm thấy học phần', ['ma_hoc_phan' => $ma_hoc_phan]);
+                    continue;
+                }
+                
+                // Tìm viên chức theo tên
+                $vien_chuc = User::where('name', 'like', "%{$ten_vien_chuc}%")
+                    ->where('id_bo_mon', $this->id_bo_mon)
+                    ->first();
+                    
+                if (!$vien_chuc) {
+                    Log::warning('Import dữ liệu bị bỏ qua - không tìm thấy viên chức', ['ten_vien_chuc' => $ten_vien_chuc]);
+                    continue;
+                }
+                
+                // Chuẩn hóa hình thức thi
+                if (!in_array($hinh_thuc_thi, ['Trắc nghiệm', 'Tự luận', 'Trắc nghiệm và tự luận'])) {
+                    $hinh_thuc_thi = 'Trắc nghiệm';
+                }
+                
+                // Tạo chi tiết danh sách đăng ký
+                $ctDSDangKy = CTDSDangKy::create([
+                    'id_ds_dang_ky' => $this->id_ds_dang_ky,
+                    'id_hoc_phan' => $hoc_phan->id,
+                    'hinh_thuc_thi' => $hinh_thuc_thi,
+                    'so_luong' => $so_luong,
+                    'trang_thai' => 'Draft',
+                    'able' => true,
+                    'so_gio' => 0,
+                ]);
+                
+                // Tạo bản ghi viên chức biên soạn
+                DSGVBienSoan::create([
+                    'id_ct_ds_dang_ky' => $ctDSDangKy->id,
+                    'id_vien_chuc' => $vien_chuc->id
+                ]);
+                
+                DB::commit();
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Lỗi khi import dữ liệu: ' . $e->getMessage(), ['row' => $row]);
+            }
         }
-
-        // Kiểm tra viên chức có thuộc bộ môn không
-        $vienChuc = User::find($row['id_vien_chuc']);
-        if (!$vienChuc || $vienChuc->id_bo_mon != $this->id_bo_mon) {
-            throw new \Exception("Viên chức {$row['id_vien_chuc']} không thuộc bộ môn này");
-        }
-
-        // Kiểm tra xem đã tồn tại bản ghi chưa
-        $existingRecord = CTDSDangKy::where('id_ds_dang_ky', $this->id_ds_dang_ky)
-            ->where('id_hoc_phan', $row['id_hoc_phan'])
-            ->where('id_vien_chuc', $row['id_vien_chuc'])
-            ->first();
-
-        if ($existingRecord) {
-            // Nếu đã tồn tại thì cập nhật số giờ
-            $existingRecord->update([
-                'so_gio' => $row['so_gio']
-            ]);
-            return null; // Trả về null để không tạo bản ghi mới
-        }
-
-        // Nếu chưa tồn tại thì tạo mới
-        return new CTDSDangKy([
-            'id_ds_dang_ky' => $this->id_ds_dang_ky,
-            'id_hoc_phan' => $row['id_hoc_phan'],
-            'id_vien_chuc' => $row['id_vien_chuc'],
-            'so_gio' => $row['so_gio'],
-            'trang_thai' => 'Draft'
-        ]);
-    }
-
-    public function rules(): array
-    {
-        return [
-            'id_hoc_phan' => 'required|exists:hoc_phans,id',
-            'id_vien_chuc' => 'required|exists:users,id',
-            'so_gio' => 'required|numeric|min:0'
-        ];
-    }
-
-    public function customValidationMessages()
-    {
-        return [
-            'id_hoc_phan.required' => 'Mã học phần không được để trống',
-            'id_hoc_phan.exists' => 'Mã học phần không tồn tại',
-            'id_vien_chuc.required' => 'Mã viên chức không được để trống',
-            'id_vien_chuc.exists' => 'Mã viên chức không tồn tại',
-            'so_gio.required' => 'Số giờ không được để trống',
-            'so_gio.numeric' => 'Số giờ phải là số',
-            'so_gio.min' => 'Số giờ phải lớn hơn 0'
-        ];
     }
 
     public function headingRow(): int

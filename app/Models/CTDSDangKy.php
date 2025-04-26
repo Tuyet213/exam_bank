@@ -13,7 +13,6 @@ class CTDSDangKy extends Model
         'ten',
         'id_ds_dang_ky',
         'id_hoc_phan',
-        'so_gio',
         'trang_thai',
         'able',
         'loai_ngan_hang',

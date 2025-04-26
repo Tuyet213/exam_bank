@@ -125,6 +125,24 @@ const handleCreateBienBan = () => {
     });
 };
 
+// Hàm để xác định class cho badge trạng thái
+const getStatusBadgeClass = (status) => {
+    const classes = 'badge ';
+    switch (status) {
+        case 'Approved':
+            return classes + 'bg-success';
+        case 'Rejected':
+            return classes + 'bg-danger';
+        case 'Pending':
+            return classes + 'bg-info';
+        case 'Completed':
+            return classes + 'bg-primary';
+        case 'Draft':
+        default:
+            return classes + 'bg-secondary';
+    }
+};
+
 </script>
 
 <template>
@@ -243,15 +261,7 @@ const handleCreateBienBan = () => {
 
                                         <td>{{ ct.hinh_thuc_thi }}</td>
                                         <td>
-                                            <span 
-                                                class="badge"
-                                                :class="{
-                                                    'bg-warning': ct.trang_thai === 'Draft',
-                                                    'bg-info': ct.trang_thai === 'Pending',
-                                                    'bg-success': ct.trang_thai === 'Approved',
-                                                    'bg-danger': ct.trang_thai === 'Rejected'
-                                                }"
-                                            >
+                                            <span :class="getStatusBadgeClass(ct.trang_thai)">
                                                 {{ ct.trang_thai }}
                                             </span>
                                         </td>

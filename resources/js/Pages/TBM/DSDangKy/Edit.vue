@@ -7,6 +7,10 @@ const props = defineProps({
         type: Object,
         required: true
     },
+    ds_nam_hoc: {
+        type: Array,
+        default: () => [],
+    },
     message: {
         type: String,
         default: ""
@@ -19,7 +23,7 @@ const props = defineProps({
 
 const form = useForm({
     hoc_ki: props.dsdangky.hoc_ki,
-    thoi_gian: props.dsdangky.thoi_gian
+    nam_hoc: props.dsdangky.nam_hoc
 });
 
 const submit = () => {
@@ -58,25 +62,41 @@ const submit = () => {
                     <!-- Card Body -->
                     <div class="card-body p-4">
                         <form @submit.prevent="submit">
-                            <div class="row">
-                                <div class="col-12">
-                                    <label for="ten" class="form-label">Học kì</label>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="hoc_ki" class="form-label">Học kỳ</label>
                                     <select 
                                         id="hoc_ki" 
                                         class="form-select" 
                                         v-model="form.hoc_ki"
                                         required
                                     >   
-                                        <option value="1">Học kì 1</option> 
-                                        <option value="2">Học kì 2</option>
-                                        <option value="Hè">Học kì Hè</option>
+                                        <option value="1">Học kỳ 1</option> 
+                                        <option value="2">Học kỳ 2</option>
+                                        <option value="Hè">Học kỳ Hè</option>
                                     </select>
                                     <small v-if="form.errors.hoc_ki" class="text-danger">
                                         {{ form.errors.hoc_ki }}
                                     </small>
                                 </div>
-
                                 
+                                <div class="col-md-6">
+                                    <label for="nam_hoc" class="form-label">Năm học</label>
+                                    <select 
+                                        id="nam_hoc" 
+                                        class="form-select" 
+                                        v-model="form.nam_hoc"
+                                        required
+                                    >
+                                        <option value="">Chọn năm học</option>
+                                        <option v-for="nam_hoc in ds_nam_hoc" :key="nam_hoc" :value="nam_hoc">
+                                            {{ nam_hoc }}
+                                        </option>
+                                    </select>
+                                    <small v-if="form.errors.nam_hoc" class="text-danger">
+                                        {{ form.errors.nam_hoc }}
+                                    </small>
+                                </div>
                             </div>
 
                             <!-- Buttons -->

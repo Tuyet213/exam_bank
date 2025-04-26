@@ -26,10 +26,16 @@ const loai_ngan_hang = computed(() => {
 const selectedGioQuyDoiBienSoanId = ref(null);
 const selectedGioQuyDoiPhanBienId = ref(null);
 const tongSoGioError = ref('');
+const tongSoGioBienSoanError = ref('');
 
 // Form để cập nhật số giờ
 const form = useForm({
-    so_gio_bien_soan: props.bien_ban.ct_d_s_dang_ky.so_gio ? parseFloat(props.bien_ban.ct_d_s_dang_ky.so_gio) : 0,
+    ds_g_v_bien_soans: props.bien_ban.ct_d_s_dang_ky.ds_g_v_bien_soans?.map(gv => ({
+        id: gv.id,
+        id_vien_chuc: gv.vien_chuc?.id,
+        ten: gv.vien_chuc?.name || 'Không có tên',
+        so_gio: parseFloat(gv.so_gio || 0)
+    })) || [],
     ds_hop: props.bien_ban.ds_hop.map(hop => ({
         id: hop.id,
         so_gio: hop.so_gio ? parseFloat(hop.so_gio) : 0,
@@ -46,6 +52,11 @@ const formatSoGio = (value) => {
     return isNaN(num) ? 0 : (num % 1 === 0 ? num : parseFloat(num.toFixed(1)));
 };
 
+// Tính tổng số giờ của các giảng viên biên soạn
+const tongSoGioBienSoan = computed(() => {
+    return form.ds_g_v_bien_soans.reduce((total, gv) => total + (gv.so_gio || 0), 0);
+});
+
 // Xử lý khi chọn giờ quy đổi cho người biên soạn
 const handleChonGioQuyDoiBienSoan = () => {
     const selectedItem = props.gio_quy_doi_bien_soan.find(
@@ -59,7 +70,13 @@ const handleChonGioQuyDoiBienSoan = () => {
         const soLuongCauQuyDoi = selectedItem.so_luong || 1;
         
         const soGio = (soLuong / soLuongCauQuyDoi) * gioQuyDoi;
-        form.so_gio_bien_soan = formatSoGio(soGio);
+        const gioMoiGiangVien = formatSoGio(soGio / form.ds_g_v_bien_soans.length);
+        
+        // Cập nhật số giờ cho mỗi giảng viên
+        form.ds_g_v_bien_soans.forEach(gv => {
+            gv.so_gio = gioMoiGiangVien;
+        });
+        
         form.id_gio_quy_doi_bien_soan = selectedItem.id;
     }
 };
@@ -83,6 +100,27 @@ const tongSoGioPhanBien = computed(() => {
 // Xử lý submit form
 const submit = () => {
     tongSoGioError.value = '';
+    tongSoGioBienSoanError.value = '';
+    
+    // Kiểm tra giờ biên soạn nếu đã chọn giờ quy đổi biên soạn
+    if (form.id_gio_quy_doi_bien_soan) {
+        const selectedItem = props.gio_quy_doi_bien_soan.find(
+            item => item.id === form.id_gio_quy_doi_bien_soan
+        );
+        
+        if (selectedItem) {
+            const soLuong = props.bien_ban.ct_d_s_dang_ky.so_luong || 0;
+            const gioQuyDoi = selectedItem.gio || 0;
+            const soLuongCauQuyDoi = selectedItem.so_luong || 1;
+            
+            const tongSoGioDuKien = formatSoGio((soLuong / soLuongCauQuyDoi) * gioQuyDoi);
+            
+            if (Math.abs(tongSoGioBienSoan.value - tongSoGioDuKien) > 0.1) {
+                tongSoGioBienSoanError.value = `Tổng số giờ biên soạn (${tongSoGioBienSoan.value}) khác với số giờ quy định (${tongSoGioDuKien})`;
+                return;
+            }
+        }
+    }
     
     // Kiểm tra giờ phản biện nếu đã chọn giờ quy đổi phản biện
     if (form.id_gio_quy_doi_phan_bien) {
@@ -143,7 +181,7 @@ const submit = () => {
                                 </div>
                                 <div class="col-md-4">
                                     <strong>Giảng viên:</strong>
-                                    {{ bien_ban.ct_d_s_dang_ky.vien_chuc.name }}
+                                    {{ (bien_ban.ct_d_s_dang_ky.ds_g_v_bien_soans || []).map(gv => gv?.vien_chuc?.name || 'Không có tên').join(', ') || 'Chưa có giảng viên' }}
                                 </div>
                                 <div class="col-md-4">
                                     <strong>Loại ngân hàng:</strong>
@@ -163,27 +201,41 @@ const submit = () => {
                         <form @submit.prevent="submit">
                             <!-- Số giờ người biên soạn -->
                             <div class="mb-3">
-                                <div class="border rounded p-3 mb-2">
-                                    <div class="mb-3">
-                                        <label class="form-label">Chọn giờ quy đổi cho người biên soạn <span class="text-danger">*</span></label>
-                                        <select 
-                                            class="form-select"
-                                            v-model="selectedGioQuyDoiBienSoanId"
-                                            @change="handleChonGioQuyDoiBienSoan"
+                                <div class="mb-3">
+                                    <label class="form-label">Chọn giờ quy đổi cho người biên soạn <span class="text-danger">*</span></label>
+                                    <select 
+                                        class="form-select"
+                                        v-model="selectedGioQuyDoiBienSoanId"
+                                        @change="handleChonGioQuyDoiBienSoan"
+                                    >
+                                        <option value="">Chọn giờ quy đổi</option>
+                                        <option 
+                                            v-for="gqd in gio_quy_doi_bien_soan" 
+                                            :key="gqd.id" 
+                                            :value="gqd.id"
                                         >
-                                            <option value="">Chọn giờ quy đổi</option>
-                                            <option 
-                                                v-for="gqd in gio_quy_doi_bien_soan" 
-                                                :key="gqd.id" 
-                                                :value="gqd.id"
-                                            >
-                                                {{ gqd.gio }} giờ / {{ gqd.so_luong }} {{ loai_ngan_hang }}
-                                            </option>
-                                        </select>
-                                    </div>
+                                            {{ gqd.gio }} giờ / {{ gqd.so_luong }} {{ loai_ngan_hang }}
+                                        </option>
+                                    </select>
+                                </div>
+                                
+                                <div v-if="tongSoGioBienSoanError" class="alert alert-danger">
+                                    {{ tongSoGioBienSoanError }}
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h5>Danh sách giảng viên biên soạn</h5>
+                                    <div>Tổng số giờ: <strong>{{ tongSoGioBienSoan }}</strong></div>
+                                </div>
+                                
+                                <div 
+                                    v-for="(giangVien, index) in form.ds_g_v_bien_soans" 
+                                    :key="index"
+                                    class="border rounded p-3 mb-2"
+                                >
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <strong>{{ bien_ban.ct_d_s_dang_ky.vien_chuc.name }}</strong>
+                                            <strong>{{ giangVien.ten }}</strong>
                                             <br>
                                             <small class="text-muted">Người biên soạn</small>
                                         </div>
@@ -191,16 +243,16 @@ const submit = () => {
                                             <label class="form-label">Số giờ <span class="text-danger">*</span></label>
                                             <input 
                                                 type="number"
-                                                v-model="form.so_gio_bien_soan"
+                                                v-model="giangVien.so_gio"
                                                 class="form-control"
-                                                :class="{ 'is-invalid': form.errors.so_gio_bien_soan }"
+                                                :class="{ 'is-invalid': form.errors[`ds_g_v_bien_soans.${index}.so_gio`] }"
                                                 min="0"
                                                 step="0.5"
                                                 required
-                                                @input="form.so_gio_bien_soan = formatSoGio($event.target.value)"
+                                                @input="giangVien.so_gio = formatSoGio($event.target.value)"
                                             >
-                                            <div class="invalid-feedback" v-if="form.errors.so_gio_bien_soan">
-                                                {{ form.errors.so_gio_bien_soan }}
+                                            <div class="invalid-feedback" v-if="form.errors[`ds_g_v_bien_soans.${index}.so_gio`]">
+                                                {{ form.errors[`ds_g_v_bien_soans.${index}.so_gio`] }}
                                             </div>
                                         </div>
                                     </div>

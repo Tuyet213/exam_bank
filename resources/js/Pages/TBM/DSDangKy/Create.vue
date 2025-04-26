@@ -24,11 +24,15 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    
+    ds_nam_hoc: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const form = useForm({
     hoc_ki: '',
+    nam_hoc: '',
     chi_tiet: []
 });
 
@@ -37,7 +41,8 @@ const addChiTiet = () => {
         id_hoc_phan: '',
         id_vien_chuc: [],
         loai_ngan_hang: '',
-        so_luong: 0
+        so_luong: 0,
+        hinh_thuc_thi: ''
     });
 };
 
@@ -117,6 +122,24 @@ const handleSubmit = () => {
                                 </div>
                             </div>
 
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="nam_hoc" class="form-label">Năm học</label>
+                                    <select 
+                                        id="nam_hoc" 
+                                        class="form-select" 
+                                        v-model="form.nam_hoc"
+                                        required
+                                    >
+                                        <option value="">Chọn năm học</option>
+                                        <option v-for="nam_hoc in ds_nam_hoc" :key="nam_hoc" :value="nam_hoc">
+                                            {{ nam_hoc }}
+                                        </option>
+                                    </select>
+                                    <div v-if="form.errors.nam_hoc" class="text-danger">{{ form.errors.nam_hoc }}</div>
+                                </div>
+                            </div>
+
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h5>Chi tiết danh sách</h5>
@@ -133,11 +156,13 @@ const handleSubmit = () => {
                                                 <th>Viên chức</th>
                                                 <th>Loại ngân hàng</th>
                                                 <th>Số lượng</th>
+                                                <th>Hình thức thi</th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr v-if="form.chi_tiet.length === 0">
-                                                <td colspan="5" class="text-center">Chưa có chi tiết nào</td>
+                                                <td colspan="6" class="text-center">Chưa có chi tiết nào</td>
                                             </tr>
                                             <tr v-for="(ct, index) in form.chi_tiet" :key="index">
                                                 <td>
@@ -202,6 +227,18 @@ const handleSubmit = () => {
                                                         min="0"
                                                         required
                                                     />
+                                                </td>
+                                                <td>
+                                                    <select 
+                                                        class="form-select" 
+                                                        v-model="ct.hinh_thuc_thi"
+                                                        required
+                                                    >
+                                                        <option value="">Chọn hình thức</option>
+                                                        <option value="Trắc nghiệm">Trắc nghiệm</option>
+                                                        <option value="Tự luận">Tự luận</option>
+                                                        <option value="Trắc nghiệm và tự luận">Trắc nghiệm và tự luận</option>
+                                                    </select>
                                                 </td>
                                                 <td>
                                                     <button 
