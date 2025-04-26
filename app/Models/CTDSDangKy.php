@@ -13,7 +13,6 @@ class CTDSDangKy extends Model
         'ten',
         'id_ds_dang_ky',
         'id_hoc_phan',
-        'id_vien_chuc',
         'so_gio',
         'trang_thai',
         'able',
@@ -32,11 +31,16 @@ class CTDSDangKy extends Model
         return $this->belongsTo(HocPhan::class, 'id_hoc_phan');
     }
 
-    public function vienChuc()
+    public function dsGVBienSoans()
     {
-        return $this->belongsTo(User::class, 'id_vien_chuc');
+        return $this->hasMany(DSGVBienSoan::class, 'id_ct_ds_dang_ky');
     }
     
+    // Phương thức tiện ích để lấy các viên chức biên soạn
+    public function vienChucs()
+    {
+        return User::whereIn('id', $this->dsGVBienSoans->pluck('id_vien_chuc'))->get();
+    }
 
     public function cauHois()
     {

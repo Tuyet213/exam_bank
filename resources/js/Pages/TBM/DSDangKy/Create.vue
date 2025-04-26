@@ -45,6 +45,28 @@ const removeChiTiet = (index) => {
     form.chi_tiet.splice(index, 1);
 };
 
+// Thêm một viên chức vào danh sách
+const addVienChuc = (chiTietIndex, vienChucId) => {
+    // Nếu không tìm thấy viên chức trong danh sách và giá trị không rỗng
+    if (!form.chi_tiet[chiTietIndex].id_vien_chuc.includes(vienChucId) && vienChucId) {
+        form.chi_tiet[chiTietIndex].id_vien_chuc.push(vienChucId);
+    }
+};
+
+// Xóa một viên chức khỏi danh sách
+const removeVienChuc = (chiTietIndex, vienChucId) => {
+    const index = form.chi_tiet[chiTietIndex].id_vien_chuc.indexOf(vienChucId);
+    if (index !== -1) {
+        form.chi_tiet[chiTietIndex].id_vien_chuc.splice(index, 1);
+    }
+};
+
+// Tìm thông tin viên chức từ ID
+const getVienChucInfo = (vienChucId) => {
+    const vienChuc = props.vien_chucs.find(vc => vc.id === vienChucId);
+    return vienChuc ? vienChuc : { id: vienChucId, name: 'Unknown' };
+};
+
 const handleSubmit = () => {
     form.post(route('tbm.dsdangky.store'), {
         onSuccess: () => {
@@ -131,20 +153,34 @@ const handleSubmit = () => {
                                                     </select>
                                                 </td>
                                                 <td>
+                                                    <div class="selected-vien-chuc-list mb-2">
+                                                        <div v-if="ct.id_vien_chuc.length === 0" class="text-muted">
+                                                            Chưa chọn viên chức nào
+                                                        </div>
+                                                        <div v-else class="selected-items">
+                                                            <div v-for="vcId in ct.id_vien_chuc" :key="vcId" class="selected-item">
+                                                                <span>{{ getVienChucInfo(vcId).id }} - {{ getVienChucInfo(vcId).name }}</span>
+                                                                <button type="button" class="btn-remove" @click="removeVienChuc(index, vcId)">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
                                                     <div class="select-wrapper">
-                                                        <small class="text-muted d-block mb-1">
-                                                            Giữ Ctrl (Windows) hoặc Command (Mac) để chọn nhiều viên chức
-                                                        </small>
                                                         <select 
                                                             class="form-select" 
-                                                            v-model="ct.id_vien_chuc"
-                                                            multiple
-                                                            required
+                                                            @change="addVienChuc(index, $event.target.value); $event.target.value = ''"
                                                         >
-                                                            <option v-for="vc in vien_chucs" :key="vc.id" :value="vc.id">
+                                                            <option value="">Chọn viên chức</option>
+                                                            <option v-for="vc in vien_chucs" :key="vc.id" :value="vc.id"
+                                                                :disabled="ct.id_vien_chuc.includes(vc.id)">
                                                                 {{ vc.id }} - {{ vc.name }}
                                                             </option>
                                                         </select>
+                                                        <div v-if="form.errors['chi_tiet.' + index + '.id_vien_chuc']" class="text-danger">
+                                                            {{ form.errors['chi_tiet.' + index + '.id_vien_chuc'] }}
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -277,32 +313,44 @@ const handleSubmit = () => {
     margin-right: 0.5rem !important;
 }
 
-/* Style cho select multiple */
-select[multiple] {
-    height: 120px;
-}
-
-.select-wrapper {
-    position: relative;
-}
-
-select[multiple] {
-    height: 120px;
-    padding: 8px;
-}
-
-select[multiple] option {
-    padding: 4px 8px;
-    margin: 2px 0;
+/* Style cho danh sách viên chức đã chọn */
+.selected-vien-chuc-list {
+    border: 1px solid #ced4da;
     border-radius: 4px;
+    padding: 8px;
+    min-height: 60px;
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
 }
 
-select[multiple] option:checked {
-    background-color: #007bff;
-    color: white;
+.selected-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-select[multiple] option:hover {
-    background-color: #e9ecef;
+.selected-item {
+    display: flex;
+    align-items: center;
+    background-color: #e7f3ff;
+    border: 1px solid #b8daff;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: #dc3545;
+    margin-left: 6px;
+    cursor: pointer;
+    padding: 0;
+    font-size: 12px;
+}
+
+.btn-remove:hover {
+    color: #bd2130;
 }
 </style>

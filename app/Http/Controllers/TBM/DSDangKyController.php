@@ -13,6 +13,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\CTDSDangKy;
+use App\Models\DSGVBienSoan;
 
 class DSDangKyController extends Controller
 {
@@ -194,8 +195,8 @@ class DSDangKyController extends Controller
             'chi_tiet.*.so_luong' => 'required|integer|min:0'
         ]);
 
-        // try {
-        //     DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
             // Tạo danh sách đăng ký
             $nam = now()->year;
@@ -208,32 +209,37 @@ class DSDangKyController extends Controller
 
             // Tạo chi tiết danh sách
             foreach ($request->chi_tiet as $ct) {
+                // Tạo bản ghi CTDSDangKy
+                $ctDSDangKy = CTDSDangKy::create([
+                    'id_ds_dang_ky' => $dsDangKy->id,
+                    'id_hoc_phan' => $ct['id_hoc_phan'],
+                    'loai_ngan_hang' => $ct['loai_ngan_hang'],
+                    'so_luong' => $ct['so_luong'],
+                    'trang_thai' => 'Draft',
+                    'so_gio' => 0
+                ]);
+                
+                // Tạo bản ghi DSGVBienSoan cho từng viên chức
                 foreach ($ct['id_vien_chuc'] as $idVienChuc) {
-                    CTDSDangKy::create([
-                        'id_ds_dang_ky' => $dsDangKy->id,
-                        'id_hoc_phan' => $ct['id_hoc_phan'],
-                        'id_vien_chuc' => $idVienChuc,
-                        'loai_ngan_hang' => $ct['loai_ngan_hang'],
-                        'so_luong' => $ct['so_luong'],
-                        'trang_thai' => 'Draft',
-                        'so_gio' => 0
+                    DSGVBienSoan::create([
+                        'id_ct_ds_dang_ky' => $ctDSDangKy->id,
+                        'id_vien_chuc' => $idVienChuc
                     ]);
                 }
             }
 
-        //     DB::commit();
+            DB::commit();
 
-        //     return redirect()->route('tbm.dsdangky.index')
-        //         ->with('success', true)
-        //         ->with('message', 'Tạo danh sách đăng ký thành công!');
+            return redirect()->route('tbm.dsdangky.index')
+                ->with('success', true)
+                ->with('message', 'Tạo danh sách đăng ký thành công!');
 
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //     return redirect()->back()
-        //         ->with('success', false)
-        //         ->with('message', 'Có lỗi xảy ra: ' . $e->getMessage());
-        // }
-        return redirect()->route('tbm.dsdangky.index')->with('message', 'Tạo danh sách đăng ký thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('success', false)
+                ->with('message', 'Có lỗi xảy ra: ' . $e->getMessage());
+        }
     }
 
     public function edit($id)
