@@ -87,6 +87,7 @@ onUnmounted(() => {
       
       <!-- Nhân viên P.ĐBCL Menu -->
       <ul v-else-if="role === 'dbcl'" class="sidebar-menu">
+        <li><i class="fas fa-users"></i> <Link :href="route('quality.thongbao.index')">Thông báo quy định</Link></li>
         <li><i class="fas fa-users"></i> <Link :href="route('qlo.notice.create')">Thông báo quy định</Link></li>
         <li><i class="fas fa-users"></i> <Link :href="route('quality.dsdangky.index')">Danh sách đăng ký</Link></li>
         <li><i class="fas fa-users"></i> <Link :href="route('quality.dsbienban.index')">Danh sách biên bản họp cấp Bộ môn</Link></li>

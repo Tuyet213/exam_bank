@@ -208,12 +208,13 @@ const sendNotification = (bienBanId) => {
                                                                         <th>Giảng viên</th>
                                                                         <th>Địa điểm</th>
                                                                         <th>File biên bản</th>
+                                                                        <th>Trạng thái</th>
                                                                         <th>Thao tác</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
                                                                     <tr v-if="hocKiData.danh_sach.length === 0">
-                                                                        <td colspan="6" class="text-center">
+                                                                        <td colspan="7" class="text-center">
                                                                             Không có dữ liệu
                                                                         </td>
                                                                     </tr>
@@ -235,18 +236,33 @@ const sendNotification = (bienBanId) => {
                                                                                 Chưa có
                                                                             </span>
                                                                         </td>
+                                                                        <td>
+                                                                            <span 
+                                                                                class="badge"
+                                                                                :class="{
+                                                                                    'bg-secondary': bb.trang_thai === 'Draft', 
+                                                                                    'bg-warning': bb.trang_thai === 'Pending',
+                                                                                    'bg-success': bb.trang_thai === 'Approved',
+                                                                                    'bg-danger': bb.trang_thai === 'Rejected'
+                                                                                }"
+                                                                            >
+                                                                                {{ bb.trang_thai || 'Draft' }}
+                                                                            </span>
+                                                                        </td>
                                                                         <td class="text-center">
                                                                             <div class="btn-group">
                                                                                 <Link 
-                                                                                    :href="route('tbm.dsbienban.edit', bb.id)"
+                                                                                    :href="bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected' ? route('tbm.dsbienban.edit', bb.id) : '#'"
                                                                                     class="btn btn-sm btn-warning me-2"
+                                                                                    :class="{ 'disabled': !(bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected') }"
                                                                                     title="Chỉnh sửa"
                                                                                 >
                                                                                     <i class="fas fa-edit"></i>
                                                                                 </Link>
                                                                                 <Link 
-                                                                                    :href="route('tbm.dsbienban.edit-so-gio', bb.id)"
+                                                                                    :href="bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected' ? route('tbm.dsbienban.edit-so-gio', bb.id) : '#'"
                                                                                     class="btn btn-sm btn-secondary me-2"
+                                                                                    :class="{ 'disabled': !(bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected') }"
                                                                                     title="Chỉnh sửa số giờ"
                                                                                 >
                                                                                     <i class="fas fa-clock"></i>
@@ -254,7 +270,8 @@ const sendNotification = (bienBanId) => {
                                                                                 <button 
                                                                                     class="btn btn-sm btn-info me-2"
                                                                                     title="Thêm nội dung"
-                                                                                    @click="uploadNoiDung(bb)"
+                                                                                    @click="bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected' ? uploadNoiDung(bb) : ''"
+                                                                                    :disabled="!(bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected')"
                                                                                 >
                                                                                     <i class="fas fa-file-pdf"></i>
                                                                                 </button>
@@ -262,7 +279,8 @@ const sendNotification = (bienBanId) => {
                                                                                     v-if="bb.noi_dung !='' && bb.ct_d_s_dang_ky?.ds_g_v_bien_soans?.some(gv => gv.so_gio > 0)"
                                                                                     class="btn btn-sm btn-success me-2"
                                                                                     title="Gửi thông báo đến P.ĐBCL"
-                                                                                    @click="sendNotification(bb.id)"
+                                                                                    @click="bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected' ? sendNotification(bb.id) : ''"
+                                                                                    :disabled="!(bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected')"
                                                                                 >
                                                                                     <i class="fas fa-paper-plane"></i>
                                                                                 </button>
@@ -421,5 +439,16 @@ const sendNotification = (bienBanId) => {
 .form-label {
     margin-bottom: 0.5rem;
     font-weight: 500;
+}
+
+.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 </style> 

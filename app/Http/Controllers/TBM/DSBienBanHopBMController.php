@@ -184,7 +184,8 @@ class DSBienBanHopBMController extends Controller
                 'thoi_gian' => $request->thoi_gian,
                 'dia_diem' => $request->dia_diem,
                 'cap' => 'Bộ môn',
-                'able' => true
+                'able' => true,
+                'trang_thai' => 'Draft'
             ]);
             Log::info('Biên bản họp đã được tạo:', $bienBan->toArray());
 
@@ -624,7 +625,8 @@ class DSBienBanHopBMController extends Controller
                 );
             }
             // $bienBan->ctDSDangKy->trang_thai = 'SentNT';
-            $bienBan->ctDSDangKy->save();
+            $bienBan->trang_thai = 'Pending';
+            $bienBan->save();
             Log::info('gửi mail thành công============');
             return back()->with([
                 'type' => 'success',

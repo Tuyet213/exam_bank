@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Notifications\NotifyApprovedBienBan;
 use App\Notifications\NotifyRejectedBienBan;
+use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 
 class DSBienBanController extends Controller
 {
@@ -27,7 +29,7 @@ class DSBienBanController extends Controller
             'ctDSDangKy.hocPhan', 
             'ctDSDangKy.hocPhan.boMon', 
             'ctDSDangKy.dsDangKy',
-            'ctDSDangKy.vienChuc'
+            'ctDSDangKy.dsGVBienSoans.vienChuc'
         ]);
         
         // Tìm kiếm theo từ khóa
@@ -194,7 +196,7 @@ class DSBienBanController extends Controller
     
     public function approve(Request $request, BienBanHop $bienban)
     {
-        $bienban->duyet = true;
+        $bienban->trang_thai = 'Approved';
         $bienban->save();
         
         return redirect()->back()->with('success', 'Biên bản đã được duyệt thành công.');
@@ -202,7 +204,7 @@ class DSBienBanController extends Controller
     
     public function reject(Request $request, BienBanHop $bienban)
     {
-        $bienban->duyet = false;
+        $bienban->trang_thai = 'Rejected';
         $bienban->save();
         
         return redirect()->back()->with('success', 'Biên bản đã bị từ chối.');
@@ -248,7 +250,7 @@ class DSBienBanController extends Controller
         $bienban->load([
             'ctDSDangKy',
             'ctDSDangKy.hocPhan',
-            'ctDSDangKy.vienChuc',
+            'ctDSDangKy.dsGVBienSoans.vienChuc',
             'ctDSDangKy.dsDangKy',
             'ctDSDangKy.hocPhan.boMon',
             'ctDSDangKy.hocPhan.boMon.khoa',
@@ -263,7 +265,7 @@ class DSBienBanController extends Controller
             'hocPhan' => $bienban->ctDSDangKy->hocPhan,
             'boMon' => $bienban->ctDSDangKy->hocPhan->boMon,
             'khoa' => $bienban->ctDSDangKy->hocPhan->boMon->khoa,
-            'giangVien' => $bienban->ctDSDangKy->vienChuc,
+            'giangViens' => $bienban->ctDSDangKy->dsGVBienSoans,
             'thanhViens' => $bienban->dsHop
         ]);
     }
@@ -271,21 +273,46 @@ class DSBienBanController extends Controller
     public function approveWithEmail(Request $request, BienBanHop $bienban)
     {
         try {
-           
             // Cập nhật trạng thái biên bản
-            $bienban->duyet = true;
+            $bienban->trang_thai = 'Approved';
             $bienban->save();
+            Log::info('Biên bản đã được duyệt');
             
-            // Lấy thông tin giảng viên 
-            $giangVien = $bienban->ctDSDangKy->vienChuc;
-            
-            // Gửi thông báo email
-            if ($giangVien && $giangVien->email) {
-                $giangVien->notify(new NotifyApprovedBienBan($bienban));
-                return redirect()->back()->with('success', 'Biên bản đã được duyệt và email thông báo đã được gửi.');
+            $bienban->load('ctDSDangKy');
+            $ctDSDangKy = $bienban->ctDSDangKy;
+            if ($ctDSDangKy) {
+                $ctDSDangKy->trang_thai = 'Completed';
+                $ctDSDangKy->save();
+                Log::info('Đã cập nhật ctDSDangKy thành Completed');
             }
             
-            return redirect()->back()->with('success', 'Biên bản đã được duyệt nhưng không thể gửi email (không tìm thấy email giảng viên).');
+            // Lấy thông tin bộ môn từ biên bản
+            $bienban->load('ctDSDangKy.hocPhan.boMon');
+            $boMon = $bienban->ctDSDangKy->hocPhan->boMon;
+            
+            if (!$boMon) {
+                return redirect()->back()->with('error', 'Không tìm thấy thông tin bộ môn.');
+            }
+            
+            // Tìm Trưởng Bộ Môn
+            $truongBoMon = User::where('id_bo_mon', $boMon->id)
+                ->whereHas('roles', function($query) {
+                    $query->where('name', 'Trưởng Bộ Môn');
+                })
+                ->where('able', 1)
+                ->first();
+                
+            if (!$truongBoMon || !$truongBoMon->email) {
+                return redirect()->back()->with('success', 'Biên bản đã được duyệt nhưng không thể gửi email (không tìm thấy email Trưởng Bộ Môn).');
+            }
+            
+            // Gửi email thông báo cho Trưởng Bộ Môn
+            Mail::to($truongBoMon->email)->send(
+                new \App\Mail\NotifyApprovedBienBan($bienban, $truongBoMon)
+            );
+            
+            return redirect()->back()->with('success', 'Biên bản đã được duyệt và email thông báo đã được gửi đến Trưởng Bộ Môn.');
+            
         } catch (\Exception $e) {
             Log::error('Lỗi khi duyệt biên bản: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Đã xảy ra lỗi khi duyệt biên bản: ' . $e->getMessage());
@@ -303,19 +330,36 @@ class DSBienBanController extends Controller
         
         try {
             // Cập nhật trạng thái biên bản
-            $bienban->duyet = false;
+            $bienban->trang_thai = 'Rejected';
             $bienban->save();
             
-            // Lấy thông tin giảng viên 
-            $giangVien = $bienban->ctDSDangKy->vienChuc;
+            // Lấy thông tin bộ môn từ biên bản
+            $bienban->load('ctDSDangKy.hocPhan.boMon');
+            $boMon = $bienban->ctDSDangKy->hocPhan->boMon;
             
-            // Gửi thông báo email
-            if ($giangVien && $giangVien->email) {
-                $giangVien->notify(new NotifyRejectedBienBan($bienban, $request->ly_do));
-                return redirect()->back()->with('success', 'Biên bản đã bị từ chối và email thông báo đã được gửi.');
+            if (!$boMon) {
+                return redirect()->back()->with('error', 'Không tìm thấy thông tin bộ môn.');
             }
             
-            return redirect()->back()->with('success', 'Biên bản đã bị từ chối nhưng không thể gửi email (không tìm thấy email giảng viên).');
+            // Tìm Trưởng Bộ Môn
+            $truongBoMon = User::where('id_bo_mon', $boMon->id)
+                ->whereHas('roles', function($query) {
+                    $query->where('name', 'Trưởng Bộ Môn');
+                })
+                ->where('able', 1)
+                ->first();
+                
+            if (!$truongBoMon || !$truongBoMon->email) {
+                return redirect()->back()->with('success', 'Biên bản đã bị từ chối nhưng không thể gửi email (không tìm thấy email Trưởng Bộ Môn).');
+            }
+            
+            // Gửi email thông báo cho Trưởng Bộ Môn
+            Mail::to($truongBoMon->email)->send(
+                new \App\Mail\NotifyRejectedBienBan($bienban, $truongBoMon, $request->ly_do)
+            );
+            
+            return redirect()->back()->with('success', 'Biên bản đã bị từ chối và email thông báo đã được gửi đến Trưởng Bộ Môn.');
+            
         } catch (\Exception $e) {
             Log::error('Lỗi khi từ chối biên bản: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Đã xảy ra lỗi khi từ chối biên bản: ' . $e->getMessage());

@@ -290,7 +290,7 @@ const getStatusBadgeClass = (status) => {
                                                                                                 <th>Người biên soạn</th>
                                                                                                 <th>Nội dung</th>
                                                                                                 <th>Ngày họp</th>
-              
+                                                                                                <th>Trạng thái</th>
                                                                                                 <th>Thao tác</th>
                                                                                             </tr>
                                                                                         </thead>
@@ -298,10 +298,34 @@ const getStatusBadgeClass = (status) => {
                                                                                             <tr v-for="(bb, index) in boMonData.danh_sach" :key="bb.id">
                                                                                                 <td>{{ index + 1 }}</td>
                                                                                                 <td>{{ bb.ct_d_s_dang_ky?.hoc_phan?.ten || 'Chưa có thông tin' }}</td>
-                                                                                                <td>{{ bb.ct_d_s_dang_ky?.vien_chuc?.name || 'Chưa phân công' }}</td>
-                                                                                                <td>{{ bb.noi_dung || 'Chưa có nội dung' }}</td>
+                                                                                                <td>
+                                                                                                    {{ (bb.ct_d_s_dang_ky?.ds_g_v_bien_soans || []).map(gv => gv?.vien_chuc?.name || 'Không có tên').join(', ') || 'Chưa có giảng viên' }}
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <a v-if="bb.noi_dung" 
+                                                                                                       :href="route('quality.dsbienban.download', bb.id)" 
+                                                                                                       class="btn btn-primary " 
+                                                                                                       style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
+                                                                                                       title="Tải xuống nội dung">
+                                                                                                       <i class="fas fa-download"></i>
+                                                                                                    </a>
+                                                                                                    <span v-else>Chưa có nội dung</span>
+                                                                                                </td>
                                                                                                 <td>{{ bb.thoi_gian || 'Chưa có thông tin' }}</td>
-                                                                                              
+                                                                                                <td>
+                                                                                                    <span 
+                                                                                                        class="badge"
+                                                                                                        :class="{
+                                                                                                            'bg-secondary': bb.trang_thai === 'Draft', 
+                                                                                                            'bg-warning': bb.trang_thai === 'Pending',
+                                                                                                            'bg-success': bb.trang_thai === 'Approved',
+                                                                                                            'bg-danger': bb.trang_thai === 'Rejected'
+                                                                                                        }"
+                                                                                                    >
+                                                                                                        {{ bb.trang_thai || 'Draft' }}
+                                                                                                    </span>
+                                                                                                </td>
+                                                                                                
                                                                                                 <td>
                                                                                                     <a 
                                                                                                         :href="route('quality.dsbienban.show', bb.id)"
@@ -311,32 +335,7 @@ const getStatusBadgeClass = (status) => {
                                                                                                         <i class="fas fa-eye"></i>
                                                                                                     </a>
                                                                                                     
-                                                                                                    <a 
-                                                                                                        v-if="bb.file_path"
-                                                                                                        :href="route('quality.dsbienban.download', bb.id)"
-                                                                                                        class="btn btn-sm btn-info me-2"
-                                                                                                        title="Tải xuống"
-                                                                                                    >
-                                                                                                        <i class="fas fa-download"></i>
-                                                                                                    </a>
-                                                                                                    
-                                                                                                    <Link 
-                                                                                                        v-if="bb.file_path && bb.trang_thai === 'Chờ duyệt'" 
-                                                                                                        :href="route('quality.dsbienban.approve', bb.id)"
-                                                                                                        class="btn btn-sm btn-success me-2"
-                                                                                                        title="Duyệt"
-                                                                                                    >
-                                                                                                        <i class="fas fa-check"></i>
-                                                                                                    </Link>
-                                                                                                    
-                                                                                                    <Link 
-                                                                                                        v-if="bb.trang_thai === 'Đã duyệt'" 
-                                                                                                        :href="route('quality.dsbienban.reject', bb.id)"
-                                                                                                        class="btn btn-sm btn-danger me-2"
-                                                                                                        title="Hủy duyệt"
-                                                                                                    >
-                                                                                                        <i class="fas fa-times"></i>
-                                                                                                    </Link>
+                                                                                                  
                                                                                                 </td>
                                                                                             </tr>
                                                                                             <tr v-if="boMonData.danh_sach.length === 0">

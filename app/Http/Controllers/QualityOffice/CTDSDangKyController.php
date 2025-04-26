@@ -16,7 +16,7 @@ class CTDSDangKyController extends Controller
     public function index($id_ds_dang_ky)
     {
         $dsDangKy = DSDangKy::with('boMon')->findOrFail($id_ds_dang_ky);
-        $ctDsDangKy = CTDSDangKy::with(['hocPhan', 'vienChuc'])
+        $ctDsDangKy = CTDSDangKy::with(['hocPhan', 'dsGVBienSoans.vienChuc'])
             ->where('id_ds_dang_ky', $id_ds_dang_ky)
             ->get();
 

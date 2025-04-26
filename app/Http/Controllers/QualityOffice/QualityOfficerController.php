@@ -54,7 +54,7 @@ class QualityOfficerController extends Controller
          // Gửi email thông báo
          $receivers = User::where('able', true)
          ->whereHas('roles', function ($query) {
-             $query->where('name', 'TK');
+             $query->where('name', 'Trưởng Bộ Môn');
          })
          ->get();
 

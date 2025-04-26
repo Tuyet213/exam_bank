@@ -133,7 +133,7 @@ const handleSubmit = () => {
                                     <tr>
                                         <th>STT</th>
                                         <th>Học phần</th>
-                                        <th>Viên chức</th>
+                                        <th>Giảng viên biên soạn</th>
                                         <th>Số giờ</th>
                                         <th>Trạng thái</th>
                                         <th>Thao tác</th>
@@ -143,7 +143,9 @@ const handleSubmit = () => {
                                     <tr v-for="(ct, index) in ctdsdangky" :key="ct.id">
                                         <td>{{ index + 1 }}</td>
                                         <td>{{ ct.hoc_phan?.ten }}</td>
-                                        <td>{{ ct.vien_chuc?.name }}</td>
+                                        <td>
+                                            {{ (ct.ds_g_v_bien_soans || []).map(gv => gv?.vien_chuc?.name || 'Không có tên').join(', ') || 'Chưa có giảng viên' }}
+                                        </td>
                                         <td>{{ ct.so_gio }}</td>
                                         <td>
                                             <span :class="getStatusBadgeClass(ct.trang_thai)" class="badge">

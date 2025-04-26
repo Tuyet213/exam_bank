@@ -239,6 +239,12 @@
         Route::post('/dsbienban/{bienban}/approve-with-email', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'approveWithEmail'])->name('dsbienban.approve-with-email');
         Route::post('/dsbienban/{bienban}/reject-with-email', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'rejectWithEmail'])->name('dsbienban.reject-with-email');
         
+        // Quản lý thông báo
+        Route::get('/thongbao', [App\Http\Controllers\QualityOffice\ThongbaoController::class, 'index'])->name('thongbao.index');
+        Route::get('/thongbao/create', [App\Http\Controllers\QualityOffice\ThongbaoController::class, 'create'])->name('thongbao.create');
+        Route::post('/thongbao/store', [App\Http\Controllers\QualityOffice\ThongbaoController::class, 'store'])->name('thongbao.store');
+        Route::get('/thongbao/{thongbao}', [App\Http\Controllers\QualityOffice\ThongbaoController::class, 'show'])->name('thongbao.show');
+        
         // Thống kê
         Route::get('/thongke', [QualityThongKeController::class, 'index'])->name('thongke.index');
         Route::get('/thongke/excel', [QualityThongKeController::class, 'exportExcel'])->name('thongke.excel');

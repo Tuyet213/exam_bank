@@ -36,10 +36,10 @@ class AuthenticatedSessionController extends Controller
             return redirect(route('admin.khoa.index'));
         }
         if($role->contains('Nhân viên P.ĐBCL')){
-            return redirect(route('qlo.notice.index'));
+            return redirect(route('quality.dsdangky.index'));
         }
         if($role->contains('Trưởng Bộ Môn')){
-            return redirect(route('tbm.dsdangky.index'));
+            return redirect(route('quality.dsdangky.index'));
         }
         if($role->contains('Trưởng Khoa')){
             return redirect(route('tk.dsbienban.index'));

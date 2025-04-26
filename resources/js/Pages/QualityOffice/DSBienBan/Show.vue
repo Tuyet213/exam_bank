@@ -9,7 +9,7 @@ const props = defineProps({
     hocPhan: Object,
     boMon: Object,
     khoa: Object,
-    giangVien: Object,
+    giangViens: Array,
     thanhViens: Array,
     errors: Object,
     success: {
@@ -28,8 +28,10 @@ const approveForm = useForm({});
 const getStatusClass = computed(() => {
     if (props.ctDSDangKy.trang_thai === 'Completed') {
         return 'badge bg-success';
-    } else if (props.bienban.duyet) {
+    } else if (props.bienban.trang_thai === 'Approved') {
         return 'badge bg-success';
+    } else if (props.bienban.trang_thai === 'Rejected') {
+        return 'badge bg-danger';
     } else {
         return 'badge bg-warning';
     }
@@ -38,6 +40,10 @@ const getStatusClass = computed(() => {
 const getStatusText = computed(() => {
     if (props.ctDSDangKy.trang_thai === 'Completed') {
         return 'Đã hoàn thành';
+    } else if (props.bienban.trang_thai === 'Approved') {
+        return 'Đã duyệt';
+    } else if (props.bienban.trang_thai === 'Rejected') {
+        return 'Đã từ chối';
     } else {
         return 'Chờ duyệt';
     }
@@ -129,33 +135,31 @@ const toggleRejectForm = () => {
                                 <h5 class="fw-bold mb-3">Thông tin người biên soạn</h5>
                                 <div class="table-responsive">
                                     <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>STT</th>
+                                                <th>Mã giảng viên</th>
+                                                <th>Họ tên</th>
+                                                <th>Email</th>
+                                                <th>Số giờ</th>
+                                            </tr>
+                                        </thead>
                                         <tbody>
-                                            <tr>
-                                                <th width="30%">Mã giảng viên:</th>
-                                                <td>{{ giangVien.id }}</td>
+                                            <tr v-for="(gv, index) in giangViens" :key="index">
+                                                <td>{{ index + 1 }}</td>
+                                                <td>{{ gv.vien_chuc?.id || 'N/A' }}</td>
+                                                <td>{{ gv.vien_chuc?.name || 'Không có thông tin' }}</td>
+                                                <td>{{ gv.vien_chuc?.email || 'Không có thông tin' }}</td>
+                                                <td class="fw-bold">{{ gv.so_gio || 0 }} giờ</td>
                                             </tr>
-                                            <tr>
-                                                <th>Họ tên:</th>
-                                                <td>{{ giangVien.name }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Email:</th>
-                                                <td>{{ giangVien.email }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Số điện thoại:</th>
-                                                <td>{{ giangVien.sdt || 'Không có thông tin' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Thời gian họp:</th>
-                                                <td>{{ bienban.thoi_gian || 'Không có thông tin' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Số giờ quy đổi:</th>
-                                                <td class="fw-bold">{{ ctDSDangKy.so_gio || 0 }} giờ</td>
+                                            <tr v-if="!giangViens || giangViens.length === 0">
+                                                <td colspan="5" class="text-center">Chưa có giảng viên biên soạn</td>
                                             </tr>
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="mt-3">
+                                    <p><strong>Thời gian họp:</strong> {{ bienban.thoi_gian || 'Không có thông tin' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -206,17 +210,16 @@ const toggleRejectForm = () => {
 
                             <div v-if="!showRejectForm">
                                 <button 
-                                    v-if="!bienban.duyet && ctDSDangKy.trang_thai !== 'Completed'" 
                                     @click="submitApprove" 
                                     class="btn btn-success me-2"
-                                    :disabled="approveForm.processing"
+                                    :disabled="bienban.trang_thai !== 'Pending' || approveForm.processing"
                                 >
                                     <i class="fas fa-check me-2"></i> Duyệt biên bản
                                 </button>
                                 <button 
-                                    v-if="!showRejectForm" 
                                     @click="toggleRejectForm" 
                                     class="btn btn-danger"
+                                    :disabled="bienban.trang_thai !== 'Pending'"
                                 >
                                     <i class="fas fa-times me-2"></i> Từ chối
                                 </button>
