@@ -97,6 +97,20 @@ const uploadNoiDung = (bienBan) => {
     
     input.click();
 };
+
+const sendNotification = (bienBanId) => {
+    if (confirm('Bạn có chắc chắn muốn gửi thông báo hoàn thành biên soạn đến Phòng ĐBCL?')) {
+        router.post(route('tbm.dsbienban.send-notification', bienBanId), {}, {
+            onSuccess: () => {
+                alert('Đã gửi thông báo hoàn thành biên soạn đến Phòng ĐBCL thành công!');
+            },
+            onError: (errors) => {
+                alert('Có lỗi xảy ra: ' + (errors.message || 'Không thể gửi thông báo'));
+                console.error(errors);
+            }
+        });
+    }
+};
 </script>
 
 <template>
@@ -239,6 +253,14 @@ const uploadNoiDung = (bienBan) => {
                                                                                     @click="uploadNoiDung(bb)"
                                                                                 >
                                                                                     <i class="fas fa-file-pdf"></i>
+                                                                                </button>
+                                                                                <button 
+                                                                                    v-if="bb.noi_dung !='' && bb.ct_d_s_dang_ky.so_gio != null"
+                                                                                    class="btn btn-sm btn-success me-2"
+                                                                                    title="Gửi thông báo đến P.ĐBCL"
+                                                                                    @click="sendNotification(bb.id)"
+                                                                                >
+                                                                                    <i class="fas fa-paper-plane"></i>
                                                                                 </button>
                                                                             </div>
                                                                         </td>

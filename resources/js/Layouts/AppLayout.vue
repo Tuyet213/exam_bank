@@ -89,6 +89,7 @@ onUnmounted(() => {
       <ul v-else-if="role === 'dbcl'" class="sidebar-menu">
         <li><i class="fas fa-users"></i> <Link :href="route('qlo.notice.create')">Thông báo quy định</Link></li>
         <li><i class="fas fa-users"></i> <Link :href="route('quality.dsdangky.index')">Danh sách đăng ký</Link></li>
+        <li><i class="fas fa-users"></i> <Link :href="route('quality.dsbienban.index')">Danh sách biên bản họp cấp Bộ môn</Link></li>
         <li><i class="fas fa-chart-bar"></i> <Link :href="route('quality.thongke.index')">Thống kê biên soạn</Link></li>
       </ul>
 

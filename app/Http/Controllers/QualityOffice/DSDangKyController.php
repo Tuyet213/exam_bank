@@ -28,15 +28,17 @@ class DSDangKyController extends Controller
         }
         
         // Lọc theo khoa
-        if ($request->has('khoa_id') && !empty($request->khoa_id)) {
-            $query->whereHas('boMon', function($q) use ($request) {
-                $q->where('id_khoa', $request->khoa_id);
+        if ($request->has('khoa') && !empty($request->khoa)) {
+            $query->whereHas('boMon.khoa', function($q) use ($request) {
+                $q->where('ten', $request->khoa);
             });
         }
         
         // Lọc theo bộ môn
-        if ($request->has('bomon_id') && !empty($request->bomon_id)) {
-            $query->where('id_bo_mon', $request->bomon_id);
+        if ($request->has('bo_mon') && !empty($request->bo_mon)) {
+            $query->whereHas('boMon', function($q) use ($request) {
+                $q->where('ten', $request->bo_mon);
+            });
         }
         
         // Lọc theo học kỳ
@@ -56,24 +58,28 @@ class DSDangKyController extends Controller
         // Xử lý trạng thái cho từng DSDangKy
         $danhSachDangKy->each(function ($ds) {
             if ($ds->ctDSDangKies->isEmpty()) {
-                $ds->status = 'Pending';
+                $ds->trang_thai = 'Pending';
             } else if ($ds->ctDSDangKies->contains('trang_thai', 'Rejected')) {
-                $ds->status = 'Rejected';
+                $ds->trang_thai = 'Rejected';
             } else if ($ds->ctDSDangKies->every(function ($ct) {
                 return $ct->trang_thai === 'Approved';
             })) {
-                $ds->status = 'Approved';
+                $ds->trang_thai = 'Approved';
             } else {
-                $ds->status = 'Pending';
+                $ds->trang_thai = 'Pending';
             }
         });
 
-        // Tổ chức dữ liệu theo cấu trúc phân cấp: năm học -> học kỳ -> danh sách đăng ký
+        // Tổ chức dữ liệu theo cấu trúc phân cấp: năm học -> học kỳ -> khoa -> bộ môn -> danh sách đăng ký
         $danhSachHierarchy = [];
         
         foreach ($danhSachDangKy as $dsDangKy) {
             $namHoc = $dsDangKy->nam_hoc;
             $hocKi = $dsDangKy->hoc_ki;
+            $khoaTen = $dsDangKy->boMon->khoa->ten;
+            $khoaId = $dsDangKy->boMon->khoa->id;
+            $boMonTen = $dsDangKy->boMon->ten;
+            $boMonId = $dsDangKy->boMon->id;
             
             // Tạo năm học nếu chưa tồn tại
             if (!isset($danhSachHierarchy[$namHoc])) {
@@ -87,12 +93,30 @@ class DSDangKyController extends Controller
             if (!isset($danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi])) {
                 $danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi] = [
                     'ten' => 'Học kỳ ' . $hocKi,
+                    'khoa' => []
+                ];
+            }
+            
+            // Tạo khoa nếu chưa tồn tại
+            if (!isset($danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi]['khoa'][$khoaId])) {
+                $danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi]['khoa'][$khoaId] = [
+                    'ten' => $khoaTen,
+                    'id' => $khoaId,
+                    'bo_mon' => []
+                ];
+            }
+            
+            // Tạo bộ môn nếu chưa tồn tại
+            if (!isset($danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi]['khoa'][$khoaId]['bo_mon'][$boMonId])) {
+                $danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi]['khoa'][$khoaId]['bo_mon'][$boMonId] = [
+                    'ten' => $boMonTen,
+                    'id' => $boMonId,
                     'danh_sach' => []
                 ];
             }
             
-            // Thêm danh sách đăng ký vào học kỳ tương ứng
-            $danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi]['danh_sach'][] = $dsDangKy;
+            // Thêm danh sách đăng ký vào bộ môn tương ứng
+            $danhSachHierarchy[$namHoc]['hoc_ki'][$hocKi]['khoa'][$khoaId]['bo_mon'][$boMonId]['danh_sach'][] = $dsDangKy;
         }
         
         // Sắp xếp theo năm học mới nhất trước
@@ -103,6 +127,9 @@ class DSDangKyController extends Controller
             ->orderBy('ten')
             ->get();
         
+        // Danh sách tên khoa
+        $dsKhoa = $khoas->pluck('ten')->toArray();
+        
         // Lấy danh sách bộ môn (loại trừ admin và dbcl)
         // Đảm bảo chỉ lấy bộ môn thuộc các khoa hợp lệ
         $boMons = BoMon::with('khoa')
@@ -112,6 +139,18 @@ class DSDangKyController extends Controller
             })
             ->orderBy('ten')
             ->get();
+            
+        // Danh sách tên bộ môn
+        $dsBoMon = $boMons->pluck('ten')->toArray();
+
+        // Tạo danh sách bộ môn theo khoa
+        $boMonTheoKhoa = [];
+        foreach ($khoas as $khoa) {
+            $boMonTheoKhoa[$khoa->ten] = $boMons
+                ->where('id_khoa', $khoa->id)
+                ->pluck('ten')
+                ->toArray();
+        }
         
         // Lấy danh sách học kỳ (1, 2, 3)
         $dsHocKi = ['1', '2', 'Hè'];
@@ -125,13 +164,13 @@ class DSDangKyController extends Controller
         $dsNamHoc = array_reverse($dsNamHoc);
 
         return Inertia::render('QualityOffice/DSDangKy/Index', [
-            'dsdangky' => $danhSachDangKy,
-            'dsdangky_hierarchy' => $danhSachHierarchy,
-            'khoas' => $khoas,
-            'bomons' => $boMons,
+            'danhsachs_hierarchy' => $danhSachHierarchy,
+            'ds_khoa' => $dsKhoa,
+            'ds_bo_mon' => $dsBoMon,
+            'bo_mon_theo_khoa' => $boMonTheoKhoa,
             'ds_hoc_ki' => $dsHocKi,
             'ds_nam_hoc' => $dsNamHoc,
-            'filters' => $request->only(['search', 'khoa_id', 'bomon_id', 'hoc_ki', 'nam_hoc']),
+            'filters' => $request->only(['search', 'khoa', 'bo_mon', 'hoc_ki', 'nam_hoc']),
         ]);
     }
 } 

@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\GioQuyDoi;
 use App\Models\BoMon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NotifyCompletedBienSoan;
 
 class DSBienBanHopBMController extends Controller
 {
@@ -552,6 +554,66 @@ class DSBienBanHopBMController extends Controller
             return back()->with([
                 'type' => 'error',
                 'message' => 'Có lỗi xảy ra khi tải xuống file: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Gửi email thông báo hoàn thành biên soạn
+     */
+    public function sendNotification($id)
+    {
+        Log::info('BIENBAN======================================');
+        try {
+            // Lấy thông tin biên bản
+            $bienBan = BienBanHop::with([
+                'ctDSDangKy.hocPhan.boMon',
+                'ctDSDangKy.vienChuc',
+                'ctDSDangKy.dsDangKy'
+            ])->findOrFail($id);
+            Log::info('$bienBan======================================'.$bienBan);
+
+            // Tìm địa chỉ email của nhân viên P.ĐBCL
+            $qualityOfficers = User::where('able', 1)->whereHas('roles', function($query) {
+                $query->where('name', 'Nhân viên P.ĐBCL');
+            })->get();
+            if ($qualityOfficers->isEmpty()) {
+                return back()->with([
+                    'type' => 'error',
+                    'message' => 'Không tìm thấy nhân viên Phòng ĐBCL để gửi thông báo'
+                ]);
+            }
+
+            $nguoiGui = Auth::user();
+            $boMon = BoMon::find($nguoiGui->id_bo_mon);
+            Log::info($nguoiGui);
+            Log::info($boMon);
+            Log::info('bắt đầu gửi mail============');
+            // Gửi email cho từng nhân viên P.ĐBCL
+            foreach ($qualityOfficers as $officer) {
+                Mail::to($officer->email)->send(
+                    new NotifyCompletedBienSoan($bienBan, $nguoiGui, $boMon)
+                );
+            }
+            // $bienBan->ctDSDangKy->trang_thai = 'SentNT';
+            $bienBan->ctDSDangKy->save();
+            Log::info('gửi mail thành công============');
+            return back()->with([
+                'type' => 'success',
+                'message' => 'Đã gửi thông báo hoàn thành biên soạn đến Phòng ĐBCL'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Lỗi gửi thông báo email:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->with([
+                'type' => 'error',
+                'message' => 'Có lỗi xảy ra khi gửi thông báo: ' . $e->getMessage()
             ]);
         }
     }

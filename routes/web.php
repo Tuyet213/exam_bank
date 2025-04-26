@@ -187,6 +187,7 @@
         Route::get('/dsbienban/{id}/edit-so-gio', [DSBienBanHopBMController::class, 'editSoGio'])->name('tbm.dsbienban.edit-so-gio');
         Route::put('/dsbienban/{id}/update-so-gio', [DSBienBanHopBMController::class, 'updateSoGio'])->name('tbm.dsbienban.update-so-gio');
         Route::get('/dsbienban/{id}/download', [DSBienBanHopBMController::class, 'download'])->name('tbm.dsbienban.download');
+        Route::post('/dsbienban/{id}/send-notification', [DSBienBanHopBMController::class, 'sendNotification'])->name('tbm.dsbienban.send-notification');
         
     });
     Route::middleware('auth')->group(function () {
@@ -229,6 +230,15 @@
         Route::put('/ctdsdangky/{dsdangky_id}/update-status-all', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'updateStatusAll'])
             ->name('ctdsdangky.updateStatusAll');
             
+        // Danh sách biên bản
+        Route::get('/dsbienban', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'index'])->name('dsbienban.index');
+        Route::get('/dsbienban/{bienban}', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'show'])->name('dsbienban.show');
+        Route::get('/dsbienban/{bienban}/approve', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'approve'])->name('dsbienban.approve');
+        Route::get('/dsbienban/{bienban}/reject', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'reject'])->name('dsbienban.reject');
+        Route::get('/dsbienban/{bienban}/download', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'download'])->name('dsbienban.download');
+        Route::post('/dsbienban/{bienban}/approve-with-email', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'approveWithEmail'])->name('dsbienban.approve-with-email');
+        Route::post('/dsbienban/{bienban}/reject-with-email', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'rejectWithEmail'])->name('dsbienban.reject-with-email');
+        
         // Thống kê
         Route::get('/thongke', [QualityThongKeController::class, 'index'])->name('thongke.index');
         Route::get('/thongke/excel', [QualityThongKeController::class, 'exportExcel'])->name('thongke.excel');
