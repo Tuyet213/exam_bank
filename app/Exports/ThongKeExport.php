@@ -34,44 +34,125 @@ class ThongKeExport implements FromCollection, WithHeadings, WithTitle, ShouldAu
     {
         $collection = new Collection();
         
+        // Thêm thống kê tổng hợp chung
+        $collection->push([
+            'stt' => '',
+            'nam_hoc' => 'TỔNG HỢP CHUNG',
+            'hoc_ki' => '',
+            'khoa' => '',
+            'bomon' => '',
+            'hoc_phan' => '',
+            'giang_vien' => '',
+            'nguoi_phan_bien' => '',
+            'tong_so_gio' => $this->thongke_data['tong_hop']['tong_so_gio'],
+            'tong_so_nguoi' => $this->thongke_data['tong_hop']['tong_so_nguoi_tham_gia'],
+            'tong_so_hoc_phan' => $this->thongke_data['tong_hop']['tong_so_hoc_phan'],
+            'tong_so_cau_hoi' => $this->thongke_data['tong_hop']['tong_so_cau_hoi'],
+            'tong_so_de_thi' => $this->thongke_data['tong_hop']['tong_so_de_thi']
+        ]);
+        
+        // Thêm dòng trống sau tổng hợp chung
+        $collection->push([
+            'stt' => '', 'nam_hoc' => '', 'hoc_ki' => '', 'khoa' => '', 'bomon' => '',
+            'hoc_phan' => '', 'giang_vien' => '', 'nguoi_phan_bien' => '',
+            'tong_so_gio' => '', 'tong_so_nguoi' => '', 'tong_so_hoc_phan' => '',
+            'tong_so_cau_hoi' => '', 'tong_so_de_thi' => ''
+        ]);
+
         // Biến đếm STT
         $stt = 1;
         
-        // Duyệt qua cấu trúc dữ liệu đã được tổ chức
+        // Duyệt qua cấu trúc dữ liệu đã được tổ chức (bỏ qua key tong_hop)
         foreach ($this->thongke_data as $nam_hoc => $nam_data) {
+            if ($nam_hoc === 'tong_hop') continue;
+
+            // Thêm thống kê năm học
+            $collection->push([
+                'stt' => '',
+                'nam_hoc' => "NĂM HỌC: $nam_hoc",
+                'hoc_ki' => '',
+                'khoa' => '',
+                'bomon' => '',
+                'hoc_phan' => '',
+                'giang_vien' => '',
+                'nguoi_phan_bien' => '',
+                'tong_so_gio' => $nam_data['tong_hop']['tong_so_gio'],
+                'tong_so_nguoi' => $nam_data['tong_hop']['tong_so_nguoi_tham_gia'],
+                'tong_so_hoc_phan' => $nam_data['tong_hop']['tong_so_hoc_phan'],
+                'tong_so_cau_hoi' => $nam_data['tong_hop']['tong_so_cau_hoi'],
+                'tong_so_de_thi' => $nam_data['tong_hop']['tong_so_de_thi']
+            ]);
+
             foreach ($nam_data['hoc_ki'] as $hoc_ki => $hoc_ki_data) {
+                // Thêm thống kê học kỳ
+                $collection->push([
+                    'stt' => '',
+                    'nam_hoc' => '',
+                    'hoc_ki' => "HỌC KỲ: $hoc_ki",
+                    'khoa' => '',
+                    'bomon' => '',
+                    'hoc_phan' => '',
+                    'giang_vien' => '',
+                    'nguoi_phan_bien' => '',
+                    'tong_so_gio' => $hoc_ki_data['tong_hop']['tong_so_gio'],
+                    'tong_so_nguoi' => $hoc_ki_data['tong_hop']['tong_so_nguoi_tham_gia'],
+                    'tong_so_hoc_phan' => $hoc_ki_data['tong_hop']['tong_so_hoc_phan'],
+                    'tong_so_cau_hoi' => $hoc_ki_data['tong_hop']['tong_so_cau_hoi'],
+                    'tong_so_de_thi' => $hoc_ki_data['tong_hop']['tong_so_de_thi']
+                ]);
+
                 foreach ($hoc_ki_data['khoa'] as $khoa) {
+                    // Thêm thống kê khoa
+                    $collection->push([
+                        'stt' => '',
+                        'nam_hoc' => '',
+                        'hoc_ki' => '',
+                        'khoa' => "KHOA: {$khoa['ten']}",
+                        'bomon' => '',
+                        'hoc_phan' => '',
+                        'giang_vien' => '',
+                        'nguoi_phan_bien' => '',
+                        'tong_so_gio' => $khoa['tong_hop']['tong_so_gio'],
+                        'tong_so_nguoi' => $khoa['tong_hop']['tong_so_nguoi_tham_gia'],
+                        'tong_so_hoc_phan' => $khoa['tong_hop']['tong_so_hoc_phan'],
+                        'tong_so_cau_hoi' => $khoa['tong_hop']['tong_so_cau_hoi'],
+                        'tong_so_de_thi' => $khoa['tong_hop']['tong_so_de_thi']
+                    ]);
+
                     foreach ($khoa['bomon'] as $bomon) {
-                        // Thêm hàng nhóm thông tin chung
+                        // Thêm thống kê bộ môn
                         $collection->push([
                             'stt' => '',
-                            'nam_hoc' => $nam_hoc,
-                            'hoc_ki' => 'Học kỳ ' . $hoc_ki,
-                            'khoa' => $khoa['ten'],
-                            'bomon' => $bomon['ten'],
+                            'nam_hoc' => '',
+                            'hoc_ki' => '',
+                            'khoa' => '',
+                            'bomon' => "BỘ MÔN: {$bomon['ten']}",
                             'hoc_phan' => '',
                             'giang_vien' => '',
                             'nguoi_phan_bien' => '',
-                            'so_gio' => '',
-                            'hinh_thuc_thi' => '',
-                            'loai_ngan_hang' => '',
-                            'so_luong' => ''
+                            'tong_so_gio' => $bomon['tong_hop']['tong_so_gio'],
+                            'tong_so_nguoi' => $bomon['tong_hop']['tong_so_nguoi_tham_gia'],
+                            'tong_so_hoc_phan' => $bomon['tong_hop']['tong_so_hoc_phan'],
+                            'tong_so_cau_hoi' => $bomon['tong_hop']['tong_so_cau_hoi'],
+                            'tong_so_de_thi' => $bomon['tong_hop']['tong_so_de_thi']
                         ]);
                         
+                        // Thêm chi tiết của bộ môn
                         foreach ($bomon['chitiet'] as $chitiet) {
                             $collection->push([
                                 'stt' => $stt++,
-                                'nam_hoc' => '',  // Để trống vì đã có ở hàng nhóm
-                                'hoc_ki' => '',   // Để trống vì đã có ở hàng nhóm
-                                'khoa' => '',     // Để trống vì đã có ở hàng nhóm
-                                'bomon' => '',    // Để trống vì đã có ở hàng nhóm
+                                'nam_hoc' => '',
+                                'hoc_ki' => '',
+                                'khoa' => '',
+                                'bomon' => '',
                                 'hoc_phan' => $chitiet['hoc_phan'],
                                 'giang_vien' => $chitiet['giang_vien'],
                                 'nguoi_phan_bien' => $chitiet['nguoi_phan_bien'],
-                                'so_gio' => $chitiet['so_gio'],
-                                'hinh_thuc_thi' => $chitiet['hinh_thuc_thi'],
-                                'loai_ngan_hang' => $chitiet['loai_ngan_hang'],
-                                'so_luong' => $chitiet['so_luong']
+                                'tong_so_gio' => $chitiet['so_gio'],
+                                'tong_so_nguoi' => '',
+                                'tong_so_hoc_phan' => '',
+                                'tong_so_cau_hoi' => $chitiet['loai_ngan_hang'] == 'Ngân hàng câu hỏi' ? $chitiet['so_luong'] : '',
+                                'tong_so_de_thi' => $chitiet['loai_ngan_hang'] == 'Ngân hàng đề thi' ? $chitiet['so_luong'] : ''
                             ]);
                         }
                     }
@@ -96,10 +177,11 @@ class ThongKeExport implements FromCollection, WithHeadings, WithTitle, ShouldAu
             'Học phần',
             'Giảng viên biên soạn',
             'Người phản biện cấp bộ môn',
-            'Số giờ',
-            'Hình thức thi',
-            'Loại ngân hàng',
-            'Số lượng'
+            'Tổng số giờ',
+            'Tổng số GV tham gia',
+            'Tổng số học phần',
+            'Tổng số câu hỏi',
+            'Tổng số đề thi'
         ];
     }
 
@@ -109,7 +191,7 @@ class ThongKeExport implements FromCollection, WithHeadings, WithTitle, ShouldAu
     public function styles(Worksheet $sheet)
     {
         // Định dạng tiêu đề
-        $sheet->getStyle('A1:L1')->applyFromArray([
+        $sheet->getStyle('A1:M1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
             'fill' => [
                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
@@ -120,31 +202,82 @@ class ThongKeExport implements FromCollection, WithHeadings, WithTitle, ShouldAu
         // Định dạng các hàng dữ liệu
         $dataRows = $sheet->getHighestRow();
         
-        // Định dạng các hàng thông tin chung
+        // Định dạng các hàng thống kê
         $rowNumber = 2; // Bắt đầu từ hàng 2 (sau tiêu đề)
         while ($rowNumber <= $dataRows) {
-            // Nếu cột năm học (B) có giá trị nhưng cột Học phần (F) không có giá trị
-            // thì đây là hàng thông tin chung
-            if ($sheet->getCell('B'.$rowNumber)->getValue() != '' && $sheet->getCell('F'.$rowNumber)->getValue() == '') {
-                $sheet->getStyle('A'.$rowNumber.':L'.$rowNumber)->applyFromArray([
+            $cellValue = $sheet->getCell('B'.$rowNumber)->getValue();
+            
+            // Định dạng cho tổng hợp chung
+            if (strpos($cellValue, 'TỔNG HỢP CHUNG') !== false) {
+                $sheet->getStyle('A'.$rowNumber.':M'.$rowNumber)->applyFromArray([
                     'font' => ['bold' => true],
                     'fill' => [
                         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                        'startColor' => ['argb' => 'FFDBE5F1'], // Màu xanh nhạt
+                        'startColor' => ['argb' => 'FFFF9900'], // Màu cam
                     ],
                 ]);
             }
+            // Định dạng cho năm học
+            elseif (strpos($cellValue, 'NĂM HỌC:') !== false) {
+                $sheet->getStyle('A'.$rowNumber.':M'.$rowNumber)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['argb' => 'FF92D050'], // Màu xanh lá
+                    ],
+                ]);
+            }
+            // Định dạng cho học kỳ
+            elseif (strpos($sheet->getCell('C'.$rowNumber)->getValue(), 'HỌC KỲ:') !== false) {
+                $sheet->getStyle('A'.$rowNumber.':M'.$rowNumber)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['argb' => 'FFB4C6E7'], // Màu xanh nhạt
+                    ],
+                ]);
+            }
+            // Định dạng cho khoa
+            elseif (strpos($sheet->getCell('D'.$rowNumber)->getValue(), 'KHOA:') !== false) {
+                $sheet->getStyle('A'.$rowNumber.':M'.$rowNumber)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['argb' => 'FFD9E1F2'], // Màu tím nhạt
+                    ],
+                ]);
+            }
+            // Định dạng cho bộ môn
+            elseif (strpos($sheet->getCell('E'.$rowNumber)->getValue(), 'BỘ MÔN:') !== false) {
+                $sheet->getStyle('A'.$rowNumber.':M'.$rowNumber)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['argb' => 'FFE2EFDA'], // Màu xanh rêu nhạt
+                    ],
+                ]);
+            }
+            
             $rowNumber++;
         }
         
         // Đường viền cho tất cả các ô dữ liệu
-        $sheet->getStyle('A1:L'.$dataRows)->applyFromArray([
+        $sheet->getStyle('A1:M'.$dataRows)->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
                 ],
             ],
         ]);
+
+        // Căn giữa cho các cột số liệu
+        $sheet->getStyle('A1:A'.$dataRows)->getAlignment()->setHorizontal('center'); // STT
+        $sheet->getStyle('I1:M'.$dataRows)->getAlignment()->setHorizontal('center'); // Các cột số liệu
+        
+        // Tự động điều chỉnh chiều rộng cột
+        foreach(range('A','M') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
         
         return [];
     }

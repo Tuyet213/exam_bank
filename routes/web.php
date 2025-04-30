@@ -24,6 +24,8 @@
     use Illuminate\Support\Facades\Http;
     use App\Http\Controllers\TK\DSBienBanHopKhoaController;
     use App\Http\Controllers\TK\DSDangKyKhoaController;
+    use App\Http\Controllers\QualityOffice\ThongKeGiangVienController as QualityThongKeGiangVienController;
+    use App\Http\Controllers\QualityOffice\ThongKeHocPhanController;
 
     // chỉ trả về component hoặc page vì nó tự import vào app.blade.php
 
@@ -125,6 +127,12 @@
         // Thống kê
         Route::get('/thongke', [AdminThongKeController::class, 'index'])->name('admin.thongke.index');
         Route::get('/thongke/excel', [AdminThongKeController::class, 'exportExcel'])->name('admin.thongke.excel');
+        // Thống kê giảng viên
+        Route::get('/thongke-giang-vien', [QualityThongKeGiangVienController::class, 'index'])->name('admin.thongke_giang_vien.index');
+        Route::get('/thongke-giang-vien/excel', [QualityThongKeGiangVienController::class, 'exportExcel'])->name('quality.thongke_giang_vien.excel');
+         // Thống kê học phần
+         Route::get('/thongkehocphan', [ThongKeHocPhanController::class, 'index'])->name('admin.thongkehocphan.index');
+         Route::get('/thongkehocphan/excel', [ThongKeHocPhanController::class, 'exportExcel'])->name('quality.thongkehocphan.excel');
     });
 
 
@@ -248,6 +256,14 @@
         // Thống kê
         Route::get('/thongke', [QualityThongKeController::class, 'index'])->name('thongke.index');
         Route::get('/thongke/excel', [QualityThongKeController::class, 'exportExcel'])->name('thongke.excel');
+
+        // Thống kê giảng viên
+        Route::get('/thongke-giang-vien', [QualityThongKeGiangVienController::class, 'index'])->name('thongke_giang_vien.index');
+        Route::get('/thongke-giang-vien/excel', [QualityThongKeGiangVienController::class, 'exportExcel'])->name('thongke_giang_vien.excel');
+
+        // Thống kê học phần
+        Route::get('/thongkehocphan', [ThongKeHocPhanController::class, 'index'])->name('thongkehocphan.index');
+        Route::get('/thongkehocphan/excel', [ThongKeHocPhanController::class, 'exportExcel'])->name('thongkehocphan.excel');
     });
 
     // Routes cho Trưởng Khoa
@@ -274,5 +290,6 @@
            
         });
     });
+
 
     require __DIR__.'/auth.php';

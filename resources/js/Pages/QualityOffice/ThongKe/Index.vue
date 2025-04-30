@@ -1,7 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -36,11 +36,27 @@ const props = defineProps({
     }
 });
 
+// Computed property để lọc ra các năm học (loại bỏ tong_hop)
+const filteredThongKeData = computed(() => {
+    const data = { ...props.thongke_data };
+    delete data.tong_hop;
+    return data;
+});
+
 // State cho collapse/expand của các phần
 const expandedNamHoc = ref({});
 const expandedHocKi = ref({});
 const expandedKhoa = ref({});
 const expandedBoMon = ref({});
+
+// Khởi tạo trạng thái mở rộng mặc định
+onMounted(() => {
+    // Mở rộng năm học đầu tiên
+    const firstNamHoc = Object.keys(filteredThongKeData.value)[0];
+    if (firstNamHoc) {
+        expandedNamHoc.value[firstNamHoc] = true;
+    }
+});
 
 // Các biến cho bộ lọc
 const selectedKhoa = ref(props.filters.khoa_id || '');
@@ -122,6 +138,39 @@ const exportExcel = () => {
     }).toString();
     
     window.location.href = route('quality.thongke.excel') + '?' + queryParams;
+};
+
+// Thêm các phương thức xử lý trạng thái
+const getStatusClass = (status) => {
+    switch(status) {
+        case 'Approved':
+            return 'badge bg-secondary';
+        case 'Pending':
+            return 'badge bg-primary';
+        case 'Rejected':
+            return 'badge bg-danger';
+        case 'Draft':
+            return 'badge bg-secondary';
+        case 'Completed':
+            return 'badge bg-success';
+    }
+};
+
+const getStatusText = (status) => {
+    switch(status) {
+        case 'Approved':
+            return 'Approved';
+        case 'Pending':
+            return 'Pending';
+        case 'Rejected':
+            return 'Rejected';
+        case 'Draft':
+            return 'Draft';
+        case 'Completed':
+            return 'Completed';
+        default:
+            return 'Không xác định';
+    }
 };
 </script>
 
@@ -215,14 +264,55 @@ const exportExcel = () => {
                     <div class="card-body">
                         <div class="thongke-content">
                             <!-- Danh sách trống -->
-                            <div v-if="Object.keys(thongke_data).length === 0" class="text-center py-5">
+                            <div v-if="Object.keys(filteredThongKeData).length === 0" class="text-center py-5">
                                 <h5 class="text-muted">Không có dữ liệu thống kê</h5>
                                 <p>Vui lòng chọn các tiêu chí lọc khác để xem thống kê</p>
                             </div>
                             
+                            <!-- Tổng hợp chung -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Tổng hợp chung</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="stat-item">
+                                                <span class="stat-label">Tổng số giờ:</span>
+                                                <span class="stat-value">{{ thongke_data?.tong_hop?.tong_so_gio || 0 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="stat-item">
+                                                <span class="stat-label">Tổng số giảng viên tham gia:</span>
+                                                <span class="stat-value">{{ thongke_data?.tong_hop?.tong_so_nguoi_tham_gia || 0 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="stat-item">
+                                                <span class="stat-label">Tổng số học phần:</span>
+                                                <span class="stat-value">{{ thongke_data?.tong_hop?.tong_so_hoc_phan || 0 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="stat-item">
+                                                <span class="stat-label">Tổng số câu hỏi:</span>
+                                                <span class="stat-value">{{ thongke_data?.tong_hop?.tong_so_cau_hoi || 0 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="stat-item">
+                                                <span class="stat-label">Tổng số đề thi:</span>
+                                                <span class="stat-value">{{ thongke_data?.tong_hop?.tong_so_de_thi || 0 }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Danh sách năm học -->
-                            <div v-else class="accordion accordion-custom">
-                                <div v-for="(namData, namHoc) in thongke_data" :key="namHoc" class="accordion-item">
+                            <div class="accordion accordion-custom">
+                                <div v-for="(namData, namHoc) in filteredThongKeData" :key="namHoc" class="accordion-item">
                                     <!-- Năm học -->
                                     <div class="accordion-header" @click="toggleNamHoc(namHoc)">
                                         <div class="accordion-button" :class="{ 'collapsed': !expandedNamHoc[namHoc] }">
@@ -234,45 +324,210 @@ const exportExcel = () => {
                                     <!-- Nội dung của năm học -->
                                     <div class="accordion-collapse" :class="{ 'show': expandedNamHoc[namHoc] }">
                                         <div class="accordion-body">
+                                            <!-- Tổng hợp năm học -->
+                                            <div class="card mb-4">
+                                                <div class="card-header bg-light">
+                                                    <h5 class="mb-0">Tổng hợp năm học {{ namData.ten }}</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-3">
+                                                            <div class="stat-item">
+                                                                <span class="stat-label">Tổng số giờ:</span>
+                                                                <span class="stat-value">{{ namData?.tong_hop?.tong_so_gio || 0 }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="stat-item">
+                                                                <span class="stat-label">Tổng số giảng viên tham gia:</span>
+                                                                <span class="stat-value">{{ namData?.tong_hop?.tong_so_nguoi_tham_gia || 0 }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="stat-item">
+                                                                <span class="stat-label">Tổng số học phần:</span>
+                                                                <span class="stat-value">{{ namData?.tong_hop?.tong_so_hoc_phan || 0 }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="stat-item">
+                                                                <span class="stat-label">Tổng số câu hỏi:</span>
+                                                                <span class="stat-value">{{ namData?.tong_hop?.tong_so_cau_hoi || 0 }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="stat-item">
+                                                                <span class="stat-label">Tổng số đề thi:</span>
+                                                                <span class="stat-value">{{ namData?.tong_hop?.tong_so_de_thi || 0 }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
                                             <!-- Danh sách học kỳ -->
-                                            <div v-for="(hocKiData, hocKi) in namData.hoc_ki" :key="`${namHoc}_${hocKi}`" class="accordion-item ms-4 mt-2">
+                                            <div v-for="(hocKiData, hocKi) in namData.hoc_ki" :key="hocKi" class="accordion-item">
                                                 <!-- Học kỳ -->
                                                 <div class="accordion-header" @click="toggleHocKi(namHoc, hocKi)">
                                                     <div class="accordion-button" :class="{ 'collapsed': !expandedHocKi[`${namHoc}_${hocKi}`] }">
                                                         <i class="fas" :class="expandedHocKi[`${namHoc}_${hocKi}`] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                                                        <span class="ms-2">{{ hocKiData.ten }}</span>
+                                                        <span class="ms-2">Học kỳ: {{ hocKiData.ten }}</span>
                                                     </div>
                                                 </div>
                                                 
                                                 <!-- Nội dung của học kỳ -->
                                                 <div class="accordion-collapse" :class="{ 'show': expandedHocKi[`${namHoc}_${hocKi}`] }">
                                                     <div class="accordion-body">
+                                                        <!-- Tổng hợp học kỳ -->
+                                                        <div class="card mb-4">
+                                                            <div class="card-header bg-light">
+                                                                <h5 class="mb-0">{{ hocKiData.ten }}</h5>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <div class="row">
+                                                                    <div class="col-md-3">
+                                                                        <div class="stat-item">
+                                                                            <span class="stat-label">Tổng số giờ:</span>
+                                                                            <span class="stat-value">{{ hocKiData?.tong_hop?.tong_so_gio || 0 }}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <div class="stat-item">
+                                                                            <span class="stat-label">Tổng số giảng viên tham gia:</span>
+                                                                            <span class="stat-value">{{ hocKiData?.tong_hop?.tong_so_nguoi_tham_gia || 0 }}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <div class="stat-item">
+                                                                            <span class="stat-label">Tổng số học phần:</span>
+                                                                            <span class="stat-value">{{ hocKiData?.tong_hop?.tong_so_hoc_phan || 0 }}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <div class="stat-item">
+                                                                            <span class="stat-label">Tổng số câu hỏi:</span>
+                                                                            <span class="stat-value">{{ hocKiData?.tong_hop?.tong_so_cau_hoi || 0 }}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <div class="stat-item">
+                                                                            <span class="stat-label">Tổng số đề thi:</span>
+                                                                            <span class="stat-value">{{ hocKiData?.tong_hop?.tong_so_de_thi || 0 }}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
                                                         <!-- Danh sách khoa -->
-                                                        <div v-for="khoa in hocKiData.khoa" :key="`${namHoc}_${hocKi}_${khoa.id}`" class="accordion-item ms-4 mt-2">
+                                                        <div v-for="(khoa, khoaId) in hocKiData.khoa" :key="khoaId" class="accordion-item">
                                                             <!-- Khoa -->
-                                                            <div class="accordion-header" @click="toggleKhoa(namHoc, hocKi, khoa.id)">
-                                                                <div class="accordion-button" :class="{ 'collapsed': !expandedKhoa[`${namHoc}_${hocKi}_${khoa.id}`] }">
-                                                                    <i class="fas" :class="expandedKhoa[`${namHoc}_${hocKi}_${khoa.id}`] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                                                                    <span class="ms-2">{{ khoa.ten }}</span>
+                                                            <div class="accordion-header" @click="toggleKhoa(namHoc, hocKi, khoaId)">
+                                                                <div class="accordion-button" :class="{ 'collapsed': !expandedKhoa[`${namHoc}_${hocKi}_${khoaId}`] }">
+                                                                    <i class="fas" :class="expandedKhoa[`${namHoc}_${hocKi}_${khoaId}`] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                                                                    <span class="ms-2">Khoa: {{ khoa.ten }}</span>
                                                                 </div>
                                                             </div>
                                                             
                                                             <!-- Nội dung của khoa -->
-                                                            <div class="accordion-collapse" :class="{ 'show': expandedKhoa[`${namHoc}_${hocKi}_${khoa.id}`] }">
+                                                            <div class="accordion-collapse" :class="{ 'show': expandedKhoa[`${namHoc}_${hocKi}_${khoaId}`] }">
                                                                 <div class="accordion-body">
+                                                                    <!-- Tổng hợp khoa -->
+                                                                    <div class="card mb-4">
+                                                                        <div class="card-header bg-light">
+                                                                            <h5 class="mb-0">{{ khoa.ten }}</h5>
+                                                                        </div>
+                                                                        <div class="card-body">
+                                                                            <div class="row">
+                                                                                <div class="col-md-3">
+                                                                                    <div class="stat-item">
+                                                                                        <span class="stat-label">Tổng số giờ:</span>
+                                                                                        <span class="stat-value">{{ khoa?.tong_hop?.tong_so_gio || 0 }}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <div class="stat-item">
+                                                                                        <span class="stat-label">Tổng số giảng viên tham gia:</span>
+                                                                                        <span class="stat-value">{{ khoa?.tong_hop?.tong_so_nguoi_tham_gia || 0 }}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <div class="stat-item">
+                                                                                        <span class="stat-label">Tổng số học phần:</span>
+                                                                                        <span class="stat-value">{{ khoa?.tong_hop?.tong_so_hoc_phan || 0 }}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <div class="stat-item">
+                                                                                        <span class="stat-label">Tổng số câu hỏi:</span>
+                                                                                        <span class="stat-value">{{ khoa?.tong_hop?.tong_so_cau_hoi || 0 }}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <div class="stat-item">
+                                                                                        <span class="stat-label">Tổng số đề thi:</span>
+                                                                                        <span class="stat-value">{{ khoa?.tong_hop?.tong_so_de_thi || 0 }}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    
                                                                     <!-- Danh sách bộ môn -->
-                                                                    <div v-for="bomon in khoa.bomon" :key="`${namHoc}_${hocKi}_${khoa.id}_${bomon.id}`" class="accordion-item ms-4 mt-2">
+                                                                    <div v-for="(bomon, bomonId) in khoa.bomon" :key="bomonId" class="accordion-item">
                                                                         <!-- Bộ môn -->
-                                                                        <div class="accordion-header" @click="toggleBoMon(namHoc, hocKi, khoa.id, bomon.id)">
-                                                                            <div class="accordion-button" :class="{ 'collapsed': !expandedBoMon[`${namHoc}_${hocKi}_${khoa.id}_${bomon.id}`] }">
-                                                                                <i class="fas" :class="expandedBoMon[`${namHoc}_${hocKi}_${khoa.id}_${bomon.id}`] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                                                                                <span class="ms-2">{{ bomon.ten }}</span>
+                                                                        <div class="accordion-header" @click="toggleBoMon(namHoc, hocKi, khoaId, bomonId)">
+                                                                            <div class="accordion-button" :class="{ 'collapsed': !expandedBoMon[`${namHoc}_${hocKi}_${khoaId}_${bomonId}`] }">
+                                                                                <i class="fas" :class="expandedBoMon[`${namHoc}_${hocKi}_${khoaId}_${bomonId}`] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                                                                                <span class="ms-2">Bộ môn: {{ bomon.ten }}</span>
                                                                             </div>
                                                                         </div>
                                                                         
-                                                                        <!-- Chi tiết của bộ môn -->
-                                                                        <div class="accordion-collapse" :class="{ 'show': expandedBoMon[`${namHoc}_${hocKi}_${khoa.id}_${bomon.id}`] }">
+                                                                        <!-- Nội dung của bộ môn -->
+                                                                        <div class="accordion-collapse" :class="{ 'show': expandedBoMon[`${namHoc}_${hocKi}_${khoaId}_${bomonId}`] }">
                                                                             <div class="accordion-body">
+                                                                                <!-- Tổng hợp bộ môn -->
+                                                                                <div class="card mb-4">
+                                                                                    <div class="card-header bg-light">
+                                                                                        <h5 class="mb-0">{{ bomon.ten }}</h5>
+                                                                                    </div>
+                                                                                    <div class="card-body">
+                                                                                        <div class="row">
+                                                                                            <div class="col-md-3">
+                                                                                                <div class="stat-item">
+                                                                                                    <span class="stat-label">Tổng số giờ:</span>
+                                                                                                    <span class="stat-value">{{ bomon?.tong_hop?.tong_so_gio || 0 }}</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-md-3">
+                                                                                                <div class="stat-item">
+                                                                                                    <span class="stat-label">Tổng số giảng viên tham gia:</span>
+                                                                                                    <span class="stat-value">{{ bomon?.tong_hop?.tong_so_nguoi_tham_gia || 0 }}</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-md-3">
+                                                                                                <div class="stat-item">
+                                                                                                    <span class="stat-label">Tổng số học phần:</span>
+                                                                                                    <span class="stat-value">{{ bomon?.tong_hop?.tong_so_hoc_phan || 0 }}</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-md-3">
+                                                                                                <div class="stat-item">
+                                                                                                    <span class="stat-label">Tổng số câu hỏi:</span>
+                                                                                                    <span class="stat-value">{{ bomon?.tong_hop?.tong_so_cau_hoi || 0 }}</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div class="col-md-3">
+                                                                                                <div class="stat-item">
+                                                                                                    <span class="stat-label">Tổng số đề thi:</span>
+                                                                                                    <span class="stat-value">{{ bomon?.tong_hop?.tong_so_de_thi || 0 }}</span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                
+                                                                                <!-- Bảng chi tiết -->
                                                                                 <div class="table-responsive">
                                                                                     <table class="table table-hover">
                                                                                         <thead>
@@ -285,21 +540,24 @@ const exportExcel = () => {
                                                                                                 <th>Hình thức thi</th>
                                                                                                 <th>Loại ngân hàng</th>
                                                                                                 <th>Số lượng</th>
+                                                                                                <th>Trạng thái</th>
                                                                                             </tr>
                                                                                         </thead>
                                                                                         <tbody>
-                                                                                            <tr v-for="(chitiet, index) in bomon.chitiet" :key="chitiet.id">
+                                                                                            <tr v-for="(chitiet, index) in bomon.chitiet" :key="index">
                                                                                                 <td>{{ index + 1 }}</td>
-                                                                                                <td>{{ chitiet.hoc_phan }}</td>
-                                                                                                <td>{{ chitiet.giang_vien }}</td>
-                                                                                                <td>{{ chitiet.nguoi_phan_bien }}</td>
-                                                                                                <td>{{ chitiet.so_gio }}</td>
-                                                                                                <td>{{ chitiet.hinh_thuc_thi }}</td>
-                                                                                                <td>{{ chitiet.loai_ngan_hang }}</td>
-                                                                                                <td>{{ chitiet.so_luong }}</td>
-                                                                                            </tr>
-                                                                                            <tr v-if="!bomon.chitiet || bomon.chitiet.length === 0">
-                                                                                                <td colspan="8" class="text-center">Không có dữ liệu chi tiết</td>
+                                                                                                <td>{{ chitiet?.hoc_phan || '' }}</td>
+                                                                                                <td>{{ chitiet?.giang_vien || '' }}</td>
+                                                                                                <td>{{ chitiet?.nguoi_phan_bien || '' }}</td>
+                                                                                                <td>{{ chitiet?.so_gio || 0 }}</td>
+                                                                                                <td>{{ chitiet?.hinh_thuc_thi || '' }}</td>
+                                                                                                <td>{{ chitiet?.loai_ngan_hang || '' }}</td>
+                                                                                                <td>{{ chitiet?.so_luong || 0 }}</td>
+                                                                                                <td>
+                                                                                                    <span :class="getStatusClass(chitiet?.trang_thai)">
+                                                                                                        {{ getStatusText(chitiet?.trang_thai) }}
+                                                                                                    </span>
+                                                                                                </td>
                                                                                             </tr>
                                                                                         </tbody>
                                                                                     </table>
@@ -307,23 +565,11 @@ const exportExcel = () => {
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    
-                                                                    <div v-if="Object.keys(khoa.bomon).length === 0" class="text-center py-3">
-                                                                        <p class="text-muted">Không có bộ môn nào</p>
-                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        
-                                                        <div v-if="Object.keys(hocKiData.khoa).length === 0" class="text-center py-3">
-                                                            <p class="text-muted">Không có khoa nào</p>
-                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            
-                                            <div v-if="Object.keys(namData.hoc_ki).length === 0" class="text-center py-3">
-                                                <p class="text-muted">Không có học kỳ nào</p>
                                             </div>
                                         </div>
                                     </div>
@@ -356,23 +602,47 @@ const exportExcel = () => {
     border-color: #dee2e6;
 }
 
-.table > :not(caption) > * > * {
-    padding: 0.5rem;
-    border-bottom-width: 1px;
-}
-
-.btn-light {
+.stat-item {
+    padding: 10px;
+    border-radius: 5px;
     background-color: #f8f9fa;
-    border-color: #f8f9fa;
+    margin-bottom: 10px;
 }
 
-.btn-light:hover {
-    background-color: #e2e6ea;
-    border-color: #dae0e5;
+.stat-label {
+    font-weight: 600;
+    color: #6c757d;
+    margin-right: 10px;
 }
 
-.bg-success-tb {
-    background-color: #5cb85c;
+.stat-value {
+    font-weight: 700;
+    color: #212529;
+}
+
+.badge {
+    font-size: 0.875rem;
+    padding: 0.35em 0.65em;
+}
+
+.animated-fade-in {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
 }
 
 .accordion-custom .accordion-item {
@@ -397,6 +667,7 @@ const exportExcel = () => {
     border: none;
     width: 100%;
     text-align: left;
+    transition: all 0.3s ease;
 }
 
 .accordion-custom .accordion-button.collapsed {
@@ -410,7 +681,7 @@ const exportExcel = () => {
 }
 
 .accordion-custom .accordion-collapse {
-    transition: all 0.2s ease;
+    transition: max-height 0.3s ease-out;
     max-height: 0;
     overflow: hidden;
 }
@@ -421,25 +692,5 @@ const exportExcel = () => {
 
 .accordion-custom .accordion-body {
     padding: 1rem;
-}
-
-.animated-fade-in {
-    animation: fadeIn 0.5s;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.form-select:focus,
-.form-control:focus {
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-.form-label {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
 }
 </style> 

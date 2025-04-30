@@ -24,7 +24,7 @@ class ThongKeController extends Controller
     public function index(Request $request)
     {
         // Lấy danh sách các khoa, bộ môn, năm học, học kỳ để hiển thị trong bộ lọc
-        $khoas = Khoa::where('able', true)->get();
+        $khoas = Khoa::where('able', true)->where('id', '!=', 'admin')->where('id', '!=', 'DBCL')->get();
         
         $bomons = BoMon::with('khoa')
             ->where('able', true)
@@ -75,7 +75,8 @@ class ThongKeController extends Controller
                 'boMon.khoa',
                 'ctDSDangKies',
                 'ctDSDangKies.hocPhan',
-                'ctDSDangKies.vienChuc'
+                'ctDSDangKies.dsGVBienSoans.vienChuc',
+                'ctDSDangKies.bienBanHop.dsHop.vienChuc'
             ])
             ->where('able', true);
             
@@ -104,6 +105,29 @@ class ThongKeController extends Controller
         // Tổ chức dữ liệu theo cấu trúc yêu cầu: Năm học -> Học kỳ -> Khoa -> Bộ môn -> Chi tiết
         $thongke = [];
         
+        // Biến thống kê tổng hợp
+        $tong_hop = [
+            'tong_so_gio' => 0,
+            'tong_so_nguoi_tham_gia' => 0,
+            'tong_so_cau_hoi' => 0,
+            'tong_so_de_thi' => 0,
+            'tong_so_hoc_phan' => 0
+        ];
+
+        // Mảng lưu ID học phần cho từng cấp
+        $ds_id_hoc_phan_tong_hop = [];
+        $ds_id_hoc_phan_nam = [];
+        $ds_id_hoc_phan_hoc_ki = [];
+        $ds_id_hoc_phan_khoa = [];
+        $ds_id_hoc_phan_bomon = [];
+        
+        // Mảng lưu ID người tham gia cho từng cấp
+        $ds_id_tham_gia_tong_hop = [];
+        $ds_id_tham_gia_nam = [];
+        $ds_id_tham_gia_hoc_ki = [];
+        $ds_id_tham_gia_khoa = [];
+        $ds_id_tham_gia_bomon = [];
+        
         foreach ($dsdangky as $ds) {
             $nam_hoc = $ds->nam_hoc;
             $hoc_ki = $ds->hoc_ki;
@@ -116,72 +140,192 @@ class ThongKeController extends Controller
             if (!isset($thongke[$nam_hoc])) {
                 $thongke[$nam_hoc] = [
                     'ten' => $nam_hoc,
-                    'hoc_ki' => []
+                    'hoc_ki' => [],
+                    'tong_hop' => [
+                        'tong_so_gio' => 0,
+                        'tong_so_nguoi_tham_gia' => 0,
+                        'tong_so_cau_hoi' => 0,
+                        'tong_so_de_thi' => 0,
+                        'tong_so_hoc_phan' => 0
+                    ]
                 ];
+                $ds_id_tham_gia_nam[$nam_hoc] = [];
+                $ds_id_hoc_phan_nam[$nam_hoc] = [];
             }
             
             if (!isset($thongke[$nam_hoc]['hoc_ki'][$hoc_ki])) {
                 $thongke[$nam_hoc]['hoc_ki'][$hoc_ki] = [
                     'ten' => 'Học kỳ ' . $hoc_ki,
-                    'khoa' => []
+                    'khoa' => [],
+                    'tong_hop' => [
+                        'tong_so_gio' => 0,
+                        'tong_so_nguoi_tham_gia' => 0,
+                        'tong_so_cau_hoi' => 0,
+                        'tong_so_de_thi' => 0,
+                        'tong_so_hoc_phan' => 0
+                    ]
                 ];
+                $ds_id_tham_gia_hoc_ki["{$nam_hoc}_{$hoc_ki}"] = [];
+                $ds_id_hoc_phan_hoc_ki["{$nam_hoc}_{$hoc_ki}"] = [];
             }
             
             if (!isset($thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id])) {
                 $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id] = [
                     'ten' => $khoa_name,
                     'id' => $khoa_id,
-                    'bomon' => []
+                    'bomon' => [],
+                    'tong_hop' => [
+                        'tong_so_gio' => 0,
+                        'tong_so_nguoi_tham_gia' => 0,
+                        'tong_so_cau_hoi' => 0,
+                        'tong_so_de_thi' => 0,
+                        'tong_so_hoc_phan' => 0
+                    ]
                 ];
+                $ds_id_tham_gia_khoa["{$nam_hoc}_{$hoc_ki}_{$khoa_id}"] = [];
+                $ds_id_hoc_phan_khoa["{$nam_hoc}_{$hoc_ki}_{$khoa_id}"] = [];
             }
             
             if (!isset($thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['bomon'][$bomon_id])) {
                 $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['bomon'][$bomon_id] = [
                     'ten' => $bomon_name,
                     'id' => $bomon_id,
-                    'chitiet' => []
+                    'chitiet' => [],
+                    'tong_hop' => [
+                        'tong_so_gio' => 0,
+                        'tong_so_nguoi_tham_gia' => 0,
+                        'tong_so_cau_hoi' => 0,
+                        'tong_so_de_thi' => 0,
+                        'tong_so_hoc_phan' => 0
+                    ]
                 ];
+                $ds_id_tham_gia_bomon["{$nam_hoc}_{$hoc_ki}_{$khoa_id}_{$bomon_id}"] = [];
+                $ds_id_hoc_phan_bomon["{$nam_hoc}_{$hoc_ki}_{$khoa_id}_{$bomon_id}"] = [];
             }
             
             // Thêm chi tiết đăng ký vào cấu trúc
             foreach ($ds->ctDSDangKies as $ct) {
-                if ($ct->able && $ct->trang_thai == 'Approved') {
+                if ($ct->able) {
                     // Lấy thông tin người phản biện từ biên bản họp
                     $nguoi_phan_bien = BienBanHop::where('id_ct_ds_dang_ky', $ct->id)
                         ->where('able', true)
                         ->with('dsHop.vienChuc')
                         ->get();
                     
-                    // Tính tổng số giờ của người phản biện
+                    // Tính tổng số giờ của người phản biện và lấy danh sách người phản biện
                     $tong_gio_phan_bien = 0;
                     $ds_nguoi_phan_bien = [];
+                    $ds_id_phan_bien = [];
                     
                     foreach ($nguoi_phan_bien as $bb) {
                         foreach ($bb->dsHop as $tg) {
-                            // Giả sử số giờ của người phản biện là field 'so_gio' trong dsHop
                             $gio_phan_bien = isset($tg->so_gio) ? $tg->so_gio : 0;
                             $tong_gio_phan_bien += $gio_phan_bien;
                             
                             // Thêm tên người phản biện kèm số giờ
                             $ds_nguoi_phan_bien[] = $tg->vienChuc->name . ' (' . $gio_phan_bien . ')';
+                            $ds_id_phan_bien[] = $tg->vienChuc->id;
                         }
                     }
                     
-                    // Tổng số giờ = số giờ của giảng viên + số giờ của người phản biện
-                    $tong_gio = $ct->so_gio + $tong_gio_phan_bien;
+                    // Lấy danh sách giảng viên biên soạn
+                    $tong_gio_bien_soan = 0;
+                    $ds_id_giang_vien = [];
+                    $ds_giang_vien = $ct->dsGVBienSoans->map(function($gvbs) use (&$tong_gio_bien_soan, &$ds_id_giang_vien) {
+                        $gio = $gvbs->so_gio ?? 0;
+                        $tong_gio_bien_soan += $gio;
+                        $ds_id_giang_vien[] = $gvbs->vienChuc->id;
+                        return $gvbs->vienChuc->name . ' (' . $gio . ')';
+                    })->join(', ');
+                    
+                    // Tổng số giờ = số giờ biên soạn + số giờ phản biện
+                    $tong_gio = $tong_gio_bien_soan + $tong_gio_phan_bien;
                     
                     // Chuỗi tên người phản biện
                     $nguoi_phan_bien_str = implode(', ', $ds_nguoi_phan_bien);
+                    
+                    // Tính số người tham gia không trùng lặp cho từng cấp
+                    $ds_id_tham_gia = array_unique(array_merge($ds_id_giang_vien, $ds_id_phan_bien));
+                    
+                    // Cập nhật danh sách ID người tham gia cho từng cấp
+                    $ds_id_tham_gia_tong_hop = array_unique(array_merge($ds_id_tham_gia_tong_hop, $ds_id_tham_gia));
+                    $ds_id_tham_gia_nam[$nam_hoc] = array_unique(array_merge($ds_id_tham_gia_nam[$nam_hoc], $ds_id_tham_gia));
+                    $ds_id_tham_gia_hoc_ki["{$nam_hoc}_{$hoc_ki}"] = array_unique(array_merge($ds_id_tham_gia_hoc_ki["{$nam_hoc}_{$hoc_ki}"], $ds_id_tham_gia));
+                    $ds_id_tham_gia_khoa["{$nam_hoc}_{$hoc_ki}_{$khoa_id}"] = array_unique(array_merge($ds_id_tham_gia_khoa["{$nam_hoc}_{$hoc_ki}_{$khoa_id}"], $ds_id_tham_gia));
+                    $ds_id_tham_gia_bomon["{$nam_hoc}_{$hoc_ki}_{$khoa_id}_{$bomon_id}"] = array_unique(array_merge($ds_id_tham_gia_bomon["{$nam_hoc}_{$hoc_ki}_{$khoa_id}_{$bomon_id}"], $ds_id_tham_gia));
+                    
+                    // Cập nhật danh sách ID học phần cho từng cấp
+                    $ds_id_hoc_phan_tong_hop[] = $ct->id_hoc_phan;
+                    $ds_id_hoc_phan_nam[$nam_hoc][] = $ct->id_hoc_phan;
+                    $ds_id_hoc_phan_hoc_ki["{$nam_hoc}_{$hoc_ki}"][] = $ct->id_hoc_phan;
+                    $ds_id_hoc_phan_khoa["{$nam_hoc}_{$hoc_ki}_{$khoa_id}"][] = $ct->id_hoc_phan;
+                    $ds_id_hoc_phan_bomon["{$nam_hoc}_{$hoc_ki}_{$khoa_id}_{$bomon_id}"][] = $ct->id_hoc_phan;
+                    
+                    // Cập nhật thống kê tổng hợp bộ môn
+                    $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['bomon'][$bomon_id]['tong_hop']['tong_so_gio'] += $tong_gio;
+                    $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['bomon'][$bomon_id]['tong_hop']['tong_so_nguoi_tham_gia'] = count($ds_id_tham_gia_bomon["{$nam_hoc}_{$hoc_ki}_{$khoa_id}_{$bomon_id}"]);
+                    $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['bomon'][$bomon_id]['tong_hop']['tong_so_hoc_phan'] = count(array_unique($ds_id_hoc_phan_bomon["{$nam_hoc}_{$hoc_ki}_{$khoa_id}_{$bomon_id}"]));
+                    
+                    if ($ct->loai_ngan_hang == 1) {
+                        $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['bomon'][$bomon_id]['tong_hop']['tong_so_cau_hoi'] += $ct->so_luong;
+                    } else {
+                        $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['bomon'][$bomon_id]['tong_hop']['tong_so_de_thi'] += $ct->so_luong;
+                    }
+                    
+                    // Cập nhật thống kê cấp khoa
+                    $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['tong_hop']['tong_so_gio'] += $tong_gio;
+                    $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['tong_hop']['tong_so_nguoi_tham_gia'] = count($ds_id_tham_gia_khoa["{$nam_hoc}_{$hoc_ki}_{$khoa_id}"]);
+                    $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['tong_hop']['tong_so_hoc_phan'] = count(array_unique($ds_id_hoc_phan_khoa["{$nam_hoc}_{$hoc_ki}_{$khoa_id}"]));
+                    
+                    if ($ct->loai_ngan_hang == 1) {
+                        $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['tong_hop']['tong_so_cau_hoi'] += $ct->so_luong;
+                    } else {
+                        $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['tong_hop']['tong_so_de_thi'] += $ct->so_luong;
+                    }
+                    
+                    // Cập nhật thống kê cấp học kỳ
+                    $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['tong_hop']['tong_so_gio'] += $tong_gio;
+                    $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['tong_hop']['tong_so_nguoi_tham_gia'] = count($ds_id_tham_gia_hoc_ki["{$nam_hoc}_{$hoc_ki}"]);
+                    $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['tong_hop']['tong_so_hoc_phan'] = count(array_unique($ds_id_hoc_phan_hoc_ki["{$nam_hoc}_{$hoc_ki}"]));
+                    
+                    if ($ct->loai_ngan_hang == 1) {
+                        $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['tong_hop']['tong_so_cau_hoi'] += $ct->so_luong;
+                    } else {
+                        $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['tong_hop']['tong_so_de_thi'] += $ct->so_luong;
+                    }
+                    
+                    // Cập nhật thống kê cấp năm học
+                    $thongke[$nam_hoc]['tong_hop']['tong_so_gio'] += $tong_gio;
+                    $thongke[$nam_hoc]['tong_hop']['tong_so_nguoi_tham_gia'] = count($ds_id_tham_gia_nam[$nam_hoc]);
+                    $thongke[$nam_hoc]['tong_hop']['tong_so_hoc_phan'] = count(array_unique($ds_id_hoc_phan_nam[$nam_hoc]));
+                    
+                    if ($ct->loai_ngan_hang == 1) {
+                        $thongke[$nam_hoc]['tong_hop']['tong_so_cau_hoi'] += $ct->so_luong;
+                    } else {
+                        $thongke[$nam_hoc]['tong_hop']['tong_so_de_thi'] += $ct->so_luong;
+                    }
+                    
+                    // Cập nhật thống kê tổng hợp chung
+                    $tong_hop['tong_so_gio'] += $tong_gio;
+                    $tong_hop['tong_so_nguoi_tham_gia'] = count($ds_id_tham_gia_tong_hop);
+                    $tong_hop['tong_so_hoc_phan'] = count(array_unique($ds_id_hoc_phan_tong_hop));
+                    
+                    if ($ct->loai_ngan_hang == 1) {
+                        $tong_hop['tong_so_cau_hoi'] += $ct->so_luong;
+                    } else {
+                        $tong_hop['tong_so_de_thi'] += $ct->so_luong;
+                    }
                         
                     $thongke[$nam_hoc]['hoc_ki'][$hoc_ki]['khoa'][$khoa_id]['bomon'][$bomon_id]['chitiet'][] = [
                         'id' => $ct->id,
                         'hoc_phan' => $ct->hocPhan->ten,
-                        'giang_vien' => $ct->vienChuc->name . ' (' . $ct->so_gio . ')',
+                        'giang_vien' => $ds_giang_vien,
                         'nguoi_phan_bien' => $nguoi_phan_bien_str,
                         'so_gio' => $tong_gio,
                         'hinh_thuc_thi' => $ct->hinh_thuc_thi,
                         'loai_ngan_hang' => $ct->loai_ngan_hang == 1 ? 'Ngân hàng câu hỏi' : 'Ngân hàng đề thi',
-                        'so_luong' => $ct->so_luong
+                        'so_luong' => $ct->so_luong,
+                        'trang_thai' => $ct->trang_thai
                     ];
                 }
             }
@@ -200,6 +344,9 @@ class ThongKeController extends Controller
                 }
             }
         }
+        
+        // Thêm thống kê tổng hợp vào kết quả
+        $thongke['tong_hop'] = $tong_hop;
         
         return $thongke;
     }

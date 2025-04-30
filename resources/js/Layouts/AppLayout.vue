@@ -77,6 +77,8 @@ onUnmounted(() => {
         <li><i class="fas fa-building"></i> <Link :href="route('admin.gioquydoi.index')">Giờ quy đổi</Link></li>
         <li><i class="fas fa-users"></i> <Link :href="route('admin.user.index')">Users</Link></li>
         <li><i class="fas fa-chart-bar"></i> <Link :href="route('admin.thongke.index')">Thống kê biên soạn</Link></li>
+        <li><i class="fas fa-chart-bar"></i> <Link :href="route('admin.thongke_giang_vien.index')">Thống kê giảng viên</Link></li>
+        <li><i class="fas fa-chart-bar"></i> <Link :href="route('admin.thongkehocphan.index')">Thống kê học phần</Link></li>
       </ul>
 
       <!-- Giảng viên Menu -->
@@ -92,6 +94,8 @@ onUnmounted(() => {
         <li><i class="fas fa-users"></i> <Link :href="route('quality.dsdangky.index')">Danh sách đăng ký</Link></li>
         <li><i class="fas fa-users"></i> <Link :href="route('quality.dsbienban.index')">Danh sách biên bản họp cấp Bộ môn</Link></li>
         <li><i class="fas fa-chart-bar"></i> <Link :href="route('quality.thongke.index')">Thống kê biên soạn</Link></li>
+        <li><i class="fas fa-chart-bar"></i> <Link :href="route('quality.thongke_giang_vien.index')">Thống kê giảng viên</Link></li>
+        <li><i class="fas fa-chart-bar"></i> <Link :href="route('quality.thongkehocphan.index')">Thống kê học phần</Link></li>
       </ul>
 
       <!-- Trưởng Khoa Menu -->

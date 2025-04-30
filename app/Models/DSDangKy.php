@@ -20,6 +20,7 @@ class DSDangKy extends Model
 
 
     public function boMon()
+
     {
         return $this->belongsTo(BoMon::class, 'id_bo_mon');
     }
@@ -29,3 +30,4 @@ class DSDangKy extends Model
         return $this->hasMany(CTDSDangKy::class, 'id_ds_dang_ky');
     }
 }
+
