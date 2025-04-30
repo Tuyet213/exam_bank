@@ -54,6 +54,7 @@ class ThongKeHocPhanController extends Controller
         $thongke_data = $this->layDuLieuThongKe($khoa_id, $bomon_id, $hoc_ki, $nam_hoc, $bac_dao_tao);
 
         return Inertia::render('QualityOffice/ThongKeHocPhan/Index', [
+            'role' => $role,
             'khoas' => $khoas,
             'bomons' => $bomons,
             'ds_nam_hoc' => $ds_nam_hoc,
