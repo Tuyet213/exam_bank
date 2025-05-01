@@ -1,13 +1,18 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import {useForm } from "@inertiajs/vue3";
+import { ref, computed } from 'vue';
 
-const { bacdaotaos, bomons } = defineProps({
+const { bacdaotaos, bomons, khoas } = defineProps({
     bacdaotaos: {
         type: Array,
         required: true,
     },
     bomons: {
+        type: Array,
+        required: true,
+    },
+    khoas: {
         type: Array,
         required: true,
     },
@@ -17,14 +22,72 @@ const form = useForm({
     id:"",
     ten: "",
     id_bac_dao_tao: "",
+    id_khoa: "",
     id_bo_mon: "",
     so_tin_chi: "",
+    chuan_dau_ras: [],
+    chuongs: []
 });
 
+const newChuanDauRa = ref({
+    ten: "",
+    noi_dung: ""
+});
+
+const newChuong = ref({
+    ten: "",
+    chuan_dau_ras: []
+});
+
+const selectedChuanDauRa = ref("");
+
+// Lọc bộ môn theo khoa
+const filteredBomons = computed(() => {
+    if (!form.id_khoa) return [];
+    return bomons.filter(bomon => bomon.id_khoa === form.id_khoa);
+});
+
+const addChuanDauRa = () => {
+    if (newChuanDauRa.value.ten && newChuanDauRa.value.noi_dung) {
+        form.chuan_dau_ras.push({...newChuanDauRa.value});
+        newChuanDauRa.value = { ten: "", noi_dung: "" };
+    }
+};
+
+const removeChuanDauRa = (index) => {
+    form.chuan_dau_ras.splice(index, 1);
+};
+
+// Thêm hàm để xóa chuẩn đầu ra khỏi chương
+const removeChuanDauRaFromChuong = (chuongIndex, cdrId) => {
+    const cdrIndexInArray = form.chuongs[chuongIndex].chuan_dau_ras.indexOf(cdrId);
+    if (cdrIndexInArray > -1) {
+        form.chuongs[chuongIndex].chuan_dau_ras.splice(cdrIndexInArray, 1);
+    }
+};
+
+const addChuong = () => {
+    form.chuongs.push({
+        ten: "",
+        chuan_dau_ras: []
+    });
+};
+
+const removeChuong = (index) => {
+    form.chuongs.splice(index, 1);
+};
+
+const addChuanDauRaToChuong = (chuongIndex) => {
+    if (selectedChuanDauRa.value && !form.chuongs[chuongIndex].chuan_dau_ras.includes(selectedChuanDauRa.value)) {
+        form.chuongs[chuongIndex].chuan_dau_ras.push(selectedChuanDauRa.value);
+        selectedChuanDauRa.value = "";
+    }
+};
+
 const submit = () => {
-        form.post(route("admin.hocphan.store"), {
+    form.post(route("admin.hocphan.store"), {
         onSuccess: () => {
-            alert(" Thêm Học phần thành công!");
+            alert("Thêm Học phần thành công!");
             form.reset();
         },
         onError: (errors) => {
@@ -70,33 +133,131 @@ const submit = () => {
                                 </small>
                             </div>  
                             <div class="mb-3">
-                                    <label for="so_tin_chi" class="form-label">Số tín chỉ</label>
-                                    <input type="number" class="form-control" id="so_tin_chi" v-model="form.so_tin_chi" required min="1" step="1">
-                                    <small v-if="form.errors.so_tin_chi" class="text-danger">
-                                        {{ form.errors.so_tin_chi }}
-                                    </small>
-                                </div>
+                                <label for="so_tin_chi" class="form-label">Số tín chỉ</label>
+                                <input type="number" class="form-control" id="so_tin_chi" v-model="form.so_tin_chi" required min="1" step="1">
+                                <small v-if="form.errors.so_tin_chi" class="text-danger">
+                                    {{ form.errors.so_tin_chi }}
+                                </small>
+                            </div>
 
                             <div class="row">
-                                <div class="mb-3 col-md-6 col-sm-12">
+                                <div class="mb-3 col-md-4 col-sm-12">
                                     <label for="id_bac_dao_tao" class="form-label">Bậc đào tạo</label>
                                     <select v-model="form.id_bac_dao_tao" id="id_bac_dao_tao" class="form-control" :class="{ 'has-value': form.id_bac_dao_tao }" required>
                                         <option v-for="bacdaotao in bacdaotaos" :key="bacdaotao.id" :value="bacdaotao.id">{{ bacdaotao.ten }}</option>
                                     </select>
                                     <small v-if="form.errors.id_bac_dao_tao" class="text-danger">
                                         {{ form.errors.id_bac_dao_tao }}
-                                        </small>
+                                    </small>
                                 </div>
-                                <div class="mb-3 col-md-6 col-sm-12">
+                                <div class="mb-3 col-md-4 col-sm-12">
+                                    <label for="id_khoa" class="form-label">Khoa</label>
+                                    <select v-model="form.id_khoa" id="id_khoa" class="form-control" :class="{ 'has-value': form.id_khoa }" required>
+                                        <option v-for="khoa in khoas" :key="khoa.id" :value="khoa.id">{{ khoa.ten }}</option>
+                                    </select>
+                                    <small v-if="form.errors.id_khoa" class="text-danger">
+                                        {{ form.errors.id_khoa }}
+                                    </small>
+                                </div>
+                                <div class="mb-3 col-md-4 col-sm-12">
                                     <label for="id_bo_mon" class="form-label">Bộ môn</label>
                                     <select v-model="form.id_bo_mon" id="id_bo_mon" class="form-control" :class="{ 'has-value': form.id_bo_mon }" required>
-                                        <option v-for="bomon in bomons" :key="bomon.id" :value="bomon.id">{{ bomon.ten }}</option>
+                                        <option v-for="bomon in filteredBomons" :key="bomon.id" :value="bomon.id">{{ bomon.ten }}</option>
                                     </select>
                                     <small v-if="form.errors.id_bo_mon" class="text-danger">
                                         {{ form.errors.id_bo_mon }}
                                     </small>
                                 </div>
                             </div>
+
+                            <!-- Quản lý chuẩn đầu ra -->
+                            <div class="mb-4">
+                                <h4 class="mb-3">Chuẩn đầu ra</h4>
+                                <div class="row mb-3">
+                                    <div class="col-md-5">
+                                        <input type="text" class="form-control" v-model="newChuanDauRa.ten" placeholder="Tên chuẩn đầu ra">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <input type="text" class="form-control" v-model="newChuanDauRa.noi_dung" placeholder="Nội dung">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-primary w-100" @click="addChuanDauRa">Thêm</button>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Tên chuẩn đầu ra</th>
+                                                <th>Nội dung</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(cdr, index) in form.chuan_dau_ras" :key="index">
+                                                <td>{{ cdr.ten }}</td>
+                                                <td>{{ cdr.noi_dung }}</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm" @click="removeChuanDauRa(index)">Xóa</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Quản lý chương -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="mb-0">Chương</h4>
+                                    <button type="button" class="btn btn-primary" @click="addChuong">Thêm chương</button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th width="30%">Tên chương</th>
+                                                <th>Chuẩn đầu ra</th>
+                                                <th width="10%">Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(chuong, chuongIndex) in form.chuongs" :key="chuongIndex">
+                                                <td>
+                                                    <input type="text" class="form-control" v-model="chuong.ten" placeholder="Nhập tên chương">
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        <div v-for="noi_dung in chuong.chuan_dau_ras" :key="noi_dung" 
+                                                            class="badge bg-primary d-flex align-items-center">
+                                                            {{ form.chuan_dau_ras.find(cdr => cdr.noi_dung == noi_dung)?.ten }}
+                                                            <button type="button" class="btn btn-link text-white p-0 ms-2"
+                                                                @click="removeChuanDauRaFromChuong(chuongIndex, noi_dung)">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <select class="form-control" v-model="selectedChuanDauRa" @change="addChuanDauRaToChuong(chuongIndex)">
+                                                            <option value="">Chọn chuẩn đầu ra</option>
+                                                            <option v-for="(cdr, index) in form.chuan_dau_ras" 
+                                                                :key="index" 
+                                                                :value="cdr.noi_dung"
+                                                                :disabled="chuong.chuan_dau_ras.includes(cdr.noi_dung)">
+                                                                {{ cdr.ten }}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm" @click="removeChuong(chuongIndex)">Xóa</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
                             <div class="text-end">
                                 <button type="submit" class="btn btn-success font-weight-bold">Lưu</button>
                             </div>

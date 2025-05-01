@@ -11,7 +11,8 @@ class ChuanDauRa extends Model
     protected $fillable = [
         'ten',
         'noi_dung',
-        'able'
+        'able',
+        'id_hoc_phan'
         // 'id_chuong'     
     ];
 
@@ -21,6 +22,10 @@ class ChuanDauRa extends Model
     // {
     //     return $this->belongsTo(Chuong::class, 'id_chuong');
     // }
+    public function hocPhan()
+    {
+        return $this->belongsTo(HocPhan::class, 'id_hoc_phan');
+    }
 
     public function maTrans()
     {

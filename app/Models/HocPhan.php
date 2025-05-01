@@ -62,4 +62,14 @@ class HocPhan extends Model
         return $this->hasMany(LopHocPhan::class, 'id_hoc_phan');
     }
 
+    public function chuanDauRas()
+    {
+        return $this->hasMany(ChuanDauRa::class, 'id_hoc_phan');
+    }
+
+    public function chuongChuanDauRas()
+    {
+        return $this->hasMany(ChuongChuanDauRa::class, 'id_hoc_phan');
+    }
+
 }
