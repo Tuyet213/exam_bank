@@ -8,6 +8,8 @@ class CTDSDangKy extends Model
 {
     use HasFactory;
 
+    protected $table = 'c_t_d_s_dang_kies';
+
     protected $fillable = [
         'id',
         'ten',

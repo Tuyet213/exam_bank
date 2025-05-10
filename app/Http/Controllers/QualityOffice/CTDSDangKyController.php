@@ -39,7 +39,7 @@ class CTDSDangKyController extends Controller
     public function updateStatusAll($dsdangky_id, Request $request)
     {
         $ctDSDangKies = CTDSDangKy::where('id_ds_dang_ky', $dsdangky_id)
-            ->whereIn('trang_thai', ['Draft', 'Rejected'])
+            ->whereIn('trang_thai', ['Draft', 'Rejected', 'Pending'])
             ->get();
 
         foreach ($ctDSDangKies as $ctDSDangKy) {
@@ -47,7 +47,7 @@ class CTDSDangKyController extends Controller
             $ctDSDangKy->save();
         }
 
-        return redirect()->back()->with('success', 'Cập nhật trạng thái tất cả thành công!');
+        return redirect()->route('quality.ctdsdangky.index', $dsdangky_id)->with('success', 'Cập nhật trạng thái tất cả thành công!');
     }
 
     public function submit($id_ds_dang_ky)

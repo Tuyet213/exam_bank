@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();         
             $table->string('ten', 255);
             $table->text('noi_dung');
+            $table->string('id_hoc_phan', 6);
+            $table->foreign('id_hoc_phan')->references('id')->on('hoc_phans')->onDelete('cascade');
             $table->boolean('able')->default(true);
         });
     }

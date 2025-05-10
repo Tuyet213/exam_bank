@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('id_cau_hoi')->constrained('cau_hois');
             $table->string('dap_an');
+            $table->decimal('diem', 4, 2)->default(0);
             $table->boolean('trang_thai');
             $table->boolean('able')->default(true);
             $table->timestamps();

@@ -39,10 +39,13 @@ class AuthenticatedSessionController extends Controller
             return redirect(route('quality.dsdangky.index'));
         }
         if($role->contains('Trưởng Bộ Môn')){
-            return redirect(route('quality.dsdangky.index'));
+            return redirect(route('tbm.dsdangky.index'));
         }
         if($role->contains('Trưởng Khoa')){
             return redirect(route('tk.dsbienban.index'));
+        }
+        if($role->contains('Giảng viên')){
+            return redirect(route('giangvien.cauhoi.import'));
         }
        // return redirect()->intended(route('dashboard', absolute: false));
     }

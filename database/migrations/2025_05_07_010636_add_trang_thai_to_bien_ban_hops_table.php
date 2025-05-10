@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('chuan_dau_ras', function (Blueprint $table) {
-            $table->foreign('id_hoc_phan')
-                  ->references('id')
-                  ->on('hoc_phans')
-                  ->onDelete('cascade');
+        Schema::table('bien_ban_hops', function (Blueprint $table) {
+            $table->string('trang_thai')->default('Draft');
         });
     }
 
@@ -24,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('chuan_dau_ras', function (Blueprint $table) {
-            $table->dropForeign(['id_hoc_phan']);
+        Schema::table('bien_ban_hops', function (Blueprint $table) {
+            $table->dropColumn('trang_thai');
         });
     }
 };

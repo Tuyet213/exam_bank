@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::table('hoc_phans', function (Blueprint $table) {
+            $table->string('id', 6)->change();
+        });
+
         Schema::table('chuan_dau_ras', function (Blueprint $table) {
-            $table->string('id_hoc_phan', 6)->change();
+            if (Schema::hasColumn('chuan_dau_ras', 'id_hoc_phan')) {
+                $table->string('id_hoc_phan', 6)->change();
+            }
         });
     }
 
@@ -21,8 +27,14 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('hoc_phans', function (Blueprint $table) {
+            $table->unsignedBigInteger('id')->change();
+        });
+
         Schema::table('chuan_dau_ras', function (Blueprint $table) {
-            $table->integer('id_hoc_phan')->change();
+            if (Schema::hasColumn('chuan_dau_ras', 'id_hoc_phan')) {
+                $table->unsignedBigInteger('id_hoc_phan')->change();
+            }
         });
     }
 }; 

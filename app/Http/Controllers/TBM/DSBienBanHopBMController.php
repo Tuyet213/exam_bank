@@ -29,6 +29,7 @@ class DSBienBanHopBMController extends Controller
     public function index(Request $request)
     {
         $query = BienBanHop::with([
+            'ctDSDangKy',
             'ctDSDangKy.dsDangKy.boMon',
             'ctDSDangKy.hocPhan',
             'ctDSDangKy.dsGVBienSoans.vienChuc'

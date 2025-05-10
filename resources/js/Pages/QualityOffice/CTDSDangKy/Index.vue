@@ -157,7 +157,7 @@ const handleSubmit = () => {
                                                 class="btn btn-sm btn-success me-1" 
                                                 @click="approve(ct.id)"
                                                 
-                                                :disabled="ct.trang_thai !== 'Rejected' && ct.trang_thai !== 'Draft'"
+                                                :disabled="ct.trang_thai !== 'Rejected' && ct.trang_thai !== 'Draft' && ct.trang_thai !== 'Pending'"
                                                 title="Duyệt"
                                             >
                                                 <i class="fas fa-check"></i>
@@ -165,7 +165,7 @@ const handleSubmit = () => {
                                             <button 
                                                 class="btn btn-sm btn-danger" 
                                                 @click="reject(ct.id)"
-                                                :disabled="ct.trang_thai !== 'Rejected' && ct.trang_thai !== 'Draft'"
+                                                :disabled="ct.trang_thai !== 'Rejected' && ct.trang_thai !== 'Draft' && ct.trang_thai !== 'Pending'"
                                                 title="Từ chối"
                                             >
                                                 <i class="fas fa-times"></i>

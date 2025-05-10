@@ -69,7 +69,7 @@ class UserController extends Controller
             'permissions' => 'array',
         ]);
 
-        try{
+        // try{
             $user = User::create([
                 'id' => $request->id,
                 'name' => $request->name,
@@ -92,9 +92,9 @@ class UserController extends Controller
             }
 
             return redirect()->route('admin.user.index');
-        }catch(\Exception $e){
-            return redirect()->route('admin.user.index');
-        }
+        // }catch(\Exception $e){
+        //     return redirect()->route('admin.user.index');
+        // }
     }
 
     public function edit($id)

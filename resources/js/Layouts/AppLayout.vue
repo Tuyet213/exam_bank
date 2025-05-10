@@ -65,6 +65,8 @@ onUnmounted(() => {
       </div>
 
       <!-- Admin Menu -->
+      
+      
       <ul v-if="role === 'admin'" class="sidebar-menu">
         <li><i class="fas fa-building"></i> <Link :href="route('admin.khoa.index')">Khoa</Link></li>
         <li><i class="fas fa-building"></i> <Link :href="route('admin.bomon.index')">Bộ môn</Link></li>
@@ -79,12 +81,15 @@ onUnmounted(() => {
         <li><i class="fas fa-chart-bar"></i> <Link :href="route('admin.thongke.index')">Thống kê biên soạn</Link></li>
         <li><i class="fas fa-chart-bar"></i> <Link :href="route('admin.thongke_giang_vien.index')">Thống kê giảng viên</Link></li>
         <li><i class="fas fa-chart-bar"></i> <Link :href="route('admin.thongkehocphan.index')">Thống kê học phần</Link></li>
+        <li><i class="fas fa-question-circle"></i> <Link :href="route('cauhoi.hocphan')">Danh sách câu hỏi</Link></li>
       </ul>
 
       <!-- Giảng viên Menu -->
       <ul v-else-if="role === 'gv'" class="sidebar-menu">
-        <li><i class="fas fa-book"></i> <Link :href="route('gv.dsdangky.index')">Đăng ký biên soạn</Link></li>
-        <li><i class="fas fa-file-alt"></i> <Link :href="route('gv.bienban.index')">Biên bản họp</Link></li>
+        <li><i class="fas fa-question-circle"></i> <Link :href="route('giangvien.cauhoi.index')">Danh sách câu hỏi</Link></li>
+        <li><i class="fas fa-plus-circle"></i> <Link :href="route('giangvien.cauhoi.create')">Tạo câu hỏi</Link></li>
+        <li><i class="fas fa-file-import"></i> <Link :href="route('giangvien.cauhoi.import')">Import câu hỏi</Link></li>
+        <li><i class="fas fa-question-circle"></i> <Link :href="route('cauhoi.hocphan')">Danh sách câu hỏi</Link></li>
       </ul>
       
       <!-- Nhân viên P.ĐBCL Menu -->
@@ -109,6 +114,7 @@ onUnmounted(() => {
         <li><i class="fas fa-users"></i> <Link :href="route('tbm.dsdangky.index')">Danh sách đăng ký biên soạn</Link></li>
         
         <li><i class="fas fa-users"></i> <Link :href="route('tbm.dsbienban.index')">Danh sách biên bản họp cấp bộ môn</Link></li>
+        <li><i class="fas fa-question-circle"></i> <Link :href="route('cauhoi.hocphan')">Danh sách câu hỏi</Link></li>
       </ul>
 
       <!-- Chung cho tất cả các menu -->

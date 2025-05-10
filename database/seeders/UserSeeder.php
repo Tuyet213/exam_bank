@@ -6,6 +6,8 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+
 class UserSeeder extends Seeder
 {
     /**
@@ -13,6 +15,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+       
         DB::table('users')->insert([
             [
                 'id' => 'admin',
@@ -71,24 +74,33 @@ class UserSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ]);
+        
+
+        // Gán role cho user
+        $admin = Role::findByName('Admin');
+        $teacher = Role::findByName('Giảng viên');
+        $qualitySurvey = Role::findByName('Nhân viên P.ĐBCL');
+        $TBM = Role::findByName('Trưởng Bộ Môn');
+        $TK = Role::findByName('Trưởng Khoa');
+
         DB::table('model_has_roles')->insert([
             [
-                'role_id' => '1',
+                'role_id' => $admin->id,
                 'model_type' => 'App\Models\User',
                 'model_id' => 'admin',
             ],
             [
-                'role_id' => '5',
+                'role_id' => $TK->id,
                 'model_type' => 'App\Models\User',
                 'model_id' => 'GV001'
             ],
             [
-                'role_id' => '4',
+                'role_id' => $TBM->id,
                 'model_type' => 'App\Models\User',
                 'model_id' => 'GV002'
             ],
             [
-                'role_id' => '3',
+                'role_id' => $qualitySurvey->id,
                 'model_type' => 'App\Models\User',
                 'model_id' => 'NV001'
             ],

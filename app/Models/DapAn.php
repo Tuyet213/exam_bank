@@ -13,13 +13,12 @@ class DapAn extends Model
         'id_cau_hoi',
         'dap_an',
         'trang_thai',
-        'able'
+        'able',
+        'diem',
     ];
 
     public function cauHoi()
     {
         return $this->belongsTo(CauHoi::class, 'id_cau_hoi');
     }
-    
-    
 }

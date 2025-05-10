@@ -26,6 +26,8 @@
     use App\Http\Controllers\TK\DSDangKyKhoaController;
     use App\Http\Controllers\QualityOffice\ThongKeGiangVienController as QualityThongKeGiangVienController;
     use App\Http\Controllers\QualityOffice\ThongKeHocPhanController;
+    use App\Http\Controllers\Giangvien\ImportCauHoiController;
+    use App\Http\Controllers\CauHoiController;
 
     // chỉ trả về component hoặc page vì nó tự import vào app.blade.php
 
@@ -291,5 +293,34 @@
         });
     });
 
+    // Routes cho giảng viên
+    Route::middleware(['auth', 'role:Giảng viên'])->name('giangvien.')->prefix('giangvien')->group(function () {
+        // Routes cho import câu hỏi
+        Route::get('/cauhoi/import', [ImportCauHoiController::class, 'index'])->name('cauhoi.import');
+        Route::post('/cauhoi/import', [ImportCauHoiController::class, 'import'])->name('cauhoi.import.store');
+    });
+
+    Route::prefix('cauhoi')->middleware(['auth'])->name('cauhoi.')->group(function () {
+        // Danh sách học phần tham gia biên soạn
+        Route::get('/hocphan', [CauHoiController::class, 'danhSachHocPhan'])->name('hocphan');
+        
+        // Danh sách câu hỏi của một học phần
+        Route::get('/hocphan/{id}', [CauHoiController::class, 'danhSachCauHoi'])->name('danhsach');
+        
+        // Tạo câu hỏi mới
+        Route::get('/tao/{id}', [CauHoiController::class, 'tao'])->name(name: 'tao');
+        Route::post('/luu', [CauHoiController::class, 'luu'])->name('luu');
+        Route::get('/import/{id}', [CauHoiController::class, 'import'])->name('import');
+        Route::post('/import/upload', [CauHoiController::class, 'upload'])->name('upload');
+        
+        // Thêm routes mới
+        Route::get('/chitiet/{id}', [CauHoiController::class, 'chiTiet'])->name('chitiet');
+        Route::get('/sua/{id}', [CauHoiController::class, 'sua'])->name('sua');
+        Route::post('/capnhat/{id}', [CauHoiController::class, 'capNhat'])->name('capnhat');
+        Route::delete('/xoa/{id}', [CauHoiController::class, 'xoa'])->name('xoa');
+        Route::get('/download-mau-import/{type}', [CauHoiController::class, 'downloadMauImport'])
+            ->name('download_mau_import');
+        Route::get('/download-template/{id}', [CauHoiController::class, 'downloadTemplate'])->name('download_template');
+    });
 
     require __DIR__.'/auth.php';
