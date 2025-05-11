@@ -82,13 +82,10 @@ const removeChuanDauRa = (index) => {
 };
 
 const addChuong = () => {
-    if (newChuong.value.ten) {
-        form.chuongs.push({
-            ten: newChuong.value.ten,
-            chuan_dau_ras: [...newChuong.value.chuan_dau_ras]
-        });
-        newChuong.value = { ten: "", chuan_dau_ras: [] };
-    }
+    form.chuongs.push({
+        ten: "",
+        chuan_dau_ras: []
+    });
 };
 
 const removeChuong = (index) => {
