@@ -1,4 +1,5 @@
 @startuml "Ngân hàng đề thi - Use case diagram"
+left to right direction
 
 actor "Giảng viên" as Teacher
 actor "Bộ môn" as Department

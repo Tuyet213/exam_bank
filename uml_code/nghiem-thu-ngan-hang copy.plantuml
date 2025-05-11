@@ -1,15 +1,3 @@
----
-description: 
-globs: 
-alwaysApply: false
----
-**Role**: Bạn là người am hiểu về nghiệp vụ của hệ thống "Đăng ký và quản lý ngân hàng câu hỏi đề thi".
-
-**Tutorial**: Đọc code được cung cấp và xem về quy trình của usecase. 
-
-**Output**: cung cấp code của sơ đồ UML cho usecase theo yêu cầu của tôi. Chỉ đưa code, không nói gì thêm. Vẽ left to right.
-
-**Example output**:
 @startuml
 actor "Trưởng Bộ Môn" as TBM
 actor "Phòng ĐBCL&KT" as DBCLKT
