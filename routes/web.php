@@ -199,6 +199,18 @@
         Route::get('/dsbienban/{id}/download', [DSBienBanHopBMController::class, 'download'])->name('tbm.dsbienban.download');
         Route::post('/dsbienban/{id}/send-notification', [DSBienBanHopBMController::class, 'sendNotification'])->name('tbm.dsbienban.send-notification');
         
+       
+        Route::get('matran/index', [\App\Http\Controllers\TBM\MatranController::class, 'index'])->name('tbm.matran.index');
+        Route::get('matran/create', [\App\Http\Controllers\TBM\MatranController::class, 'create'])->name('tbm.matran.create');
+        Route::post('matran', [\App\Http\Controllers\TBM\MatranController::class, 'store'])->name('tbm.matran.store');
+        Route::get('matran/{id}', [\App\Http\Controllers\TBM\MatranController::class, 'show'])->name('tbm.matran.show');
+        Route::get('matran/{id}/edit', [\App\Http\Controllers\TBM\MatranController::class, 'edit'])->name('tbm.matran.edit');
+        Route::put('matran/{id}', [\App\Http\Controllers\TBM\MatranController::class, 'update'])->name('tbm.matran.update');
+        Route::delete('matran/{id}', [\App\Http\Controllers\TBM\MatranController::class, 'destroy'])->name('tbm.matran.destroy');
+        Route::get('tbm/matran/{id}/export', [\App\Http\Controllers\TBM\MatranController::class, 'export'])->name('tbm.matran.export');
+        Route::get('tbm/matran/{id}/export-download', [App\Http\Controllers\TBM\MatranController::class, 'exportDownload'])->name('tbm.matran.export-download');
+        Route::get('tbm/matran/{id}/export-download-full', [App\Http\Controllers\TBM\MatranController::class, 'exportDownloadFull'])->name('tbm.matran.export-download-full');
+        Route::get('tbm/matran/{id}/export-download-simple', [App\Http\Controllers\TBM\MatranController::class, 'exportDownloadSimple'])->name('tbm.matran.export-download-simple');
     });
     Route::middleware('auth')->group(function () {
         Route::get('/admin/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');

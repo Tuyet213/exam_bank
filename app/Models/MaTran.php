@@ -15,7 +15,10 @@ class MaTran extends Model
         'id_chuan_dau_ra',
         'id_chuong',
         'diem',
-        'able'
+        'able',
+        'so_cau_de',
+        'so_cau_tb',
+        'so_cau_kho',
     ];
 
 

@@ -31,10 +31,15 @@ class Chuong extends Model
         return $this->hasMany(CauHoi::class, 'id_chuong');
     }
 
-    // public function chuanDauRas()
-    // {
-    //     return $this->hasMany(ChuanDauRa::class, 'id_chuong');
-    // }
+    public function chuanDauRas()
+    {
+        return $this->belongsToMany(
+            ChuanDauRa::class,
+            'chuong_chuan_dau_ras', // tên bảng pivot
+            'id_chuong',
+            'id_chuan_dau_ra'
+        );
+    }
 
     public function chuongChuanDauRa()
     {

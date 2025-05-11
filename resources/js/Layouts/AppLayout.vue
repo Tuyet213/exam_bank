@@ -115,6 +115,7 @@ onUnmounted(() => {
         
         <li><i class="fas fa-users"></i> <Link :href="route('tbm.dsbienban.index')">Danh sách biên bản họp cấp bộ môn</Link></li>
         <li><i class="fas fa-question-circle"></i> <Link :href="route('cauhoi.hocphan')">Danh sách câu hỏi</Link></li>
+       <li><i class="fas fa-chart-bar"></i> <Link :href="route('tbm.matran.index')">Ma trận đề thi</Link></li>
       </ul>
 
       <!-- Chung cho tất cả các menu -->
