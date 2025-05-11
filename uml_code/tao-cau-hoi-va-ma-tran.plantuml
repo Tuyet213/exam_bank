@@ -1,0 +1,32 @@
+@startuml
+left to right direction
+
+actor "Giảng Viên" as GV
+
+
+package "Quản lý câu hỏi thi" {
+  usecase "Tạo câu hỏi mới" as UC1
+  usecase "Tạo câu hỏi từ file Word" as UC2
+  usecase "Chỉnh sửa câu hỏi" as UC3
+  usecase "Xóa câu hỏi" as UC4
+  usecase "Xem danh sách câu hỏi" as UC5
+}
+
+package "Quản lý ma trận đề thi" {
+  usecase "Tạo ma trận đề thi học phần" as UC6
+  usecase "Sửa ma trận đề thi học phần" as UC7
+  usecase "Xem ma trận đề thi" as UC8
+}
+
+
+GV --> UC1
+GV --> UC2
+GV --> UC3
+GV --> UC4
+GV --> UC5
+GV --> UC6
+GV --> UC7
+GV --> UC8
+
+UC2 ..> UC1 : extend
+@enduml

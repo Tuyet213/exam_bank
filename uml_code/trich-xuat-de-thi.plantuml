@@ -1,0 +1,33 @@
+@startuml
+
+actor "Trưởng Bộ Môn" as TBM
+actor "Admin" as ADMIN
+
+rectangle "Nhóm usecase trích xuất đề thi" {
+  usecase "Xem danh sách ma trận đề thi" as UC1
+  usecase "Xem chi tiết ma trận đề thi" as UC2
+  usecase "Trích xuất đề thi từ ma trận" as UC3
+  usecase "Tải xuống đề thi có đáp án" as UC4
+  usecase "Tải xuống đề thi không có đáp án" as UC5
+  usecase "Chọn số lượng đề thi" as UC6
+  usecase "Chọn loại đề thi" as UC7
+}
+
+TBM --> UC1
+TBM --> UC2
+TBM --> UC3
+TBM --> UC4
+TBM --> UC5
+
+ADMIN --> UC1
+ADMIN --> UC2
+ADMIN --> UC3
+ADMIN --> UC4
+ADMIN --> UC5
+
+UC3 ..> UC6 : include
+UC3 ..> UC7 : include
+UC3 ..> UC2 : include
+UC4 ..> UC3 : extend
+UC5 ..> UC3 : extend
+@enduml

@@ -1,0 +1,36 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+**Role**: Bạn là người am hiểu về "hệ thống đăng ký ngân hàng câu hỏi và đề thi"
+
+**Task**: 
+
+- Output text csv dựa vào <usecase> và <code> được cung cấp. Những dòng cần merge có thể bỏ rỗng để tôi merge manual. 
+
+**Rules**:
+- Dấu ';' dùng để ngăn cách các cell nên không generate dấu ';' trong một cell.
+- Mỗi dòng chỉ xuống dòng một lần.
+- Chỉ cung cấp .cvs text, không nói gì thêm 
+- Thêm vào output ``` để tôi dễ coppy 
+
+**Example Input**
+
+<usecase>
+UC1	
+Đăng nhập	
+Cho phép người dùng đăng nhập vào Website để thực hiện một số chức năng.
+</usecase>
+
+**Example Output**
+
+```
+Tên;Đăng nhập;Code;UC1
+Mô tả;Cho phép người dùng đăng nhập vào hệ thống để thực hiện các chức năng.;;
+Actor;Quản trị viên Nhân viên ĐBCL&KT Trưởng bộ môn Giảng viên.;Trigger;Người dùng nhấn nút Đăng nhập
+Pre-condition;Người dùng đã có tài khoản trong hệ thống.;;
+Post condition;Người dùng đăng nhập thành công và truy cập được các chức năng theo vai trò.;;
+Luồng sự kiện chính;1.Người dùng truy cập trang đăng nhập của hệ thống. 2. Người dùng nhập tên đăng nhập (username) và mật khẩu (password). 3.Hệ thống kiểm tra thông tin đăng nhập. 4. Nếu thông tin hợp lệ hệ thống chuyển người dùng đến trang chính tương ứng với vai trò.;;
+Luồng ngoại lệ;Nếu thông tin không hợp lệ hệ thống sẽ điều hướng đến trang tương ứng ngược lại sẽ yêu cầu đăng nhập lại.;;
+```
