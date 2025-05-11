@@ -1,0 +1,33 @@
+@startuml "Ngân hàng đề thi - Use case diagram"
+
+actor "Giảng viên" as Teacher
+actor "Bộ môn" as Department
+actor "P.ĐBCL&KT" as QualityOffice
+
+rectangle "Hệ thống Ngân hàng đề thi" {
+  usecase "Đăng ký xây dựng đề thi" as UC1
+  usecase "Phân bổ đăng ký" as UC2
+  usecase "Quản lý biên bản họp bộ môn" as UC3
+  usecase "Xem thống kê đăng ký" as UC4
+  usecase "Quản lý thông báo" as UC5
+  usecase "Thống kê theo giảng viên" as UC6
+  usecase "Thống kê theo học phần" as UC7
+  usecase "Quản lý danh sách biên bản" as UC8
+}
+
+Teacher --> UC1
+Department --> UC1
+Department --> UC2
+Department --> UC3
+Department --> UC4
+QualityOffice --> UC2
+QualityOffice --> UC4
+QualityOffice --> UC5
+QualityOffice --> UC6
+QualityOffice --> UC7
+QualityOffice --> UC8
+
+UC1 <-- QualityOffice
+UC3 <-- QualityOffice
+
+@enduml
