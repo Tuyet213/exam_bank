@@ -12,7 +12,7 @@
         <template v-slot:content>
             <div class="content">
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-info-qo text-white p-4">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-info-qo text-white p-4 bg-success-tb">
                         <h3 class="mb-0">THÊM MỚI THÔNG BÁO</h3>
                     </div>
 
@@ -198,22 +198,3 @@ const submit = () => {
     });
 };
 </script>
-
-<style scoped>
-.bg-info-qo {
-    background-color: #5cb85c;
-}
-
-.animated-fade-in {
-    animation: fadeIn 0.5s;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.form-label {
-    font-size: 1rem;
-}
-</style> 

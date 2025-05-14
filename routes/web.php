@@ -305,13 +305,7 @@
         });
     });
 
-    // Routes cho giảng viên
-    Route::middleware(['auth', 'role:Giảng viên'])->name('giangvien.')->prefix('giangvien')->group(function () {
-        // Routes cho import câu hỏi
-        Route::get('/cauhoi/import', [ImportCauHoiController::class, 'index'])->name('cauhoi.import');
-        Route::post('/cauhoi/import', [ImportCauHoiController::class, 'import'])->name('cauhoi.import.store');
-    });
-
+    
     Route::prefix('cauhoi')->middleware(['auth'])->name('cauhoi.')->group(function () {
         // Danh sách học phần tham gia biên soạn
         Route::get('/hocphan', [CauHoiController::class, 'danhSachHocPhan'])->name('hocphan');

@@ -44,6 +44,22 @@ class MatranController extends Controller
 
     public function create(Request $request)
     {
+        $user = Auth::user();
+        $roles = $user->roles()->pluck('name');
+        $role = 'user';
+        
+        if($roles->contains('Giảng viên')){
+            $role = 'gv';
+        }
+        elseif($roles->contains('Trưởng Bộ Môn')){
+            $role = 'tbm';
+        }
+        elseif($roles->contains('Nhân viên P.ĐBCL')){
+            $role = 'dbcl';
+        }
+        elseif($roles->contains('Admin')){
+            $role = 'admin';
+        }
         $dsHocPhan =  HocPhan::with('chuongs', 'chuanDauRas')->get();
         $chuongIdsDaCoMaTran =  MaTran::distinct()->pluck('id_chuong')->toArray();
 
@@ -84,7 +100,8 @@ class MatranController extends Controller
             'chuongs' => $chuongs,
             'cdrs' => $cdrs,
             'giao' => $giao,
-            'selectedHocPhan' => $request->hoc_phan_id ?? null
+            'selectedHocPhan' => $request->hoc_phan_id ?? null,
+            'role' => $role
         ]);
     }
 
@@ -168,6 +185,22 @@ class MatranController extends Controller
 
     public function index(Request $request)
     {
+        $user = Auth::user();
+        $roles = $user->roles()->pluck('name');
+        $role = 'user';
+        
+        if($roles->contains('Giảng viên')){
+            $role = 'gv';
+        }
+        elseif($roles->contains('Trưởng Bộ Môn')){
+            $role = 'tbm';
+        }
+        elseif($roles->contains('Nhân viên P.ĐBCL')){
+            $role = 'dbcl';
+        }
+        elseif($roles->contains('Admin')){
+            $role = 'admin';
+        }
         $allHocPhans = HocPhan::select('id', 'ten')->orderBy('ten')->get();
 
         $hocPhanIds = Chuong::whereHas('maTrans')->pluck('id_hoc_phan')->unique();
@@ -188,12 +221,29 @@ class MatranController extends Controller
         return Inertia::render('TBM/Matran/Index', [
             'allHocPhans' => $allHocPhans,
             'hocPhans' => $hocPhans,
-            'filters' => $request->only(['search'])
+            'filters' => $request->only(['search']),
+            'role' => $role
         ]);
     }
 
     public function show($id)
     {
+        $user = Auth::user();
+        $roles = $user->roles()->pluck('name');
+        $role = 'user';
+        
+        if($roles->contains('Giảng viên')){
+            $role = 'gv';
+        }
+        elseif($roles->contains('Trưởng Bộ Môn')){
+            $role = 'tbm';
+        }
+        elseif($roles->contains('Nhân viên P.ĐBCL')){
+            $role = 'dbcl';
+        }
+        elseif($roles->contains('Admin')){
+            $role = 'admin';
+        }
         // Lấy học phần, chương, CDR, các cặp giao, và dữ liệu ma trận
         $hocPhan = HocPhan::with(['chuongs.chuanDauRas', 'chuanDauRas'])->findOrFail($id);
         $chuongs = $hocPhan->chuongs;
@@ -221,12 +271,29 @@ class MatranController extends Controller
             'cdrs' => $cdrs,
             'giao' => $giao,
             'bang' => $bang,
-            'id' => $id
+            'id' => $id,
+            'role' => $role
         ]);
     }
 
     public function edit($id)
     {
+        $user = Auth::user();
+        $roles = $user->roles()->pluck('name');
+        $role = 'user';
+        
+        if($roles->contains('Giảng viên')){
+            $role = 'gv';
+        }
+        elseif($roles->contains('Trưởng Bộ Môn')){
+            $role = 'tbm';
+        }
+        elseif($roles->contains('Nhân viên P.ĐBCL')){
+            $role = 'dbcl';
+        }
+        elseif($roles->contains('Admin')){
+            $role = 'admin';
+        }
         $hocPhan = HocPhan::with(['chuongs.chuanDauRas', 'chuanDauRas'])->findOrFail($id);
         $chuongs = $hocPhan->chuongs;
         $cdrs = $hocPhan->chuanDauRas;
@@ -253,7 +320,8 @@ class MatranController extends Controller
             'cdrs' => $cdrs,
             'giao' => $giao,
             'bang' => $bang,
-            'id' => $id
+            'id' => $id,
+            'role' => $role
         ]);
     }
 
@@ -290,6 +358,22 @@ class MatranController extends Controller
 
     public function export(Request $request, $id)
     {
+        $user = Auth::user();
+        $roles = $user->roles()->pluck('name');
+        $role = 'user';
+        
+        if($roles->contains('Giảng viên')){
+            $role = 'gv';
+        }
+        elseif($roles->contains('Trưởng Bộ Môn')){
+            $role = 'tbm';
+        }
+        elseif($roles->contains('Nhân viên P.ĐBCL')){
+            $role = 'dbcl';
+        }
+        elseif($roles->contains('Admin')){
+            $role = 'admin';
+        }
         Log::info('EXPORT_REQUEST', [
             'id' => $id,
             'so_de' => $request->input('so_de'),
@@ -392,12 +476,29 @@ class MatranController extends Controller
             'id' => $id,
             'soDe' => $soDe,
             'dsDe' => $dsDe,
-            'loaiDe' => $loaiDe
+            'loaiDe' => $loaiDe,
+            'role' => $role
         ]);
     }
 
     public function exportDownload(Request $request, $id)
     {
+        $user = Auth::user();
+        $roles = $user->roles()->pluck('name');
+        $role = 'user';
+        
+        if($roles->contains('Giảng viên')){
+            $role = 'gv';
+        }
+        elseif($roles->contains('Trưởng Bộ Môn')){
+            $role = 'tbm';
+        }
+        elseif($roles->contains('Nhân viên P.ĐBCL')){
+            $role = 'dbcl';
+        }
+        elseif($roles->contains('Admin')){
+            $role = 'admin';
+        }
         $deIndex = (int) $request->query('de', 1) - 1;
         $soDe = $request->input('so_de') ?? 1;
         $loaiDe = $request->input('loai_de') ?? '';

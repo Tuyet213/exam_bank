@@ -9,11 +9,11 @@
         <template v-slot:content>
             <div class="content">
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-info-qo text-white p-4">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-info-qo text-white p-4 bg-success-tb">
                         <h3 class="mb-0">DANH SÁCH THÔNG BÁO</h3>
                         <Link
                             :href="route('quality.thongbao.create')"
-                            class="btn btn-success"
+                            class="btn btn-light"
                         >
                             <i class="fas fa-plus me-2"></i>Thêm mới
                         </Link>
@@ -145,52 +145,3 @@ const truncateContent = (content) => {
     return content.length > 100 ? content.substring(0, 100) + '...' : content;
 };
 </script>
-
-<style scoped>
-.bg-info-qo {
-    background-color: #5cb85c;
-}
-
-.btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-}
-
-.btn-sm i {
-    font-size: 0.875rem;
-}
-
-.animated-fade-in {
-    animation: fadeIn 0.5s;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-}
-
-.pagination .page-link {
-    width: 35px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 3px;
-}
-
-.disabled-link {
-    pointer-events: none;
-    color: #ccc;
-}
-
-.active-page {
-    background-color: #5cb85c;
-    border-color: #5cb85c;
-    color: white;
-}
-</style> 

@@ -98,7 +98,7 @@ const formatDate = (dateString) => {
 // Chia nội dung thành các đoạn văn
 const contentParagraphs = computed(() => {
     if (!props.thongbao.content) return [];
-    return props.thongbao.content.split('\n').filter(p => p.trim() !== '');
+    return props.thongbao.content.split('\\n').filter(p => p.trim() !== '');
 });
 
 // Xác định icon cho loại file
@@ -120,47 +120,3 @@ const getFileIcon = (fileName) => {
     return iconMap[extension] || 'fas fa-file text-secondary';
 };
 </script>
-
-<style scoped>
-.bg-info-qo {
-    background-color: #5cb85c;
-}
-
-.animated-fade-in {
-    animation: fadeIn 0.5s;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.timestamp {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.thongbao-title h4 {
-    color: #333;
-    line-height: 1.4;
-}
-
-.thongbao-content {
-    font-size: 1.05rem;
-    line-height: 1.6;
-    color: #444;
-}
-
-.list-group-item:hover {
-    background-color: #f8f9fa;
-}
-
-.list-group-item i.fa-download {
-    opacity: 0.6;
-    transition: opacity 0.2s;
-}
-
-.list-group-item:hover i.fa-download {
-    opacity: 1;
-}
-</style> 

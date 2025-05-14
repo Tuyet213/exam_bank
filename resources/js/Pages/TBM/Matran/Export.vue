@@ -11,7 +11,8 @@ const props = defineProps({
   bang: Object,
   id: [String, Number],
   soDe: [String, Number, null],
-  dsDe: Array
+  dsDe: Array,
+  role: String
 });
 
 const soDe = ref(props.soDe || '');
@@ -59,7 +60,7 @@ const downloadDeSimple = (idx) => {
 };
 </script>
 <template>
-  <AppLayout role="tbm">
+  <AppLayout :role="role">
     <template #sub-link>
       <li class="breadcrumb-item"><a :href="route('tbm.matran.index')">Danh sách ma trận</a></li>
       <li class="breadcrumb-item active">Trích xuất đề thi</li>

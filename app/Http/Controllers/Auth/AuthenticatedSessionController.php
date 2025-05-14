@@ -45,7 +45,7 @@ class AuthenticatedSessionController extends Controller
             return redirect(route('tk.dsbienban.index'));
         }
         if($role->contains('Giảng viên')){
-            return redirect(route('giangvien.cauhoi.import'));
+            return redirect(route('cauhoi.hocphan'));
         }
        // return redirect()->intended(route('dashboard', absolute: false));
     }

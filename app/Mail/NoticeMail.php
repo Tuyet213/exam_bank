@@ -3,10 +3,7 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Attachment;
 
@@ -18,61 +15,37 @@ class NoticeMail extends Mailable
     public $content;
     public $attachments;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct(string $title, string $content, $attachments = null)
+    public function __construct($title, $content, $attachments = null)
     {
         $this->title = $title;
         $this->content = $content;
         $this->attachments = $attachments;
     }
 
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
+    public function envelope(): \Illuminate\Mail\Mailables\Envelope
     {
-        return new Envelope(
+        return new \Illuminate\Mail\Mailables\Envelope(
             subject: 'Thông báo: ' . $this->title,
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
+    public function content(): \Illuminate\Mail\Mailables\Content
     {
-        return new Content(
+        return new \Illuminate\Mail\Mailables\Content(
             view: 'emails.notice',
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
-        if (!$this->attachments) {
-            return [];
-        }
-
         $attachmentArray = [];
-        
         if (is_array($this->attachments)) {
-            foreach ($this->attachments as $file) {
-                $attachmentArray[] = Attachment::fromPath($file->path())
-                    ->as($file->getClientOriginalName())
-                    ->withMime($file->getMimeType());
+            foreach ($this->attachments as $filePath) {
+                $attachmentArray[] = \Illuminate\Mail\Mailables\Attachment::fromPath($filePath);
             }
-        } else {
-            $attachmentArray[] = Attachment::fromPath($this->attachments->path())
-                ->as($this->attachments->getClientOriginalName())
-                ->withMime($this->attachments->getMimeType());
+        } elseif ($this->attachments) {
+            $attachmentArray[] = \Illuminate\Mail\Mailables\Attachment::fromPath($this->attachments);
         }
-
         return $attachmentArray;
     }
 }

@@ -8,7 +8,8 @@ const props = defineProps({
   cdrs: Array,
   giao: Array,
   bang: Object,
-  id: [String, Number]
+  id: [String, Number],
+  role: String
 });
 
 const isGiao = (chuongId, cdrId) => {
@@ -26,7 +27,7 @@ const tongSoCau = (cdrId, muc) => {
 };
 </script>
 <template>
-  <AppLayout role="tbm">
+  <AppLayout :role="role">
     <template #sub-link>
       <li class="breadcrumb-item"><a :href="route('tbm.matran.index')">Danh sách ma trận</a></li>
       <li class="breadcrumb-item active">Chi tiết ma trận</li>

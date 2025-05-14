@@ -9,7 +9,8 @@ const props = defineProps({
   cdrs: Array,
   giao: Array,
   bang: Object,
-  id: [String, Number]
+  id: [String, Number],
+  role: String
 });
 
 const form = reactive({
@@ -35,7 +36,7 @@ const submit = () => {
 };
 </script>
 <template>
-  <AppLayout role="tbm">
+  <AppLayout :role="role">
     <template #sub-link>
       <li class="breadcrumb-item"><a :href="route('tbm.matran.index')">Danh sách ma trận</a></li>
       <li class="breadcrumb-item active">Chỉnh sửa ma trận</li>

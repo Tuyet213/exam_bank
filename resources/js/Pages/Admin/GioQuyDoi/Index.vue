@@ -130,7 +130,7 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
                                     />
                                 </div>
                             </div>
-                            <div class="col-md-4 col-sm-12 mb-3">
+                            <!-- <div class="col-md-4 col-sm-12 mb-3">
                                 <select
                                     v-model="selectedLoaiDeThi"
                                         class="form-control"
@@ -144,12 +144,12 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
                                             Trắc nghiệm + Tự luận
                                         </option>
                                     </select>
-                                </div>
+                                </div> -->
                             <div class="col-md-4 col-sm-12 mb-3">
                                 <select v-model="selectedLoaiHanhDong" class="form-control">
                                     <option value="">Tất cả Loại hành động</option>
                                     <option value="0">Biên soạn</option>
-                                    <option value="1">Họp phản biện cấp Bộ môn</option>
+                                    <option value="1">Họp phản biện</option>
                                     
                                 </select>
                             </div>
@@ -162,7 +162,7 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Loại đề thi</th>
+                                        <!-- <th>Loại đề thi</th> -->
                                         <th>Loại hành động</th>
                                         <th>Giờ</th>
                                         <th>Số lượng</th>
@@ -180,7 +180,7 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
                                         :key="gioQuyDoi.id"
                                     >
                                         <td>{{ gioQuyDoi?.id }}</td>
-                                        <td>
+                                        <!-- <td>
                                             {{
                                                 gioQuyDoi?.loai_de_thi == 0
                                                     ? "Trắc nghiệm"
@@ -189,12 +189,12 @@ watch([searchTerm, selectedLoaiDeThi, selectedLoaiHanhDong], () => {
                                                     ? "Tự luận"
                                                     : "Trắc nghiệm + Tự luận"
                                             }}
-                                        </td>
+                                        </td> -->
                                         <td>
                                             {{
                                                 gioQuyDoi?.loai_hanh_dong == 0
                                                     ? "Biên soạn"
-                                                    : "Họp phản biện cấp Bộ môn"
+                                                    : "Họp phản biện"
                                             }}
                                         </td>
                                         <td>{{ gioQuyDoi?.gio }}</td>

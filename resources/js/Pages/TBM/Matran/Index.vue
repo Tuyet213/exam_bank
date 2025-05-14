@@ -6,7 +6,8 @@ import { router } from '@inertiajs/vue3';
 const props = defineProps({
     allHocPhans: Array,
     hocPhans: Array,
-    filters: Object
+    filters: Object,
+    role: String
 });
 
 const search = ref(props.filters?.search || '');
@@ -32,7 +33,7 @@ const exportDe = (hocPhanId) => {
 };
 </script>
 <template>
-  <AppLayout role="tbm">
+  <AppLayout :role="role">
     <template #sub-link>
       <li class="breadcrumb-item active">Ma trận đề thi</li>
     </template>

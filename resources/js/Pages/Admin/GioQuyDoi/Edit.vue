@@ -53,7 +53,7 @@ const submit = () => {
                         <form @submit.prevent="submit">
                             <div class="mb-3">
                                 <div class="row">
-                                    <div class="mb-3 col-md-6 col-sm-12">
+                                    <!-- <div class="mb-3 col-md-6 col-sm-12">
                                         <label for="loai_de_thi" class="form-label">Loại đề thi</label>
                                             <select class="form-control" id="loai_de_thi" v-model="form.loai_de_thi" required>
                                                 <option value="0">Trắc nghiệm</option>
@@ -63,12 +63,12 @@ const submit = () => {
                                         <small v-if="form.errors.loai_de_thi" class="text-danger">
                                             {{ form.errors.loai_de_thi }}
                                         </small>
-                                    </div>
-                                    <div class="mb-3 col-md-6 col-sm-12">
+                                    </div> -->
+                                    <div class="mb-3 col-md-12 col-sm-12">
                                         <label for="loai_hanh_dong" class="form-label">Loại hành động</label>
                                         <select class="form-control" id="loai_hanh_dong" v-model="form.loai_hanh_dong" required>
                                             <option value="0">Biên soạn</option>
-                                            <option value="1">Họp phản biện cấp Bộ môn</option>
+                                            <option value="1">Họp phản biện</option>
                                         </select>
                                         <small v-if="form.errors.loai_hanh_dong" class="text-danger">
                                             {{ form.errors.loai_hanh_dong }}

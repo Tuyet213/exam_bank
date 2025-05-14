@@ -86,9 +86,6 @@ onUnmounted(() => {
 
       <!-- Giảng viên Menu -->
       <ul v-else-if="role === 'gv'" class="sidebar-menu">
-        <li><i class="fas fa-question-circle"></i> <Link :href="route('giangvien.cauhoi.index')">Danh sách câu hỏi</Link></li>
-        <li><i class="fas fa-plus-circle"></i> <Link :href="route('giangvien.cauhoi.create')">Tạo câu hỏi</Link></li>
-        <li><i class="fas fa-file-import"></i> <Link :href="route('giangvien.cauhoi.import')">Import câu hỏi</Link></li>
         <li><i class="fas fa-question-circle"></i> <Link :href="route('cauhoi.hocphan')">Danh sách câu hỏi</Link></li>
       </ul>
       

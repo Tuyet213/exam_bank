@@ -8,7 +8,8 @@ const props = defineProps({
   chuongs: Array,
   cdrs: Array,
   giao: Array,
-  selectedHocPhan: [String, Number, null]
+  selectedHocPhan: [String, Number, null],
+  role: String
 });
 
 const form = reactive({
@@ -61,7 +62,7 @@ watch(() => form.hoc_phan, (newVal, oldVal) => {
 });
 </script>
 <template>
-  <AppLayout role="tbm">
+  <AppLayout :role="role">
     <template #sub-link>
       <li class="breadcrumb-item active">
         <a :href="route('tbm.matran.index')">Danh sách ma trận</a>
