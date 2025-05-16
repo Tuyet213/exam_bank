@@ -10,11 +10,11 @@ block-beta
     
     space:5
     
-    space G["Hiển thị thông báo\nxác nhận xóa"] space H{"Xác nhận\nxóa?"} space I["Hủy thao tác"]
+    G["Hiển thị thông báo\nxác nhận xóa"] space H{"Xác nhận\nxóa?"} space I["Hủy thao tác"]
     
     space:5
     
-    space J["Xóa thông tin"] space K["Thông báo\nxóa thành công"] space L(("Kết thúc"))
+    J["Xóa thông tin"] space K["Thông báo\nxóa thành công"] space L(("Kết thúc"))
     
     A --> B
     B --> C
