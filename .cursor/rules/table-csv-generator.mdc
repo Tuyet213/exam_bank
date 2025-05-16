@@ -26,7 +26,7 @@ Cho phép người dùng đăng nhập vào Website để thực hiện một s�
 **Example Output**
 
 ```
-Tên;Đăng nhập;Code;UC1
+Tên;Đăng nhập;Code;UC6.1
 Mô tả;Cho phép người dùng đăng nhập vào hệ thống để thực hiện các chức năng.;;
 Actor;Quản trị viên Nhân viên ĐBCL&KT Trưởng bộ môn Giảng viên.;Trigger;Người dùng nhấn nút Đăng nhập
 Pre-condition;Người dùng đã có tài khoản trong hệ thống.;;

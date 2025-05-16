@@ -1,0 +1,22 @@
+@startuml
+!theme lightpurple
+skinparam backgroundColor transparent
+
+start
+:Bắt đầu;
+:Người dùng truy cập trang\nđăng nhập;
+:Nhập tên đăng nhập và\nmật khẩu;
+
+repeat
+if (Hệ thống kiểm tra\nthông tin đăng nhập) then (true)
+  :Đăng nhập thành công;
+  :Truy cập được các chức\nnăng\ntheo vai trò;
+  :Kết thúc;
+  stop
+else (false)
+  :Hiển thị thông báo lỗi;
+  :Người dùng được yêu\ncầu\nđăng nhập lại;
+endif
+repeat while
+
+@enduml 
