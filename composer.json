@@ -21,6 +21,7 @@
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "^3.1",
         "masbug/flysystem-google-drive-ext": "^2.4",
+        "orangehill/iseed": "*",
         "phpoffice/phpspreadsheet": "^1.29",
         "phpoffice/phpword": "*",
         "revolution/laravel-google-photos": "^6.2",
