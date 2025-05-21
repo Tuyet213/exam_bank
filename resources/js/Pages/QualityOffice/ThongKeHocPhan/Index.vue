@@ -69,6 +69,11 @@
 
                     <!-- Nội dung thống kê -->
                     <div class="card-body">
+
+                         <!-- Biểu đồ hình tròn -->
+                         <div class="my-4 chart-container">
+                                <Pie :data="computedPieData" :options="chartOptions" />
+                            </div>
                         <div class="thongke-content">
                             <!-- Danh sách trống -->
                             <div v-if="!thongke_data.nam_hoc || Object.keys(thongke_data.nam_hoc).length === 0" class="text-center py-5">
@@ -98,6 +103,8 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                           
                             
                             <!-- Danh sách theo cấu trúc phân cấp -->
                             <div class="accordion accordion-custom">
@@ -219,6 +226,9 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { ref, watch, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { Pie } from 'vue-chartjs'
+import { Chart, ArcElement, Tooltip, Legend } from 'chart.js'
+Chart.register(ArcElement, Tooltip, Legend);
 
 const props = defineProps({
     role: {
@@ -254,7 +264,11 @@ const props = defineProps({
     thongke_data: {
         type: Object,
         default: () => ({})
-    }
+    },
+    pieChartData: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 // State cho collapse/expand của các phần
@@ -381,6 +395,127 @@ const getStatusText = (status) => {
         default: return 'Không xác định';
     }
 };
+
+// Hàm tạo tooltip
+const getTooltipLabel = (context, selectedKhoa, selectedBoMon) => {
+    const label = context.label || '';
+    const value = context.parsed || 0;
+    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+    const percentage = ((value / total) * 100).toFixed(1);
+    
+    if (selectedKhoa && selectedBoMon) {
+        return `${label}: ${value} giờ (${percentage}%)`;
+    } else {
+        return `${label}: ${value} học phần (${percentage}%)`;
+    }
+};
+
+// Cập nhật options cho Pie Chart
+const chartOptions = computed(() => ({
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+        legend: {
+            position: 'bottom',
+            labels: {
+                boxWidth: 12,
+                font: {
+                    size: 12
+                },
+                generateLabels: (chart) => {
+                    const originalLabels = chart.data.labels;
+                    return originalLabels.map((label, i) => ({
+                        text: label.length > 20 ? label.substring(0, 20) + '...' : label,
+                        fillStyle: chart.data.datasets[0].backgroundColor[i],
+                        index: i
+                    }));
+                }
+            }
+        },
+        tooltip: {
+            callbacks: {
+                label: (context) => getTooltipLabel(context, selectedKhoa.value, selectedBoMon.value)
+            }
+        }
+    }
+}));
+
+// Chuẩn bị data cho Pie Chart dựa theo bộ lọc
+const computedPieData = computed(() => {
+    let chartData = [];
+    
+    if (selectedKhoa.value && selectedBoMon.value) {
+        // Trường hợp 3: Đã chọn cả Khoa và Bộ môn
+        Object.values(props.thongke_data.nam_hoc || {}).forEach(namHocData => {
+            Object.values(namHocData.hoc_ki || {}).forEach(hocKiData => {
+                const khoaData = hocKiData.khoa[selectedKhoa.value];
+                if (khoaData && khoaData.bo_mon[selectedBoMon.value]) {
+                    const boMonData = khoaData.bo_mon[selectedBoMon.value];
+                    boMonData.hoc_phan.forEach(hp => {
+                        const tongSoGio = hp.giang_vien.reduce((total, gv) => total + (gv.so_gio || 0), 0);
+                        const existingIndex = chartData.findIndex(item => item.label === hp.ten);
+                        if (existingIndex === -1) {
+                            chartData.push({
+                                label: hp.ten,
+                                value: tongSoGio
+                            });
+                        } else {
+                            chartData[existingIndex].value += tongSoGio;
+                        }
+                    });
+                }
+            });
+        });
+    } else if (selectedKhoa.value) {
+        // Trường hợp 2: Chỉ chọn Khoa
+        Object.values(props.thongke_data.nam_hoc || {}).forEach(namHocData => {
+            Object.values(namHocData.hoc_ki || {}).forEach(hocKiData => {
+                const khoaData = hocKiData.khoa[selectedKhoa.value];
+                if (khoaData) {
+                    Object.entries(khoaData.bo_mon || {}).forEach(([boMonId, boMonData]) => {
+                        const existingIndex = chartData.findIndex(item => item.label === boMonData.ten);
+                        if (existingIndex === -1) {
+                            chartData.push({
+                                label: boMonData.ten,
+                                value: boMonData.tong_so_hoc_phan
+                            });
+                        } else {
+                            chartData[existingIndex].value += boMonData.tong_so_hoc_phan;
+                        }
+                    });
+                }
+            });
+        });
+    } else {
+        // Trường hợp 1: Không chọn Khoa
+        Object.values(props.thongke_data.nam_hoc || {}).forEach(namHocData => {
+            Object.values(namHocData.hoc_ki || {}).forEach(hocKiData => {
+                Object.entries(hocKiData.khoa || {}).forEach(([khoaId, khoaData]) => {
+                    const existingIndex = chartData.findIndex(item => item.label === khoaData.ten);
+                    if (existingIndex === -1) {
+                        chartData.push({
+                            label: khoaData.ten,
+                            value: khoaData.tong_so_hoc_phan
+                        });
+                    } else {
+                        chartData[existingIndex].value += khoaData.tong_so_hoc_phan;
+                    }
+                });
+            });
+        });
+    }
+
+    return {
+        labels: chartData.map(item => item.label),
+        datasets: [{
+            data: chartData.map(item => item.value),
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', 
+                '#FF9F40', '#C9CBCF', '#4CAF50', '#9C27B0', '#607D8B'
+            ],
+        }]
+    };
+});
 </script>
 
 <style scoped>
@@ -465,5 +600,10 @@ const getStatusText = (status) => {
 
 .bg-success-tb {
     background-color: #5cb85c;
+}
+
+.chart-container {
+    max-width: 500px;
+    margin: 0 auto;
 }
 </style> 

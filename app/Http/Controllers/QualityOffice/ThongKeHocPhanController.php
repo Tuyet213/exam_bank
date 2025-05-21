@@ -53,6 +53,43 @@ class ThongKeHocPhanController extends Controller
         // Lấy dữ liệu thống kê
         $thongke_data = $this->layDuLieuThongKe($khoa_id, $bomon_id, $hoc_ki, $nam_hoc, $bac_dao_tao);
 
+        // Xử lý dữ liệu cho Pie Chart
+        $pieChartData = [];
+        if (!$khoa_id) {
+            // Pie chart theo từng khoa
+            foreach ($khoas as $khoa) {
+                $tong_so_hoc_phan = 0;
+                foreach ($thongke_data['nam_hoc'] as $nam) {
+                    foreach ($nam['hoc_ki'] as $hk) {
+                        if (isset($hk['khoa'][$khoa->id])) {
+                            $tong_so_hoc_phan += $hk['khoa'][$khoa->id]['tong_so_hoc_phan'];
+                        }
+                    }
+                }
+                $pieChartData[] = [
+                    'label' => $khoa->ten,
+                    'value' => $tong_so_hoc_phan,
+                ];
+            }
+        } else {
+            // Pie chart theo từng bộ môn của khoa đã chọn
+            $bomonTrongKhoa = $bomons->where('id_khoa', $khoa_id);
+            foreach ($bomonTrongKhoa as $bomon) {
+                $tong_so_hoc_phan = 0;
+                foreach ($thongke_data['nam_hoc'] as $nam) {
+                    foreach ($nam['hoc_ki'] as $hk) {
+                        if (isset($hk['khoa'][$khoa_id]['bo_mon'][$bomon->id])) {
+                            $tong_so_hoc_phan += $hk['khoa'][$khoa_id]['bo_mon'][$bomon->id]['tong_so_hoc_phan'];
+                        }
+                    }
+                }
+                $pieChartData[] = [
+                    'label' => $bomon->ten,
+                    'value' => $tong_so_hoc_phan,
+                ];
+            }
+        }
+
         return Inertia::render('QualityOffice/ThongKeHocPhan/Index', [
             'role' => $role,
             'khoas' => $khoas,
@@ -66,7 +103,8 @@ class ThongKeHocPhanController extends Controller
                 'nam_hoc' => $nam_hoc,
                 'bac_dao_tao' => $bac_dao_tao
             ],
-            'thongke_data' => $thongke_data
+            'thongke_data' => $thongke_data,
+            'pieChartData' => $pieChartData,
         ]);
     }
 

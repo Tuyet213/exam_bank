@@ -3,6 +3,10 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { Link } from '@inertiajs/vue3';
 import { ref, watch, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { Pie } from 'vue-chartjs'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const props = defineProps({
     role: {
@@ -169,6 +173,133 @@ const resetFilters = () => {
     selectedBoMon.value = '';
     performSearch();
 };
+
+// Hàm tạo tooltip
+const getTooltipLabel = (context, selectedKhoa, selectedBoMon) => {
+    const label = context.label || '';
+    const value = context.parsed || 0;
+    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+    const percentage = ((value / total) * 100).toFixed(1);
+    
+    if (selectedKhoa && selectedBoMon) {
+        return `${label}: ${value} giờ (${percentage}%)`;
+    } else {
+        return `${label}: ${value} giảng viên (${percentage}%)`;
+    }
+};
+
+// Cập nhật options cho Pie Chart
+const chartOptions = computed(() => ({
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+        legend: {
+            position: 'bottom',
+            labels: {
+                boxWidth: 12,
+                font: {
+                    size: 12
+                },
+                generateLabels: (chart) => {
+                    const originalLabels = chart.data.labels;
+                    return originalLabels.map((label, i) => ({
+                        text: label.length > 20 ? label.substring(0, 20) + '...' : label,
+                        fillStyle: chart.data.datasets[0].backgroundColor[i],
+                        index: i
+                    }));
+                }
+            }
+        },
+        tooltip: {
+            callbacks: {
+                label: (context) => getTooltipLabel(context, selectedKhoa.value, selectedBoMon.value)
+            }
+        }
+    }
+}));
+
+// Chuẩn bị data cho Pie Chart dựa theo bộ lọc
+const computedPieData = computed(() => {
+    let chartData = [];
+    
+    if (selectedKhoa.value && selectedBoMon.value) {
+        // Trường hợp 3: Đã chọn cả Khoa và Bộ môn
+        // Hiển thị tổng số giờ của từng giảng viên trong bộ môn đó
+        Object.values(props.thongke_data.giang_vien || {}).forEach(namHocData => {
+            Object.values(namHocData.hoc_ki || {}).forEach(hocKiData => {
+                const khoaData = hocKiData.khoa[selectedKhoa.value];
+                if (khoaData && khoaData.bo_mon[selectedBoMon.value]) {
+                    const boMonData = khoaData.bo_mon[selectedBoMon.value];
+                    boMonData.giang_vien.forEach(gv => {
+                        const tongSoGio = gv.chi_tiet_mon.reduce((total, mon) => total + (mon.so_gio || 0), 0);
+                        const existingIndex = chartData.findIndex(item => item.label === gv.ten);
+                        if (existingIndex === -1) {
+                            chartData.push({
+                                label: gv.ten,
+                                value: tongSoGio
+                            });
+                        } else {
+                            chartData[existingIndex].value += tongSoGio;
+                        }
+                    });
+                }
+            });
+        });
+    } else if (selectedKhoa.value) {
+        // Trường hợp 2: Chỉ chọn Khoa
+        // Hiển thị tổng số giảng viên của từng bộ môn
+        Object.values(props.thongke_data.giang_vien || {}).forEach(namHocData => {
+            Object.values(namHocData.hoc_ki || {}).forEach(hocKiData => {
+                const khoaData = hocKiData.khoa[selectedKhoa.value];
+                if (khoaData) {
+                    Object.entries(khoaData.bo_mon || {}).forEach(([boMonId, boMonData]) => {
+                        const existingIndex = chartData.findIndex(item => item.label === boMonData.ten);
+                        if (existingIndex === -1) {
+                            chartData.push({
+                                label: boMonData.ten,
+                                value: boMonData.tong_so_giang_vien || 0
+                            });
+                        } else {
+                            chartData[existingIndex].value = Math.max(chartData[existingIndex].value, boMonData.tong_so_giang_vien || 0);
+                        }
+                    });
+                }
+            });
+        });
+    } else {
+        // Trường hợp 1: Không chọn Khoa
+        // Hiển thị tổng số giảng viên của từng khoa
+        Object.values(props.thongke_data.giang_vien || {}).forEach(namHocData => {
+            Object.values(namHocData.hoc_ki || {}).forEach(hocKiData => {
+                Object.entries(hocKiData.khoa || {}).forEach(([khoaId, khoaData]) => {
+                    const khoaInfo = props.khoas.find(k => k.id === khoaId);
+                    if (khoaInfo) {
+                        const existingIndex = chartData.findIndex(item => item.label === khoaInfo.ten);
+                        if (existingIndex === -1) {
+                            chartData.push({
+                                label: khoaInfo.ten,
+                                value: khoaData.tong_so_giang_vien || 0
+                            });
+                        } else {
+                            chartData[existingIndex].value = Math.max(chartData[existingIndex].value, khoaData.tong_so_giang_vien || 0);
+                        }
+                    }
+                });
+            });
+        });
+    }
+
+    return {
+        labels: chartData.map(item => item.label),
+        datasets: [{
+            data: chartData.map(item => item.value),
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', 
+                '#FF9F40', '#C9CBCF', '#4CAF50', '#9C27B0', '#607D8B'
+            ],
+        }]
+    };
+});
 </script>
 
 <template>
@@ -242,6 +373,11 @@ const resetFilters = () => {
 
                     <!-- Nội dung thống kê -->
                     <div class="card-body">
+                           <!-- Biểu đồ hình tròn -->
+                           <div class="my-4 chart-container">
+                                <Pie :data="computedPieData" :options="chartOptions" />
+                            </div>
+                            
                         <div class="thongke-content">
                             <!-- Danh sách trống -->
                             <div v-if="!thongke_data.giang_vien || Object.keys(thongke_data.giang_vien).length === 0" class="text-center py-5">
@@ -266,6 +402,7 @@ const resetFilters = () => {
                                 </div>
                             </div>
                             
+                         
                             <!-- Danh sách theo cấu trúc phân cấp -->
                             <div class="accordion accordion-custom">
                                 <!-- Năm học -->
@@ -508,5 +645,10 @@ const resetFilters = () => {
 
 .ps-3 {
     padding-left: 1rem !important;
+}
+
+.chart-container {
+    max-width: 500px;
+    margin: 0 auto;
 }
 </style> 

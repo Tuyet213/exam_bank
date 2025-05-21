@@ -31,6 +31,17 @@ export default {
 <!-- Giữ v-model="model" để binding dữ liệu.
 Giữ ref="input" để tham chiếu DOM. -->
 
+<style>
+.card {
+     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+</style>
+
+
+
+
+
 
 <template>
     <Head title="Signin" />

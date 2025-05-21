@@ -32,10 +32,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
         $role = Auth::user()->getRoleNames();
+        $permission = Auth::user()->getPermissionNames();
         if($role->contains('Admin')){
             return redirect(route('admin.khoa.index'));
         }
-        if($role->contains('Nhân viên P.ĐBCL')){
+        if( $permission->contains('Duyệt danh sách đăng ký')){
             return redirect(route('quality.dsdangky.index'));
         }
         if($role->contains('Trưởng Bộ Môn')){
@@ -47,7 +48,8 @@ class AuthenticatedSessionController extends Controller
         if($role->contains('Giảng viên')){
             return redirect(route('cauhoi.hocphan'));
         }
-       // return redirect()->intended(route('dashboard', absolute: false));
+        return redirect(route('blank'));
+      
     }
 
     /**

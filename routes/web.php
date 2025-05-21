@@ -32,12 +32,7 @@
     // chỉ trả về component hoặc page vì nó tự import vào app.blade.php
 
     Route::get('/', function () {
-        return Inertia::render('Welcome', [
-            'canLogin' => Route::has('login'),
-            'canRegister' => Route::has('register'),
-            'laravelVersion' => Application::VERSION,
-            'phpVersion' => PHP_VERSION,
-        ]);
+        return redirect()->route('login');
     });
 
     Route::prefix('admin')->middleware(['auth', 'role:Admin'])->group(  function () {
@@ -237,7 +232,7 @@
         Route::get('/notice/show/{id}', [QualityOfficerController::class, 'show'])->name('qlo.notice.show');
         Route::get('/notice/index', [QualityOfficerController::class, 'index'])->name('qlo.notice.index');
     });
-    Route::prefix('quality')->name('quality.')->middleware(['auth', 'role:Nhân viên P.ĐBCL||Admin'])->group(function () {
+    Route::prefix('quality')->name('quality.')->middleware(['auth', 'role:Admin'])->group(function () {
         Route::get('/dsdangky', [App\Http\Controllers\QualityOffice\DSDangKyController::class, 'index'])->name('dsdangky.index');
         
         Route::get('/ctdsdangky/{id_ds_dang_ky}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'index'])->name('ctdsdangky.index');
@@ -279,7 +274,48 @@
         Route::get('/thongkehocphan', [ThongKeHocPhanController::class, 'index'])->name('thongkehocphan.index');
         Route::get('/thongkehocphan/excel', [ThongKeHocPhanController::class, 'exportExcel'])->name('thongkehocphan.excel');
     });
+    Route::prefix('quality')->name('quality.')->middleware(['auth', 'permission:Duyệt danh sách đăng ký'])->group(function () {
+        Route::get('/dsdangky', [App\Http\Controllers\QualityOffice\DSDangKyController::class, 'index'])->name('dsdangky.index');
+        
+        Route::get('/ctdsdangky/{id_ds_dang_ky}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'index'])->name('ctdsdangky.index');
 
+        Route::put('/ctdsdangky/status/{id}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'updateStatus'])->name('ctdsdangky.updateStatus');
+
+        Route::post('/ctdsdangky/submit/{id_ds_dang_ky}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'submit'])->name('ctdsdangky.submit');
+
+        Route::put('/ctdsdangky/{id}/update-status', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'updateStatus'])
+            ->name('ctdsdangky.updateStatus');
+            
+        Route::put('/ctdsdangky/{dsdangky_id}/update-status-all', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'updateStatusAll'])
+            ->name('ctdsdangky.updateStatusAll');
+            
+        // Danh sách biên bản
+        Route::get('/dsbienban', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'index'])->name('dsbienban.index');
+        Route::get('/dsbienban/{bienban}', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'show'])->name('dsbienban.show');
+        Route::get('/dsbienban/{bienban}/approve', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'approve'])->name('dsbienban.approve');
+        Route::get('/dsbienban/{bienban}/reject', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'reject'])->name('dsbienban.reject');
+        Route::get('/dsbienban/{bienban}/download', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'download'])->name('dsbienban.download');
+        Route::post('/dsbienban/{bienban}/approve-with-email', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'approveWithEmail'])->name('dsbienban.approve-with-email');
+        Route::post('/dsbienban/{bienban}/reject-with-email', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'rejectWithEmail'])->name('dsbienban.reject-with-email');
+        
+        // Quản lý thông báo
+        Route::get('/thongbao', [App\Http\Controllers\QualityOffice\ThongbaoController::class, 'index'])->name('thongbao.index');
+        Route::get('/thongbao/create', [App\Http\Controllers\QualityOffice\ThongbaoController::class, 'create'])->name('thongbao.create');
+        Route::post('/thongbao/store', [App\Http\Controllers\QualityOffice\ThongbaoController::class, 'store'])->name('thongbao.store');
+        Route::get('/thongbao/{thongbao}', [App\Http\Controllers\QualityOffice\ThongbaoController::class, 'show'])->name('thongbao.show');
+        
+        // Thống kê
+        Route::get('/thongke', [QualityThongKeController::class, 'index'])->name('thongke.index');
+        Route::get('/thongke/excel', [QualityThongKeController::class, 'exportExcel'])->name('thongke.excel');
+
+        // Thống kê giảng viên
+        Route::get('/thongke-giang-vien', [QualityThongKeGiangVienController::class, 'index'])->name('thongke_giang_vien.index');
+        Route::get('/thongke-giang-vien/excel', [QualityThongKeGiangVienController::class, 'exportExcel'])->name('thongke_giang_vien.excel');
+
+        // Thống kê học phần
+        Route::get('/thongkehocphan', [ThongKeHocPhanController::class, 'index'])->name('thongkehocphan.index');
+        Route::get('/thongkehocphan/excel', [ThongKeHocPhanController::class, 'exportExcel'])->name('thongkehocphan.excel');
+    });
     // Routes cho Trưởng Khoa
     Route::middleware(['auth', 'role:Trưởng Khoa'])->prefix('tk')->name('tk.')->group(function () {
         Route::controller(DSBienBanHopKhoaController::class)->prefix('dsbienban')->name('dsbienban.')->group(function () {
@@ -328,5 +364,8 @@
             ->name('download_mau_import');
         Route::get('/download-template/{id}', [CauHoiController::class, 'downloadTemplate'])->name('download_template');
     });
+    Route::get('/blank', function () {
+        return Inertia::render('Blank');
+    })->name('blank');  
 
     require __DIR__.'/auth.php';

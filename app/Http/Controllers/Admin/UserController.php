@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Log;
+use App\Models\Khoa;
 class UserController extends Controller
 {
     public function index(Request $request)
@@ -47,10 +48,11 @@ class UserController extends Controller
     public function create()
     {
         $chucvus = ChucVu::where('able', true)->get();
-        $bomons = BoMon::where('able', true)->get();
+        $bomons = BoMon::get();
+        $khoas = Khoa::get();
         $roles = Role::all();
         $permissions = Permission::all();
-        return Inertia::render('Admin/User/Create', compact('chucvus', 'bomons', 'roles', 'permissions'));
+        return Inertia::render('Admin/User/Create', compact('chucvus', 'bomons', 'khoas', 'roles', 'permissions'));
     }
 
     public function store(Request $request)
@@ -99,9 +101,10 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $user = User::find($id);
+        $user = User::with('bomon.khoa')->find($id);
         $chucvus = ChucVu::where('able', true)->get();
-        $bomons = BoMon::where('able', true)->get();
+        $bomons = BoMon::get();
+        $khoas = Khoa::get();
         $roles = Role::all();
         $permissions = Permission::all();
         $dia_chi = explode('-', $user->dia_chi);
@@ -115,7 +118,7 @@ class UserController extends Controller
             'roles' => $user->getRoleNames(), // Lấy danh sách tên roles
             'permissions' => $user->getPermissionNames() // Lấy danh sách tên permissions
         ]);
-        return Inertia::render('Admin/User/Edit', compact('user', 'chucvus', 'bomons', 'roles', 'permissions'));
+        return Inertia::render('Admin/User/Edit', compact('user', 'chucvus', 'bomons', 'khoas', 'roles', 'permissions'));
     }
 
     public function update(Request $request, $id)

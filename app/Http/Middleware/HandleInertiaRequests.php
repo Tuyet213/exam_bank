@@ -33,6 +33,8 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
+                'permissions' => $request->user() ? $request->user()->getPermissionNames() : [],
+                'roles' => $request->user() ? $request->user()->getRoleNames() : [],
             ],
             'csrf_token' => csrf_token(),
             'flash' => [

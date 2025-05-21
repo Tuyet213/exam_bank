@@ -1,0 +1,30 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+**Role**: Bạn là người am hiểu về "hệ thống đăng ký ngân hàng câu hỏi và đề thi"
+
+**Task**: 
+- input: là ảnh model của một bảng trong cơ sở dữ liệu
+- Output text csv dựa vào ảnh được cung cấp. Những dòng cần merge có thể bỏ rỗng để tôi merge manual. 
+
+**Rules**:
+- Dấu ';' dùng để ngăn cách các cell nên không generate dấu ';' trong một cell.
+- Mỗi dòng chỉ xuống dòng một lần.
+- Chỉ cung cấp .cvs text, không nói gì thêm 
+- Thêm vào output ``` để tôi dễ coppy 
+
+**Example Input**
+
+ảnh
+
+**Example Output**
+
+```
+STT;Trường;Kiểu Dữ Liệu;Chú thích
+1;User_id;Bigint AI PK;Mã user
+2;Address;Varchar(255);Địa chỉ
+3;Email;Varchar(255);Email người dùng
+
+```

@@ -1,16 +1,20 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { useForm } from "@inertiajs/vue3";
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import axios from "axios";
 import { onMounted } from "vue";
 
-const { chucvus, bomons, user, roles, permissions } = defineProps({
+const { chucvus, bomons, user, roles, permissions, khoas } = defineProps({
     chucvus: {
         type: Array,
         required: true,
     },
     bomons: {
+        type: Array,
+        required: true,
+    },
+    khoas: {
         type: Array,
         required: true,
     },
@@ -38,12 +42,19 @@ const form = useForm({
     gioi_tinh: user.gioi_tinh ? true : false,
     id_chuc_vu: user.id_chuc_vu,
     id_bo_mon: user.id_bo_mon,
+    id_khoa: user.bo_mon?.id_khoa,
     tinh_name: user.tinh_name,
     quan_name: user.quan_name,
     xa_name: user.xa_name,
     more_address: user.more_address,
     roles: user.role_names || [], 
     permissions: user.permission_names || [],
+});
+
+const selectedKhoa = ref(user.bomon?.id_khoa || "");
+const filteredBomons = computed(() => {
+    if (!selectedKhoa.value) return [];
+    return bomons.filter(bm => bm.id_khoa == selectedKhoa.value);
 });
 
 //ref: theo dõi thay đổi cùng vs watch
@@ -137,6 +148,7 @@ onMounted(async () => {
 
 // Hàm submit form
 const submit = () => {
+    form.gioi_tinh = form.gioi_tinh === "true" || form.gioi_tinh === true ? true : false;
     form.put(route("admin.user.update", user.id), {
         onSuccess: () => {
             alert("Cập nhật tài khoản thành công!");
@@ -396,8 +408,51 @@ const loadInitialData = async () => {
                                 </div>
 
                                 <div class="row">
-                                    <!-- Chức vụ -->
+                                   
+
+                                    <!-- Khoa -->
                                     <div class="col-md-6 col-sm-12 mb-3 form-floating form-group">
+                                        <select
+                                            v-model="selectedKhoa"
+                                            class="form-control"
+                                            required
+                                        >
+                                            <option value="">Chọn khoa</option>
+                                            <option v-for="khoa in khoas" :key="khoa.id" :value="khoa.id">
+                                                {{ khoa.ten }}
+                                            </option>
+                                        </select>
+                                        <label class="form-label">Khoa</label>
+                                    </div>
+                                     <!-- Bộ môn -->
+                                <div class="col-md-6 col-sm-12 mb-3 form-floating form-group">
+                                    <select
+                                        v-model="form.id_bo_mon"
+                                        id="id_bo_mon"
+                                        class="form-control"
+                                        :class="{ 'has-value': form.id_bo_mon }"
+                                        required
+                                        :disabled="!selectedKhoa"
+                                    >
+                                        <option value="">Chọn bộ môn</option>
+                                        <option
+                                            v-for="bomon in filteredBomons"
+                                            :key="bomon.id"
+                                            :value="bomon.id"
+                                        >
+                                            {{ bomon.ten }}
+                                        </option>
+                                    </select>
+                                    <label for="id_bomon" class="form-label">Bộ môn</label>
+                                    <small v-if="form.errors.id_bo_mon" class="text-danger">
+                                        {{ form.errors.id_bo_mon }}
+                                    </small>
+                                </div>
+                                </div>
+
+                               
+                                 <!-- Chức vụ -->
+                                 <div class="col-md-6 col-sm-12 mb-3 form-floating form-group">
                                         <select
                                             v-model="form.id_chuc_vu"
                                             id="id_chuc_vu"
@@ -419,31 +474,6 @@ const loadInitialData = async () => {
                                             {{ form.errors.id_chuc_vu }}
                                         </small>
                                     </div>
-
-                                    <!-- Bộ môn -->
-                                    <div class="col-md-6 col-sm-12 mb-3 form-floating form-group">
-                                        <select
-                                            v-model="form.id_bo_mon"
-                                            id="id_bo_mon"
-                                            class="form-control"
-                                            :class="{ 'has-value': form.id_bo_mon }"
-                                            required
-                                        >
-                                            <option value="">Chọn bộ môn</option>
-                                            <option
-                                                v-for="bomon in bomons"
-                                                :key="bomon.id"
-                                                :value="bomon.id"
-                                            >
-                                                {{ bomon.ten }}
-                                            </option>
-                                        </select>
-                                        <label for="id_bomon" class="form-label">Bộ môn</label>
-                                        <small v-if="form.errors.id_bo_mon" class="text-danger">
-                                            {{ form.errors.id_bo_mon }}
-                                        </small>
-                                    </div>
-                                </div>
                             </div>
 
                              <!-- Thêm phần Role và Permission vào trước nút Submit -->
