@@ -6,11 +6,11 @@ block-beta
     
     space:5
     
-    F["Chọn học phần từ\ndanh sách"] space E["Hệ thống hiển thị\nbảng ma trận"] space 
+    G["Nhập số câu hỏi\ncho từng mức độ"] space F["Chọn học phần từ\ndanh sách"] space E["Hệ thống hiển thị\nbảng ma trận"] space  
     
     space:5
     
-    G["Nhập số câu hỏi\ncho từng mức độ"] space H{"Kiểm tra\ndữ liệu"} space I["Thông báo\nkhông hợp lệ"]
+     space H{"Kiểm tra\ndữ liệu"} space I["Thông báo\nkhông hợp lệ"]
     
     space:5
     
