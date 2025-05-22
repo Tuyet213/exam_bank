@@ -23,3 +23,41 @@ yarn-error.log
 /.zed
 *.apps.googleusercontent.com.json
 storage/credentials/google-drive.json
+/.cursor
+
+# OS specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# Platform-dependent lock files
+composer.lock
+package-lock.json
+
+# Platform-dependent environment files
+.env.*
+*.log
+bootstrap/cache/*.php
+
+# Temporary files
+~$*
+*.tmp
+*.temp
+*.bak
+
+# Storage related files that might cause conflicts
+/storage/logs/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/cache/*
+/storage/app/public/*
+/storage/app/temp/*
+
+# Public directory files that might differ between environments
+/public/css/app.css
+/public/js/app.js
+/public/mix-manifest.json
+/public/fonts/*
+/public/images/generated/*
