@@ -379,4 +379,76 @@ class ThongKeController extends Controller
         // Xuất Excel
         return Excel::download(new ThongKeExport($thongke_data), $filename);
     }
+    public function exportExcelGioThamGia(Request $request)
+    {
+        $khoa_id = $request->input('khoa_id');
+        $bomon_id = $request->input('bomon_id');
+        $nam_hoc = $request->input('nam_hoc');
+        $hoc_ki = $request->input('hoc_ki');
+
+        // Lấy tất cả chi tiết đăng ký phù hợp
+        $query = CTDSDangKy::with(['dsGVBienSoans.vienChuc', 'bienBanHop.dsHop.vienChuc'])
+            ->where('able', true);
+
+        if ($bomon_id) {
+            $query->whereHas('dsDangKy', function($q) use ($bomon_id) {
+                $q->where('id_bo_mon', $bomon_id);
+            });
+        } elseif ($khoa_id) {
+            $query->whereHas('dsDangKy.boMon', function($q) use ($khoa_id) {
+                $q->where('id_khoa', $khoa_id);
+            });
+        }
+        if ($nam_hoc) $query->whereHas('dsDangKy', fn($q) => $q->where('nam_hoc', $nam_hoc));
+        if ($hoc_ki) $query->whereHas('dsDangKy', fn($q) => $q->where('hoc_ki', $hoc_ki));
+
+        $ctds = $query->get();
+
+        // Gom nhóm theo viên chức
+        $data = [];
+        foreach ($ctds as $ct) {
+            // Giảng viên biên soạn
+            foreach ($ct->dsGVBienSoans as $gvbs) {
+                $id = $gvbs->vienChuc->id;
+                if (!isset($data[$id])) {
+                    $data[$id] = [
+                        'ma_vien_chuc' => $gvbs->vienChuc->ma_vien_chuc ?? $gvbs->vienChuc->id,
+                        'ten' => $gvbs->vienChuc->name,
+                        'gio_bien_soan' => 0,
+                        'gio_phan_bien' => 0,
+                        'tong_gio' => 0,
+                    ];
+                }
+                $data[$id]['gio_bien_soan'] += $gvbs->so_gio ?? 0;
+            }
+            // Người phản biện
+            foreach ($ct->bienBanHop as $bb) {
+                foreach ($bb->dsHop as $hop) {
+                    $id = $hop->vienChuc->id;
+                    if (!isset($data[$id])) {
+                        $data[$id] = [
+                            'ma_vien_chuc' => $hop->vienChuc->ma_vien_chuc ?? $hop->vienChuc->id,
+                            'ten' => $hop->vienChuc->name,
+                            'gio_bien_soan' => 0,
+                            'gio_phan_bien' => 0,
+                            'tong_gio' => 0,
+                        ];
+                    }
+                    $data[$id]['gio_phan_bien'] += $hop->so_gio ?? 0;
+                }
+            }
+        }
+        // Tổng giờ
+        foreach ($data as &$row) {
+            $row['tong_gio'] = $row['gio_bien_soan'] + $row['gio_phan_bien'];
+        }
+
+        // Xuất excel bằng ThongKeExport (tái sử dụng cấu trúc headings, collection)
+        $exportData = collect($data)->values();
+        $headings = [
+            'Mã viên chức', 'Tên', 'Tổng giờ biên soạn', 'Tổng giờ phản biện', 'Tổng giờ tham gia'
+        ];
+        $filename = 'thong_ke_gio_tham_gia.xlsx';
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\ThongKeExportSimple($exportData, $headings), $filename);
+    }
 } 

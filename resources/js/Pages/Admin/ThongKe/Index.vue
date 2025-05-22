@@ -172,6 +172,15 @@ const getStatusText = (status) => {
             return 'Không xác định';
     }
 };
+const exportExcelGioThamGia = () => {
+    const queryParams = new URLSearchParams({
+        khoa_id: selectedKhoa.value,
+        bomon_id: selectedBoMon.value,
+        hoc_ki: selectedHocKi.value,
+        nam_hoc: selectedNamHoc.value
+    }).toString();
+    window.location.href = route('quality.thongke.excel_gio_tham_gia') + '?' + queryParams;
+};
 </script>
 
 <template>
@@ -196,6 +205,9 @@ const getStatusText = (status) => {
                             <div class="col-md-4 text-end">
                                 <button class="btn btn-light" @click="exportExcel">
                                     <i class="fas fa-file-excel mr-1"></i> Xuất Excel
+                                </button>
+                                <button class="btn btn-warning ms-2" @click="exportExcelGioThamGia">
+                                    <i class="fas fa-file-excel mr-1"></i> Xuất Excel giờ tham gia
                                 </button>
                             </div>
                         </div>

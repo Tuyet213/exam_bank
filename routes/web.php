@@ -124,12 +124,15 @@
         // Thống kê
         Route::get('/thongke', [AdminThongKeController::class, 'index'])->name('admin.thongke.index');
         Route::get('/thongke/excel', [AdminThongKeController::class, 'exportExcel'])->name('admin.thongke.excel');
+        Route::get('/thongke/excel-gio-tham-gia', [AdminThongKeController::class, 'exportExcelGioThamGia'])->name('admin.thongke.excel_gio_tham_gia');
+        
         // Thống kê giảng viên
         Route::get('/thongke-giang-vien', [QualityThongKeGiangVienController::class, 'index'])->name('admin.thongke_giang_vien.index');
         Route::get('/thongke-giang-vien/excel', [QualityThongKeGiangVienController::class, 'exportExcel'])->name('quality.thongke_giang_vien.excel');
          // Thống kê học phần
          Route::get('/thongkehocphan', [ThongKeHocPhanController::class, 'index'])->name('admin.thongkehocphan.index');
          Route::get('/thongkehocphan/excel', [ThongKeHocPhanController::class, 'exportExcel'])->name('quality.thongkehocphan.excel');
+         
     });
 
 
@@ -232,7 +235,7 @@
         Route::get('/notice/show/{id}', [QualityOfficerController::class, 'show'])->name('qlo.notice.show');
         Route::get('/notice/index', [QualityOfficerController::class, 'index'])->name('qlo.notice.index');
     });
-    Route::prefix('quality')->name('quality.')->middleware(['auth', 'role:Admin'])->group(function () {
+    Route::prefix('quality')->name('quality.')->middleware(['auth', 'role:Nhân viên P.ĐBCL'])->group(function () {
         Route::get('/dsdangky', [App\Http\Controllers\QualityOffice\DSDangKyController::class, 'index'])->name('dsdangky.index');
         
         Route::get('/ctdsdangky/{id_ds_dang_ky}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'index'])->name('ctdsdangky.index');
@@ -265,6 +268,7 @@
         // Thống kê
         Route::get('/thongke', [QualityThongKeController::class, 'index'])->name('thongke.index');
         Route::get('/thongke/excel', [QualityThongKeController::class, 'exportExcel'])->name('thongke.excel');
+        Route::get('/thongke/excel-gio-tham-gia', [QualityThongKeController::class, 'exportExcelGioThamGia'])->name('thongke.excel_gio_tham_gia');
 
         // Thống kê giảng viên
         Route::get('/thongke-giang-vien', [QualityThongKeGiangVienController::class, 'index'])->name('thongke_giang_vien.index');
@@ -274,7 +278,7 @@
         Route::get('/thongkehocphan', [ThongKeHocPhanController::class, 'index'])->name('thongkehocphan.index');
         Route::get('/thongkehocphan/excel', [ThongKeHocPhanController::class, 'exportExcel'])->name('thongkehocphan.excel');
     });
-    Route::prefix('quality')->name('quality.')->middleware(['auth', 'permission:Duyệt danh sách đăng ký'])->group(function () {
+    Route::prefix('quality')->name('quality.')->middleware(['auth', 'role:Nhân viên P.ĐBCL'])->group(function () {
         Route::get('/dsdangky', [App\Http\Controllers\QualityOffice\DSDangKyController::class, 'index'])->name('dsdangky.index');
         
         Route::get('/ctdsdangky/{id_ds_dang_ky}', [App\Http\Controllers\QualityOffice\CTDSDangKyController::class, 'index'])->name('ctdsdangky.index');
