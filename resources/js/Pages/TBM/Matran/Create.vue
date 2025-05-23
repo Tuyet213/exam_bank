@@ -9,11 +9,13 @@ const props = defineProps({
   cdrs: Array,
   giao: Array,
   selectedHocPhan: [String, Number, null],
+  loai_ky: String,
   role: String
 });
 
 const form = reactive({
   hoc_phan: props.selectedHocPhan || '',
+  loai_ky: props.loai_ky || 'cuoi_ky',
   bang: {}, // {chuongId: {cdrId: {1: số, 2: số, 3: số}}}
 });
 
@@ -33,7 +35,18 @@ const tongSoCau = (cdrId, muc) => {
 
 const onHocPhanChange = (e) => {
   form.hoc_phan = e.target.value;
-  router.visit(route('tbm.matran.create', { hoc_phan_id: form.hoc_phan }), { preserveState: true });
+  router.visit(route('matran.create', { 
+    hoc_phan_id: form.hoc_phan,
+    loai_ky: form.loai_ky
+  }), { preserveState: true });
+};
+
+const onLoaiKyChange = (e) => {
+  form.loai_ky = e.target.value;
+  router.visit(route('matran.create', { 
+    hoc_phan_id: form.hoc_phan,
+    loai_ky: form.loai_ky
+  }), { preserveState: true });
 };
 
 // Khởi tạo bảng nhập liệu khi props.chuongs/cdrs/giao thay đổi
@@ -52,12 +65,15 @@ const initBang = () => {
 initBang();
 
 const submit = () => {
-  router.post(route('tbm.matran.store'), form);
+  router.post(route('matran.store'), form);
 };
 
 watch(() => form.hoc_phan, (newVal, oldVal) => {
   if (newVal && newVal !== oldVal) {
-    router.get(route('tbm.matran.create', { hoc_phan_id: newVal }), { preserveState: true, });
+    router.get(route('matran.create', { 
+      hoc_phan_id: newVal,
+      loai_ky: form.loai_ky
+    }), { preserveState: true });
   }
 });
 </script>
@@ -65,7 +81,7 @@ watch(() => form.hoc_phan, (newVal, oldVal) => {
   <AppLayout :role="role">
     <template #sub-link>
       <li class="breadcrumb-item active">
-        <a :href="route('tbm.matran.index')">Danh sách ma trận</a>
+        <a :href="route('matran.index', { loai_ky: form.loai_ky })">Danh sách ma trận</a>
       </li>
     </template>
     <template #content>
@@ -75,9 +91,27 @@ watch(() => form.hoc_phan, (newVal, oldVal) => {
         </div>
         <div class="card-body">
           <form @submit.prevent="submit">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Loại kỳ</label>
+              <div class="d-flex">
+                <div class="form-check me-4">
+                  <input class="form-check-input" type="radio" v-model="form.loai_ky" id="loai_ky_giua" value="giua_ky" @change="onLoaiKyChange">
+                  <label class="form-check-label" for="loai_ky_giua">
+                    Giữa kỳ
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" v-model="form.loai_ky" id="loai_ky_cuoi" value="cuoi_ky" @change="onLoaiKyChange">
+                  <label class="form-check-label" for="loai_ky_cuoi">
+                    Cuối kỳ
+                  </label>
+                </div>
+              </div>
+            </div>
+            
             <div class="mb-4">
               <label class="block font-bold mb-1">Học phần</label>
-              <select v-model="form.hoc_phan" class="form-control" required>
+              <select v-model="form.hoc_phan" class="form-control" required @change="onHocPhanChange">
                 <option value="">Chọn học phần</option>
                 <option v-for="hp in props.hocPhans" :key="hp.id" :value="hp.id">{{ hp.ten }}</option>
               </select>

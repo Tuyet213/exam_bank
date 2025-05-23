@@ -210,37 +210,35 @@ class DSBienBanController extends Controller
         return redirect()->back()->with('success', 'Biên bản đã bị từ chối.');
     }
     
-    public function download(BienBanHop $bienban)
+    public function download($id)
     {
         try {
-            // Kiểm tra cột file_path
-            if ($bienban->file_path && file_exists(storage_path('app/public/' . $bienban->file_path))) {
-                return response()->download(storage_path('app/public/' . $bienban->file_path));
-            }
+            $bienBan = BienBanHop::findOrFail($id);
             
-            // Kiểm tra cột noi_dung
-            if ($bienban->noi_dung) {
-                // Kiểm tra xem nội dung có phải đường dẫn đầy đủ hay không
-                if (file_exists(public_path($bienban->noi_dung))) {
-                    return response()->download(public_path($bienban->noi_dung));
-                }
-                
-                // Kiểm tra trong thư mục storage
-                if (file_exists(storage_path('app/public/' . $bienban->noi_dung))) {
-                    return response()->download(storage_path('app/public/' . $bienban->noi_dung));
-                }
+            if (!$bienBan->noi_dung) {
+                return back()->with([
+                    'type' => 'error',
+                    'message' => 'Không tìm thấy file biên bản!'
+                ]);
             }
+
+            $filePath = public_path($bienBan->noi_dung);
             
-            // Không tìm thấy file
-            return redirect()->back()->with('error', 'Không tìm thấy file biên bản.');
+            if (!file_exists($filePath)) {
+                return back()->with([
+                    'type' => 'error',
+                    'message' => 'File biên bản không tồn tại!'
+                ]);
+            }
+
+            return response()->download($filePath);
         } catch (\Exception $e) {
             Log::error('Lỗi tải xuống file:', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ]);
-            
-            return redirect()->back()->with('error', 'Có lỗi xảy ra khi tải xuống file: ' . $e->getMessage());
+           
         }
     }
 

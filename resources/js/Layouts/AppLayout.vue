@@ -123,6 +123,12 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                     <i class="fas fa-users"></i>
                     <Link :href="route('admin.user.index')">Users</Link>
                 </li>
+                <!-- <li>
+                    <i class="fas fa-question-circle"></i>
+                    <Link :href="route('cauhoi.hocphan')"
+                        >Danh sách câu hỏi</Link
+                    >
+                </li> -->
                 <li>
                     <i class="fas fa-chart-bar"></i>
                     <Link :href="route('admin.thongke.index')"
@@ -141,12 +147,7 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                         >Thống kê học phần biên soạn</Link
                     >
                 </li>
-                <li>
-                    <i class="fas fa-question-circle"></i>
-                    <Link :href="route('cauhoi.hocphan')"
-                        >Danh sách câu hỏi</Link
-                    >
-                </li>
+               
             </ul>
 
             <!-- Giảng viên Menu -->
@@ -249,7 +250,7 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                 </li>
                 <li>
                     <i class="fas fa-chart-bar"></i>
-                    <Link :href="route('tbm.matran.index')"
+                    <Link :href="route('matran.index')"
                         >Ma trận đề thi</Link
                     >
                 </li>
@@ -257,13 +258,13 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
 
             <!-- Chung cho tất cả các menu -->
             <div class="sidebar-footer">
-                <template v-if="role === 'admin'">
+                <!-- <template v-if="role === 'admin'">
                     <Link
                         class="btn btn-success w-100 mt-3"
                         :href="route('dashboard')"
                         >Client Page</Link
                     >
-                </template>
+                </template> -->
                 <Link
                     class="btn btn-success w-100 mt-3"
                     :href="route('logout')"

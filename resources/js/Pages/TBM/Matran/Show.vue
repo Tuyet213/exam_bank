@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { computed } from 'vue';
+import { ref } from 'vue';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
   hocPhan: Object,
@@ -9,6 +10,7 @@ const props = defineProps({
   giao: Array,
   bang: Object,
   id: [String, Number],
+  loai_ky: String,
   role: String
 });
 
@@ -25,28 +27,65 @@ const tongSoCau = (cdrId, muc) => {
   });
   return sum;
 };
+
+const onLoaiKyChange = (e) => {
+  router.visit(route('matran.show', { 
+    id: props.id,
+    loai_ky: e.target.value 
+  }), { preserveState: false });
+};
+
+const getLoaiKyText = (loai_ky) => {
+  return loai_ky === 'giua_ky' ? 'Giữa kỳ' : 'Cuối kỳ';
+};
 </script>
+
 <template>
   <AppLayout :role="role">
     <template #sub-link>
-      <li class="breadcrumb-item"><a :href="route('tbm.matran.index')">Danh sách ma trận</a></li>
+      <li class="breadcrumb-item">
+        <a :href="route('matran.index', { loai_ky: props.loai_ky })">Danh sách ma trận</a>
+      </li>
       <li class="breadcrumb-item active">Chi tiết ma trận</li>
     </template>
     <template #content>
       <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
           <h3 class="mb-0">CHI TIẾT MA TRẬN ĐỀ THI</h3>
+          <div>
+            <a :href="route('matran.edit', { id, loai_ky: props.loai_ky })" class="btn btn-primary">Chỉnh sửa</a>
+          </div>
         </div>
         <div class="card-body">
           <div class="mb-4">
-            <b>Mã học phần:</b> {{ hocPhan.id }}<br>
-            <b>Tên học phần:</b> {{ hocPhan.ten }}
+            <div class="mb-2"><b>Mã học phần:</b> {{ hocPhan.id }}</div>
+            <div class="mb-2"><b>Tên học phần:</b> {{ hocPhan.ten }}</div>
+            <div class="mb-2"><b>Loại kỳ:</b> {{ getLoaiKyText(props.loai_ky) }}</div>
           </div>
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold">Xem theo loại kỳ</label>
+            <div class="d-flex">
+              <div class="form-check me-4">
+                <input class="form-check-input" type="radio" :checked="props.loai_ky === 'giua_ky'" id="loai_ky_giua" value="giua_ky" @change="onLoaiKyChange">
+                <label class="form-check-label" for="loai_ky_giua">
+                  Giữa kỳ
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" :checked="props.loai_ky === 'cuoi_ky'" id="loai_ky_cuoi" value="cuoi_ky" @change="onLoaiKyChange">
+                <label class="form-check-label" for="loai_ky_cuoi">
+                  Cuối kỳ
+                </label>
+              </div>
+            </div>
+          </div>
+          
           <div v-if="chuongs.length && cdrs.length" class="mb-4 overflow-x-auto">
             <table class="table-auto border w-full">
               <thead>
                 <tr>
-                  <th class="border px-2 py-1 align-bottom" rowspan="2" style="width: 120px;">Chương/Chủ đề</th>
+                  <th class="border px-2 py-1 align-bottom" rowspan="2">Chương/Chủ đề</th>
                   <th class="border px-2 py-1 text-center" :colspan="cdrs.length">CDR</th>
                 </tr>
                 <tr>
@@ -55,13 +94,13 @@ const tongSoCau = (cdrId, muc) => {
               </thead>
               <tbody>
                 <tr v-for="chuong in chuongs" :key="chuong.id">
-                  <td class="border px-2 py-1 text-center">{{ chuong.ten }}</td>
+                  <td class="border px-2 py-1">{{ chuong.ten }}</td>
                   <td v-for="cdr in cdrs" :key="cdr.id" class="border px-2 py-1 text-center">
-                    <template v-if="isGiao(chuong.id, cdr.id)">
-                      <div class="flex flex-col items-center gap-1">
-                        <input :value="bang?.[chuong.id]?.[cdr.id]?.[1] || 0" type="number" readonly class="w-25 text-center border rounded mb-1 bg-light" />
-                        <input :value="bang?.[chuong.id]?.[cdr.id]?.[2] || 0" type="number" readonly class="w-25 text-center border rounded mb-1 bg-light" />
-                        <input :value="bang?.[chuong.id]?.[cdr.id]?.[3] || 0" type="number" readonly class="w-25 text-center border rounded bg-light" />
+                    <template v-if="isGiao(chuong.id, cdr.id) && bang[chuong.id]?.[cdr.id]">
+                      <div>
+                        <div>Dễ: {{ bang[chuong.id][cdr.id][1] }}</div>
+                        <div>TB: {{ bang[chuong.id][cdr.id][2] }}</div>
+                        <div>Khó: {{ bang[chuong.id][cdr.id][3] }}</div>
                       </div>
                     </template>
                     <template v-else>
@@ -70,7 +109,7 @@ const tongSoCau = (cdrId, muc) => {
                   </td>
                 </tr>
                 <tr>
-                  <td class="border px-2 py-1 font-bold text-center">Tổng số câu hỏi</td>
+                  <td class="border px-2 py-1 font-bold">Tổng số câu hỏi</td>
                   <td v-for="cdr in cdrs" :key="cdr.id" class="border px-2 py-1 text-center font-bold">
                     <span v-for="muc in [1,2,3]" :key="muc" class="mr-1">
                       {{ tongSoCau(cdr.id, muc) }}<span v-if="muc<3">/</span>
@@ -80,8 +119,12 @@ const tongSoCau = (cdrId, muc) => {
               </tbody>
             </table>
             <div class="mt-2 italic text-sm text-gray-600">
-              <b>Ghi chú:</b> (1) Số lượng câu hỏi Dễ, mức 1; (2) Số lượng câu hỏi Trung bình, mức 2; (3) Số lượng câu hỏi Khó, mức 3.
+              <b>Ghi chú:</b> Số lượng câu hỏi theo thứ tự: Dễ / Trung bình / Khó.
             </div>
+          </div>
+          
+          <div class="mt-4">
+            <a :href="route('matran.export', { id, loai_ky: props.loai_ky })" class="btn btn-success">Xuất đề thi</a>
           </div>
         </div>
       </div>

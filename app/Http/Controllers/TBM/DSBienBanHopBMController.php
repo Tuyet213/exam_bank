@@ -581,10 +581,7 @@ class DSBienBanHopBMController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ]);
-            return back()->with([
-                'type' => 'error',
-                'message' => 'Có lỗi xảy ra khi tải xuống file: ' . $e->getMessage()
-            ]);
+          
         }
     }
 

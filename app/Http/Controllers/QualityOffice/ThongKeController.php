@@ -15,6 +15,8 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ThongKeExport;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ThongKeController extends Controller
 {
@@ -23,6 +25,16 @@ class ThongKeController extends Controller
      */
     public function index(Request $request)
     {
+        $role = Auth::user()->getRoleNames();
+        Log::info($role);
+        if($role->contains('Nhân viên P.ĐBCL')){
+            Log::info('Nhân viên P.ĐBCL');
+            $role = 'dbcl';
+        }
+        elseif($role->contains('Admin')){
+            Log::info('Admin');
+            $role = 'admin';
+        }
         // Lấy danh sách các khoa, bộ môn, năm học, học kỳ để hiển thị trong bộ lọc
         $khoas = Khoa::where('able', true)->where('id', '!=', 'admin')->where('id', '!=', 'DBCL')->get();
         
@@ -50,6 +62,7 @@ class ThongKeController extends Controller
 
         // Trả về view với dữ liệu
         return Inertia::render('QualityOffice/ThongKe/Index', [
+            'role' => $role,
             'khoas' => $khoas,
             'bomons' => $bomons,
             'ds_hoc_ki' => $ds_hoc_ki,

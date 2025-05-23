@@ -10,11 +10,13 @@ const props = defineProps({
   giao: Array,
   bang: Object,
   id: [String, Number],
+  loai_ky: String,
   role: String
 });
 
 const form = reactive({
-  bang: JSON.parse(JSON.stringify(props.bang || {}))
+  bang: JSON.parse(JSON.stringify(props.bang || {})),
+  loai_ky: props.loai_ky || 'cuoi_ky'
 });
 
 const isGiao = (chuongId, cdrId) => {
@@ -31,14 +33,24 @@ const tongSoCau = (cdrId, muc) => {
   return sum;
 };
 
+const onLoaiKyChange = (e) => {
+  router.visit(route('matran.edit', { 
+    id: props.id,
+    loai_ky: e.target.value 
+  }), { preserveState: false });
+};
+
 const submit = () => {
-  router.put(route('tbm.matran.update', props.id), { bang: form.bang });
+  router.put(route('matran.update', props.id), { 
+    bang: form.bang,
+    loai_ky: form.loai_ky
+  });
 };
 </script>
 <template>
   <AppLayout :role="role">
     <template #sub-link>
-      <li class="breadcrumb-item"><a :href="route('tbm.matran.index')">Danh sách ma trận</a></li>
+      <li class="breadcrumb-item"><a :href="route('matran.index', { loai_ky: form.loai_ky })">Danh sách ma trận</a></li>
       <li class="breadcrumb-item active">Chỉnh sửa ma trận</li>
     </template>
     <template #content>
@@ -51,6 +63,25 @@ const submit = () => {
             <b>Mã học phần:</b> {{ hocPhan.id }}<br>
             <b>Tên học phần:</b> {{ hocPhan.ten }}
           </div>
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold">Loại kỳ</label>
+            <div class="d-flex">
+              <div class="form-check me-4">
+                <input class="form-check-input" type="radio" v-model="form.loai_ky" id="loai_ky_giua" value="giua_ky" @change="onLoaiKyChange">
+                <label class="form-check-label" for="loai_ky_giua">
+                  Giữa kỳ
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" v-model="form.loai_ky" id="loai_ky_cuoi" value="cuoi_ky" @change="onLoaiKyChange">
+                <label class="form-check-label" for="loai_ky_cuoi">
+                  Cuối kỳ
+                </label>
+              </div>
+            </div>
+          </div>
+          
           <form @submit.prevent="submit">
             <div v-if="chuongs.length && cdrs.length" class="mb-4 overflow-x-auto">
               <table class="table-auto border w-full">

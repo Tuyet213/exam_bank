@@ -12,7 +12,8 @@ const props = defineProps({
   id: [String, Number],
   soDe: [String, Number, null],
   dsDe: Array,
-  role: String
+  role: String,
+  loai_ky: String
 });
 
 const soDe = ref(props.soDe || '');
@@ -27,7 +28,11 @@ const submit = () => {
     alert('Vui lòng nhập số lượng đề hợp lệ!');
     return;
   }
-  router.get(route('tbm.matran.export', props.id), { so_de: soDe.value, loai_de: loaiDe.value }, { preserveState: true });
+  router.get(route('matran.export', props.id), { 
+    so_de: soDe.value, 
+    loai_de: loaiDe.value,
+    loai_ky: props.loai_ky
+  }, { preserveState: true });
 };
 
 const getTenChuong = (id) => {
@@ -46,34 +51,57 @@ const mucDoText = (muc) => {
   return muc;
 };
 
-const downloadDe = (idx) => {
-  // Gửi request tải file bộ đề idx (có thể dùng window.open hoặc router.get tuỳ backend)
-  window.open(route('tbm.matran.export-download', { id: props.id, de: idx + 1 }), '_blank');
-};
 
 const downloadDeFull = (idx) => {
-  window.open(route('tbm.matran.export-download', { id: props.id, de: idx + 1 }), '_blank');
+  // Lưu dữ liệu đề thi vào localStorage
+  localStorage.setItem('current_de', JSON.stringify(props.dsDe[idx]));
+  localStorage.setItem('current_de_index', idx.toString());
+  
+  // Mở URL tải xuống trong tab mới với tham số để báo hiệu sử dụng localStorage
+  window.open(route('matran.export-download-full', { 
+    id: props.id, 
+    de: idx + 1,
+    so_de: soDe.value,
+    loai_de: loaiDe.value,
+    loai_ky: props.loai_ky,
+    dsCauHoi: props.dsDe[idx],
+    use_localstorage: 'true'
+  }), '_blank');
 };
 
 const downloadDeSimple = (idx) => {
-  window.open(route('tbm.matran.export-download-simple', { id: props.id, de: idx + 1 }), '_blank');
+  // Lưu dữ liệu đề thi vào localStorage
+  localStorage.setItem('current_de', JSON.stringify(props.dsDe[idx]));
+  localStorage.setItem('current_de_index', idx.toString());
+  
+  // Mở URL tải xuống trong tab mới với tham số để báo hiệu sử dụng localStorage
+  window.open(route('matran.export-download-simple', { 
+    id: props.id, 
+    de: idx + 1,
+    so_de: soDe.value,
+    loai_de: loaiDe.value,
+    loai_ky: props.loai_ky,
+    dsCauHoi: props.dsDe[idx],
+    use_localstorage: 'true'
+  }), '_blank');
 };
 </script>
 <template>
   <AppLayout :role="role">
     <template #sub-link>
-      <li class="breadcrumb-item"><a :href="route('tbm.matran.index')">Danh sách ma trận</a></li>
+      <li class="breadcrumb-item"><a :href="route('matran.index')">Danh sách ma trận</a></li>
       <li class="breadcrumb-item active">Trích xuất đề thi</li>
     </template>
     <template #content>
       <div class="card mb-4">
         <div class="card-header">
-          <h3 class="mb-0">TRÍCH XUẤT ĐỀ THI</h3>
+          <h3 class="mb-0">TRÍCH XUẤT ĐỀ THI {{ loai_ky === 'giua_ky' ? 'GIỮA KỲ' : 'CUỐI KỲ' }}</h3>
         </div>
         <div class="card-body">
           <div class="mb-4">
             <b>Mã học phần:</b> {{ hocPhan.id }}<br>
-            <b>Tên học phần:</b> {{ hocPhan.ten }}
+            <b>Tên học phần:</b> {{ hocPhan.ten }}<br>
+            <b>Loại kỳ thi:</b> {{ loai_ky === 'giua_ky' ? 'Giữa kỳ' : 'Cuối kỳ' }}
           </div>
           <form @submit.prevent="submit" class="mb-4">
             <label class="font-bold mb-1">Nhập số lượng đề cần sinh</label>
@@ -90,10 +118,10 @@ const downloadDeSimple = (idx) => {
                 <b class="me-2">Đề số {{ idx + 1 }}</b>
                 <div class="ms-auto">
                   <button class="btn btn-outline-primary btn-sm me-2" @click="downloadDeFull(idx)">
-                    <i class="bi bi-download"></i> Download đầy đủ
+                    <i class="bi bi-download"></i> Download kèm đáp án
                   </button>
                   <button class="btn btn-outline-secondary btn-sm" @click="downloadDeSimple(idx)">
-                    <i class="bi bi-download"></i> Download đơn giản
+                    <i class="bi bi-download"></i> Download
                   </button>
                 </div>
               </div>

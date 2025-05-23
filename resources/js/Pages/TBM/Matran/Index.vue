@@ -7,17 +7,33 @@ const props = defineProps({
     allHocPhans: Array,
     hocPhans: Array,
     filters: Object,
+    loai_ky: String,
     role: String
 });
 
-const search = ref(props.filters?.search || '');
+const search = ref(props.filters.search || '');
+const loai_ky = ref(props.loai_ky || 'cuoi_ky');
 
-watch(search, (val) => {
-    router.get(route('tbm.matran.index'), { search: val }, { preserveState: true, replace: true });
+const handleSearch = () => {
+    router.get(route('matran.index'), {
+        search: search.value,
+        loai_ky: loai_ky.value
+    }, { preserveState: true, replace: true });
+};
+
+const handleLoaiKyChange = () => {
+    router.get(route('matran.index'), {
+        search: search.value,
+        loai_ky: loai_ky.value
+    }, { preserveState: true, replace: true });
+};
+
+watch(loai_ky, () => {
+    handleLoaiKyChange();
 });
 
-const goTo = (routeName, id) => {
-    router.visit(route(routeName, id));
+const goTo = (routeName, params) => {
+    router.visit(route(routeName, params));
 };
 
 const deleteMatran = (id) => {
@@ -27,9 +43,10 @@ const deleteMatran = (id) => {
 };
 
 const exportDe = (hocPhanId) => {
-    
-    router.get(route('tbm.matran.export', hocPhanId));
-    
+    router.get(route('matran.export', { 
+        id: hocPhanId,
+        loai_ky: loai_ky.value
+    }));
 };
 </script>
 <template>
@@ -42,16 +59,29 @@ const exportDe = (hocPhanId) => {
         <div class="card-header bg-success-tb text-white">
           <div class="d-flex justify-content-between align-items-center">
             <h3 class="mb-0">DANH SÁCH MA TRẬN ĐỀ THI</h3>
-            <button class="btn btn-light" @click="() => router.get(route('tbm.matran.create'))">
+            <button class="btn btn-light" @click="() => router.get(route('matran.create', { loai_ky: loai_ky }))">
               <i class="fas fa-plus"></i> Tạo ma trận mới
             </button>
           </div>
         </div>
         <div class="card-body">
-          <!-- Bộ tìm kiếm học phần -->
-          <div class="mb-4">
-            <label class="font-bold mb-1">Tìm kiếm học phần</label>
-            <input v-model="search" class="form-control" placeholder="Nhập tên hoặc mã học phần..." />
+          <div class="mb-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex w-md-50">
+              <input type="text" v-model="search" placeholder="Tìm kiếm..." class="form-control me-2" @keyup.enter="handleSearch">
+              <button @click="handleSearch" class="btn btn-primary">Tìm</button>
+            </div>
+            
+            <div class="d-flex align-items-center">
+              <label class="me-2 mb-0 fw-bold">Loại kỳ:</label>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" id="loai_ky_giua" v-model="loai_ky" value="giua_ky">
+                <label class="form-check-label" for="loai_ky_giua">Giữa kỳ</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" id="loai_ky_cuoi" v-model="loai_ky" value="cuoi_ky">
+                <label class="form-check-label" for="loai_ky_cuoi">Cuối kỳ</label>
+              </div>
+            </div>
           </div>
 
           <!-- Danh sách học phần đã có ma trận -->
@@ -59,28 +89,42 @@ const exportDe = (hocPhanId) => {
             <table class="table table-bordered table-hover">
               <thead class="table-light">
                 <tr>
-                  <th>STT</th>
+                  <th class="text-center">STT</th>
                   <th>Mã học phần</th>
                   <th>Tên học phần</th>
+                  <th class="text-center">Số chương</th>
+                  <th class="text-center">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(hp, idx) in hocPhans" :key="hp.id">
-                  <td>{{ idx + 1 }}</td>
+                  <td class="text-center">{{ idx + 1 }}</td>
                   <td>{{ hp.id }}</td>
                   <td>{{ hp.ten }}</td>
-                  <td>
-                    <button class="btn btn-info btn-sm me-1" @click="goTo('tbm.matran.show', hp.id)"><i class="fas fa-eye"></i></button>
-                    <button class="btn btn-warning btn-sm me-1" @click="goTo('tbm.matran.edit', hp.id)"><i class="fas fa-edit"></i></button>
-                    
-                    <button class="btn btn-secondary btn-sm" @click="exportDe(hp.id)"><i class="fas fa-file-export"></i></button>
+                  <td class="text-center">{{ hp.chuongs_count }}</td>
+                  <td class="text-center">
+                    <a :href="route('matran.show', { id: hp.id, loai_ky: loai_ky })" class="btn btn-sm btn-info mx-1">
+                      <i class="fas fa-eye"></i> Xem
+                    </a>
+                    <a :href="route('matran.edit', { id: hp.id, loai_ky: loai_ky })" class="btn btn-sm btn-primary mx-1 mt-1">
+                      <i class="fas fa-edit"></i> Sửa
+                    </a>
+                    <a :href="route('matran.export', { id: hp.id, loai_ky: loai_ky })" class="btn btn-sm btn-secondary mx-1 mt-1">
+                      <i class="fas fa-file-export"></i> Xuất đề
+                    </a>
                   </td>
                 </tr>
                 <tr v-if="hocPhans.length === 0">
-                  <td colspan="5" class="text-center">Không có dữ liệu</td>
+                  <td colspan="5" class="text-center py-3">Không có ma trận {{ loai_ky === 'giua_ky' ? 'giữa kỳ' : 'cuối kỳ' }} nào</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+          
+          <div class="mt-4">
+            <a :href="route('matran.create', { loai_ky: loai_ky })" class="btn btn-success">
+              <i class="fas fa-plus"></i> Tạo ma trận mới
+            </a>
           </div>
         </div>
       </div>

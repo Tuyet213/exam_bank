@@ -17,7 +17,7 @@ class CauHoiController extends Controller
     public function danhSachHocPhan(Request $request)
     {
         $user = Auth::user();
-        $roles = $user->roles()->pluck('name');
+        $roles = $user->roles->pluck('name');
         $role = 'user';
         
         if($roles->contains('Giảng viên')){
@@ -232,12 +232,6 @@ class CauHoiController extends Controller
             'file' => 'required|file|mimes:docx,doc',
             'id_ct_ds_dang_ky' => 'required|exists:c_t_d_s_dang_kies,id',
         ]);
-
-        Log::info('Bắt đầu upload file ngân hàng câu hỏi', [
-            'id_ct_ds_dang_ky' => $request->id_ct_ds_dang_ky,
-            'file_name' => $request->file('file')->getClientOriginalName(),
-        ]);
-
         $ctDangKy = CTDSDangKy::with([
             'hocPhan', 'hocPhan.chuongs', 'hocPhan.chuanDauRas',
             'dsGvBienSoans.vienChuc', 'dsDangKy'
@@ -248,8 +242,7 @@ class CauHoiController extends Controller
             $file = $request->file('file');
             $filePath = $file->getRealPath();
             $phpWord = \PhpOffice\PhpWord\IOFactory::load($filePath);
-            Log::info('Đã load file Word thành công');
-
+          
             $fileInfo = [
                 'isTracNghiem' => null,
                 'tenHocPhan' => '',
@@ -293,6 +286,9 @@ class CauHoiController extends Controller
                         }
                     }
                 }
+            }
+            foreach ($allTexts as $text) {
+                Log::info('text', ['text' => $text]);
             }
 
             foreach ($allTexts as $text) {
@@ -408,6 +404,20 @@ class CauHoiController extends Controller
                             case 'khó': $currentQuestion['muc_do'] = 3; break;
                         }
                         Log::info('Cập nhật mức độ câu hỏi', ['muc_do' => $currentQuestion['muc_do']]);
+                    }
+                    continue;
+                }
+                
+                // Thêm điều kiện kiểm tra mức độ khi xuất hiện độc lập
+                if (preg_match('/^(Dễ|Trung bình|Khó)$/i', $text, $matches)) {
+                    if ($currentQuestion) {
+                        $mucDoText = strtolower($matches[1]);
+                        switch ($mucDoText) {
+                            case 'dễ': $currentQuestion['muc_do'] = 1; break;
+                            case 'trung bình': $currentQuestion['muc_do'] = 2; break;
+                            case 'khó': $currentQuestion['muc_do'] = 3; break;
+                        }
+                        Log::info('Cập nhật mức độ câu hỏi từ văn bản độc lập', ['mucDoText' => $mucDoText, 'muc_do' => $currentQuestion['muc_do']]);
                     }
                     continue;
                 }
@@ -973,7 +983,7 @@ class CauHoiController extends Controller
                     $cell->addText($qIndex, $fontStyle, $paragraphStyle);
                     
                     $table->addCell(4000, $cellStyle)->addText('Câu hỏi: .........................................');
-                    $table->addCell(1500, $cellStyle)->addText('..........d');
+                    $table->addCell(1500, $cellStyle)->addText('..........đ');
                     $table->addCell(1500, $cellStyle)->addText('.........');
                     
                     // Đáp án
@@ -990,7 +1000,7 @@ class CauHoiController extends Controller
                             $table->addRow();
                             $table->addCell(1000, ['vMerge' => 'continue']);
                             $table->addCell(4000, $cellStyle)->addText("$option. .......................................");
-                            $table->addCell(1500, $cellStyle)->addText('..........d');
+                            $table->addCell(1500, $cellStyle)->addText('..........đ');
                             $table->addCell(1500, $cellStyle);
                         }
                     } else {
@@ -1000,7 +1010,7 @@ class CauHoiController extends Controller
                             $table->addRow();
                             $table->addCell(1000, ['vMerge' => 'continue']);
                             $table->addCell(4000, $cellStyle)->addText($text);
-                            $table->addCell(1500, $cellStyle)->addText('..........d');
+                            $table->addCell(1500, $cellStyle)->addText('..........đ');
                             $table->addCell(1500, $cellStyle);
                         }
                     }
@@ -1011,7 +1021,7 @@ class CauHoiController extends Controller
         // Tổng điểm
         $table->addRow();
         $table->addCell(5000, ['gridSpan' => 2, 'valign' => 'center'])->addText('Tổng điểm', ['alignment' => 'center']);
-        $table->addCell(1500, $cellStyle)->addText('..........d');
+        $table->addCell(1500, $cellStyle)->addText('..........đ');
         $table->addCell(1500, $cellStyle);
         
         // Thêm phần ký
