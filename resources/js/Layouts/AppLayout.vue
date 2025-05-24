@@ -173,12 +173,12 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                         >Thông báo quy định</Link
                     >
                 </li>
-                <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
+                <!-- <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
                     <i class="fas fa-users"></i>
                     <Link :href="route('qlo.notice.create')"
                         >Thông báo quy định</Link
                     >
-                </li>
+                </li> -->
                 <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
                     <i class="fas fa-users"></i>
                     <Link :href="route('quality.dsdangky.index')"
@@ -188,7 +188,7 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                 <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
                     <i class="fas fa-users"></i>
                     <Link :href="route('quality.dsbienban.index')"
-                        >Danh sách biên bản họp cấp Bộ môn</Link
+                        >Danh sách biên nghiệm thu</Link
                     >
                 </li>
                 <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
@@ -239,7 +239,7 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                 <li>
                     <i class="fas fa-users"></i>
                     <Link :href="route('tbm.dsbienban.index')"
-                        >Danh sách biên bản họp cấp bộ môn</Link
+                        >Danh sách biên bản nghiệm thu</Link
                     >
                 </li>
                 <li>

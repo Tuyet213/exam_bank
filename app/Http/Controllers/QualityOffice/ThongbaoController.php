@@ -37,41 +37,36 @@ class ThongbaoController extends Controller
 
     public function store(Request $request)
     {
-       
-
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'files.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240'
+            'files' => 'nullable|file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240'
         ]);
 
-        $attachments = [];
-        $files = $request->file('files');
-        Log::info('FILES', ['files' => $files]);
-        if ($files) {
-            foreach (is_array($files) ? $files : [$files] as $file) {
-                $fileName = uniqid() . '_' . $file->getClientOriginalName();
-                $filePath = $file->storeAs('public/thongbao', $fileName);
-                $attachments[] = storage_path('app/' . $filePath);
-            }
+        $attachment = null;
+        $file = $request->file('files');
+        if ($file) {
+            $fileName = uniqid() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('storage/thongbao'), $fileName);
+            $attachment = 'storage/thongbao/' . $fileName;
         }
 
-        $thongbao = ThongBao::create([
-            'title' => $request->title,
-            'content' => $request->content,
-            'files' => json_encode($attachments),
-            'able' => true
-        ]);
-
         $truongBoMons = User::where('able', true)
-            ->whereHas('roles', function($q) {
+            ->whereHas('roles', function ($q) {
                 $q->where('name', 'Trưởng Bộ Môn');
             })->get();
 
         foreach ($truongBoMons as $truongBoMon) {
             Mail::to($truongBoMon->email)
-                ->send(new NoticeMail($request->title, $request->content, $attachments));
+                ->send(new NoticeMail($request->title, $request->content, $attachment));
         }
+
+        $thongbao = ThongBao::create([
+            'title' => $request->title,
+            'content' => $request->content,
+            'files' => $attachment ? json_encode([$attachment]) : null,
+            'able' => true
+        ]);
 
         return redirect()->route('quality.thongbao.index')
             ->with('success', 'Thông báo đã được tạo và gửi email thành công đến tất cả Trưởng Bộ Môn');

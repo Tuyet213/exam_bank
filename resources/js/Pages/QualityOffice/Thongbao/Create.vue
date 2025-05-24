@@ -62,7 +62,6 @@
                                         ref="fileInput"
                                         class="form-control" 
                                         :class="{ 'is-invalid': form.errors.files }"
-                                        multiple
                                         @change="handleFileUpload"
                                     />
                                     <button 
@@ -81,18 +80,18 @@
                                 </div>
                                 
                                 <!-- Hiển thị file đã chọn -->
-                                <div v-if="selectedFiles.length > 0" class="mt-3">
-                                    <p class="mb-2">Đã chọn {{ selectedFiles.length }} file:</p>
+                                <div v-if="selectedFile" class="mt-3">
+                                    <p class="mb-2">Đã chọn 1 file:</p>
                                     <ul class="list-group">
-                                        <li v-for="(file, index) in selectedFiles" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <div>
-                                                <i :class="getFileIcon(file.type)" class="me-2"></i>
-                                                {{ file.name }} ({{ formatFileSize(file.size) }})
+                                                <i :class="getFileIcon(selectedFile.type)" class="me-2"></i>
+                                                {{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})
                                             </div>
                                             <button 
                                                 type="button" 
                                                 class="btn btn-sm btn-outline-danger"
-                                                @click="removeFile(index)"
+                                                @click="clearFiles"
                                             >
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -135,29 +134,23 @@ import { ref } from 'vue';
 const form = useForm({
     title: '',
     content: '',
-    files: []
+    files: null
 });
 
-const selectedFiles = ref([]);
+const selectedFile = ref(null);
 const fileInput = ref(null);
 
 // Xử lý khi upload file
 const handleFileUpload = (event) => {
-    const files = Array.from(event.target.files);
-    selectedFiles.value = files;
-    form.files = files;
+    const file = event.target.files[0];
+    selectedFile.value = file;
+    form.files = file;
 };
 
-// Xóa một file cụ thể
-const removeFile = (index) => {
-    selectedFiles.value.splice(index, 1);
-    form.files = selectedFiles.value;
-};
-
-// Xóa tất cả file
+// Xóa file đã chọn
 const clearFiles = () => {
-    selectedFiles.value = [];
-    form.files = [];
+    selectedFile.value = null;
+    form.files = null;
     if (fileInput.value) {
         fileInput.value.value = '';
     }
@@ -193,7 +186,7 @@ const submit = () => {
         preserveScroll: true,
         onSuccess: () => {
             form.reset();
-            selectedFiles.value = [];
+            selectedFile.value = null;
         }
     });
 };
