@@ -13,13 +13,13 @@ class NoticeMail extends Mailable
 
     public $title;
     public $content;
-    public $attachments;
+    public $attachment;
 
-    public function __construct($title, $content, $attachments = null)
+    public function __construct($title, $content, $attachment = null)
     {
         $this->title = $title;
         $this->content = $content;
-        $this->attachments = $attachments;
+        $this->attachment = $attachment;
     }
 
     public function envelope(): \Illuminate\Mail\Mailables\Envelope
@@ -38,14 +38,9 @@ class NoticeMail extends Mailable
 
     public function attachments(): array
     {
-        $attachmentArray = [];
-        if (is_array($this->attachments)) {
-            foreach ($this->attachments as $filePath) {
-                $attachmentArray[] = \Illuminate\Mail\Mailables\Attachment::fromPath($filePath);
-            }
-        } elseif ($this->attachments) {
-            $attachmentArray[] = \Illuminate\Mail\Mailables\Attachment::fromPath($this->attachments);
+        if ($this->attachment) {
+            return [\Illuminate\Mail\Mailables\Attachment::fromPath($this->attachment)];
         }
-        return $attachmentArray;
+        return [];
     }
 }

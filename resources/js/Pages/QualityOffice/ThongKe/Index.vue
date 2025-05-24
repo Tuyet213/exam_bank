@@ -5,6 +5,10 @@ import { ref, watch, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
+    role: {
+        type: String,
+        default: () => ''
+    },
     khoas: {
         type: Array,
         default: () => []
@@ -185,7 +189,7 @@ const exportExcelGioThamGia = () => {
 </script>
 
 <template>
-    <AppLayout role="dbcl">
+    <AppLayout :role="role">
         <template #sub-link>
             <li class="breadcrumb-item active">
                 <a :href="route('quality.thongke.index')">Thống kê biên soạn</a>
@@ -207,7 +211,7 @@ const exportExcelGioThamGia = () => {
                                 <button class="btn btn-light" @click="exportExcel">
                                     <i class="fas fa-file-excel mr-1"></i> Xuất Excel
                                 </button>
-                                <button class="btn btn-warning ms-2" @click="exportExcelGioThamGia">
+                                <button class="btn btn-warning ms-2 mt-2" @click="exportExcelGioThamGia">
                                     <i class="fas fa-file-excel mr-1"></i> Xuất Excel giờ tham gia
                                 </button>
                             </div>

@@ -18,7 +18,8 @@ class MaTran extends Model
         'able',
         'so_cau_de',
         'so_cau_tb',
-        'so_cau_kho',
+        'so_cau_kho',       
+        'loai_ky',
     ];
 
 

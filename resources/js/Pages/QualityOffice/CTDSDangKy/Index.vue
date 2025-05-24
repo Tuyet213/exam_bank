@@ -98,7 +98,7 @@ const handleSubmit = () => {
                                 </h3>
                                 <div class="mt-3">
                             <p class="mb-1"><strong>Bộ môn:</strong> {{ dsdangky.bo_mon?.ten }}</p>
-                            <p class="mb-1"><strong>Thời gian:</strong> {{ formatDate(dsdangky.thoi_gian) }}</p>
+                            <!-- <p class="mb-1"><strong>Thời gian:</strong> {{ formatDate(dsdangky.thoi_gian) }}</p> -->
                             
                         </div>
                             </div>

@@ -69,9 +69,9 @@ onMounted(() => {
                                 </div>
                                 <div v-else>
                                     <div class="btn-group mb-4">
-                                        <a :href="route('cauhoi.download_mau_import', { type: 'tu_luan' })" class="btn btn-info">
+                                        <!-- <a :href="route('cauhoi.download_mau_import', { type: 'tu_luan' })" class="btn btn-info">
                                             Tải file mẫu chuẩn
-                                        </a>
+                                        </a> -->
                                         <a :href="downloadTemplateUrl" class="btn btn-success">
                                             Tải file mẫu tùy chỉnh
                                         </a>

@@ -12,7 +12,7 @@
         <template v-slot:content>
             <div class="content">
                 <div class="card border-radius-lg shadow-lg animated-fade-in mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-info-qo text-white p-4">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-info-qo text-white p-4 bg-success-tb">
                         <h3 class="mb-0">CHI TIẾT THÔNG BÁO</h3>
                         <div class="timestamp">
                             <i class="far fa-clock me-2"></i>
@@ -45,13 +45,13 @@
                                 <a 
                                     v-for="(file, index) in thongbao.files" 
                                     :key="index"
-                                    :href="file.url"
+                                    :href="getFileUrl(file)"
                                     target="_blank"
                                     class="list-group-item list-group-item-action d-flex align-items-center"
                                 >
-                                    <i :class="getFileIcon(file.name)" class="me-3 fa-lg"></i>
+                                    <i :class="getFileIcon(file)" class="me-3 fa-lg"></i>
                                     <div class="ms-2 me-auto">
-                                        <div class="fw-bold">{{ file.name }}</div>
+                                        <div class="fw-bold">{{ getFileName(file) }}</div>
                                     </div>
                                     <i class="fas fa-download ms-3"></i>
                                 </a>
@@ -102,21 +102,24 @@ const contentParagraphs = computed(() => {
 });
 
 // Xác định icon cho loại file
-const getFileIcon = (fileName) => {
-    const extension = fileName.split('.').pop().toLowerCase();
-    
-    const iconMap = {
-        'pdf': 'fas fa-file-pdf text-danger',
-        'doc': 'fas fa-file-word text-primary',
-        'docx': 'fas fa-file-word text-primary',
-        'xls': 'fas fa-file-excel text-success',
-        'xlsx': 'fas fa-file-excel text-success',
-        'jpg': 'fas fa-file-image text-info',
-        'jpeg': 'fas fa-file-image text-info',
-        'png': 'fas fa-file-image text-info',
-        'gif': 'fas fa-file-image text-info'
-    };
-    
-    return iconMap[extension] || 'fas fa-file text-secondary';
+const getFileIcon = (filePath) => {
+    if (!filePath || typeof filePath !== 'string') return 'fas fa-file text-secondary';
+    const ext = filePath.split('.').pop().toLowerCase();
+    if (['pdf'].includes(ext)) return 'fas fa-file-pdf text-danger';
+    if (['doc', 'docx'].includes(ext)) return 'fas fa-file-word text-primary';
+    if (['xls', 'xlsx'].includes(ext)) return 'fas fa-file-excel text-success';
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) return 'fas fa-file-image text-info';
+    return 'fas fa-file text-secondary';
+};
+
+const getFileName = (filePath) => {
+    if (!filePath || typeof filePath !== 'string') return '';
+    return filePath.split('/').pop();
+};
+
+const getFileUrl = (filePath) => {
+    if (!filePath) return '#';
+    // Nếu đã lưu là 'storage/thongbao/abc.docx' thì chỉ cần thêm dấu / đầu
+    return '/' + filePath.replace(/^\/+/, '');
 };
 </script>

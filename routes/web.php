@@ -122,9 +122,9 @@
         Route::delete('/gioquydoi/destroy/{id}', [GioQuyDoiController::class, 'destroy'])->name('admin.gioquydoi.destroy');
         
         // Thống kê
-        Route::get('/thongke', [AdminThongKeController::class, 'index'])->name('admin.thongke.index');
-        Route::get('/thongke/excel', [AdminThongKeController::class, 'exportExcel'])->name('admin.thongke.excel');
-        Route::get('/thongke/excel-gio-tham-gia', [AdminThongKeController::class, 'exportExcelGioThamGia'])->name('admin.thongke.excel_gio_tham_gia');
+        Route::get('/thongke', [QualityThongKeController::class, 'index'])->name('admin.thongke.index');
+        Route::get('/thongke/excel', [QualityThongKeController::class, 'exportExcel'])->name('admin.thongke.excel');
+        Route::get('/thongke/excel-gio-tham-gia', [QualityThongKeController::class, 'exportExcelGioThamGia'])->name('quality.thongke.excel_gio_tham_gia');
         
         // Thống kê giảng viên
         Route::get('/thongke-giang-vien', [QualityThongKeGiangVienController::class, 'index'])->name('admin.thongke_giang_vien.index');
@@ -198,17 +198,7 @@
         Route::post('/dsbienban/{id}/send-notification', [DSBienBanHopBMController::class, 'sendNotification'])->name('tbm.dsbienban.send-notification');
         
        
-        Route::get('matran/index', [\App\Http\Controllers\TBM\MatranController::class, 'index'])->name('tbm.matran.index');
-        Route::get('matran/create', [\App\Http\Controllers\TBM\MatranController::class, 'create'])->name('tbm.matran.create');
-        Route::post('matran', [\App\Http\Controllers\TBM\MatranController::class, 'store'])->name('tbm.matran.store');
-        Route::get('matran/{id}', [\App\Http\Controllers\TBM\MatranController::class, 'show'])->name('tbm.matran.show');
-        Route::get('matran/{id}/edit', [\App\Http\Controllers\TBM\MatranController::class, 'edit'])->name('tbm.matran.edit');
-        Route::put('matran/{id}', [\App\Http\Controllers\TBM\MatranController::class, 'update'])->name('tbm.matran.update');
-        Route::delete('matran/{id}', [\App\Http\Controllers\TBM\MatranController::class, 'destroy'])->name('tbm.matran.destroy');
-        Route::get('tbm/matran/{id}/export', [\App\Http\Controllers\TBM\MatranController::class, 'export'])->name('tbm.matran.export');
-        Route::get('tbm/matran/{id}/export-download', [App\Http\Controllers\TBM\MatranController::class, 'exportDownload'])->name('tbm.matran.export-download');
-        Route::get('tbm/matran/{id}/export-download-full', [App\Http\Controllers\TBM\MatranController::class, 'exportDownloadFull'])->name('tbm.matran.export-download-full');
-        Route::get('tbm/matran/{id}/export-download-simple', [App\Http\Controllers\TBM\MatranController::class, 'exportDownloadSimple'])->name('tbm.matran.export-download-simple');
+        
     });
     Route::middleware('auth')->group(function () {
         Route::get('/admin/profile', [ProfileController::class, 'edit'])->name('admin.profile.edit');
@@ -216,9 +206,9 @@
         Route::delete('/admin/profile', [ProfileController::class, 'destroy'])->name('admin.profile.destroy');
     });
 
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->middleware(['auth'])->name('dashboard');
+    // Route::get('/dashboard', function () {
+    //     return Inertia::render('Dashboard');
+    // })->middleware(['auth'])->name('dashboard');
 
     // Route::middleware('auth')->group(function () {
     //     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -255,7 +245,9 @@
         Route::get('/dsbienban/{bienban}', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'show'])->name('dsbienban.show');
         Route::get('/dsbienban/{bienban}/approve', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'approve'])->name('dsbienban.approve');
         Route::get('/dsbienban/{bienban}/reject', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'reject'])->name('dsbienban.reject');
+
         Route::get('/dsbienban/{bienban}/download', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'download'])->name('dsbienban.download');
+        
         Route::post('/dsbienban/{bienban}/approve-with-email', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'approveWithEmail'])->name('dsbienban.approve-with-email');
         Route::post('/dsbienban/{bienban}/reject-with-email', [App\Http\Controllers\QualityOffice\DSBienBanController::class, 'rejectWithEmail'])->name('dsbienban.reject-with-email');
         
@@ -367,6 +359,23 @@
         Route::get('/download-mau-import/{type}', [CauHoiController::class, 'downloadMauImport'])
             ->name('download_mau_import');
         Route::get('/download-template/{id}', [CauHoiController::class, 'downloadTemplate'])->name('download_template');
+    });
+    Route::prefix('matran')->middleware(['auth'])->group(function () {
+        Route::get('/index', [\App\Http\Controllers\TBM\MatranController::class, 'index'])->name('matran.index');
+        Route::get('/create', [\App\Http\Controllers\TBM\MatranController::class, 'create'])->name('matran.create');
+        Route::post('/', [\App\Http\Controllers\TBM\MatranController::class, 'store'])->name('matran.store');
+        Route::get('/{id}', [\App\Http\Controllers\TBM\MatranController::class, 'show'])->name('matran.show');
+        Route::get('/{id}/edit', [\App\Http\Controllers\TBM\MatranController::class, 'edit'])->name('matran.edit');
+        Route::put('/{id}', [\App\Http\Controllers\TBM\MatranController::class, 'update'])->name('matran.update');
+        Route::delete('/{id}', [\App\Http\Controllers\TBM\MatranController::class, 'destroy'])->name('matran.destroy');
+        Route::get('/{id}/export', [\App\Http\Controllers\TBM\MatranController::class, 'export'])->name('matran.export');
+       
+       
+
+        Route::get('/{id}/export-download-full', [App\Http\Controllers\TBM\MatranController::class, 'exportDownloadFull'])->name('matran.export-download-full');
+
+        Route::get('/{id}/export-download-simple', [App\Http\Controllers\TBM\MatranController::class, 'exportDownloadSimple'])->name('matran.export-download-simple');
+        
     });
     Route::get('/blank', function () {
         return Inertia::render('Blank');
