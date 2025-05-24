@@ -1,0 +1,48 @@
+# Hướng dẫn về chứng chỉ SSL tự ký
+
+## Thông tin về chứng chỉ đã cài đặt
+
+Bạn đã được cài đặt một chứng chỉ SSL tự ký (self-signed certificate) cho địa chỉ IP 117.2.18.234. Vì bạn đang sử dụng địa chỉ IP thay vì tên miền, không thể sử dụng Let's Encrypt để lấy chứng chỉ miễn phí và được tin cậy.
+
+## Lý do gặp lỗi "Không bảo mật" trên trình duyệt
+
+Các trình duyệt web sẽ hiển thị cảnh báo về kết nối không an toàn khi truy cập website với chứng chỉ tự ký vì:
+1. Chứng chỉ không được cấp bởi một Certification Authority (CA) được tin cậy
+2. Trình duyệt không thể xác minh danh tính của website
+
+## Giải pháp
+
+### Để người dùng truy cập mà không gặp cảnh báo
+
+1. **Cách tốt nhất: Đăng ký tên miền và sử dụng Let's Encrypt**
+   - Đăng ký một tên miền (ví dụ: exambank.vn)
+   - Trỏ tên miền về IP server của bạn (117.2.18.234)
+   - Chạy lệnh: `sudo certbot --nginx -d tenmien.vn`
+
+2. **Tạm thời: Hướng dẫn người dùng chấp nhận chứng chỉ tự ký**
+   - **Chrome/Edge**: Khi gặp cảnh báo, nhấp vào "Advanced" > "Proceed to 117.2.18.234 (unsafe)"
+   - **Firefox**: Nhấp vào "Advanced" > "Accept the Risk and Continue"
+   - **Safari**: Nhấp vào "Show Details" > "visit this website"
+
+## Thông tin kỹ thuật
+
+Chứng chỉ tự ký đã được tạo với thông tin sau:
+- Thời hạn: 10 năm (3650 ngày)
+- Thuật toán: RSA 2048-bit
+- Common Name (CN): 117.2.18.234
+- Subject Alternative Name (SAN): IP:117.2.18.234
+- Đường dẫn chứng chỉ: /etc/nginx/ssl/nginx.crt
+- Đường dẫn khóa: /etc/nginx/ssl/nginx.key
+
+## Kiểm tra trạng thái
+
+Để kiểm tra xem cấu hình SSL đã hoạt động chưa:
+```
+curl -k https://117.2.18.234
+```
+
+Nếu bạn nhận được nội dung HTML của trang web, SSL đã được cấu hình đúng.
+
+## Khuyến nghị
+
+Để có website chuyên nghiệp và không gặp cảnh báo bảo mật, vui lòng đăng ký tên miền và cài đặt chứng chỉ Let's Encrypt. 
