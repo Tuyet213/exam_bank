@@ -75,7 +75,7 @@ const performSearch = () => {
     }
     debounceTimeout.value = setTimeout(() => {
         router.get(
-            route('quality.thongke_giang_vien.index'),
+            route('thongke_giang_vien.index'),
             { 
                 khoa_id: selectedKhoa.value,
                 bomon_id: selectedBoMon.value,
@@ -136,7 +136,7 @@ const exportExcel = () => {
         nam_hoc: selectedNamHoc.value
     }).toString();
     
-    window.location.href = route('quality.thongke_giang_vien.excel') + '?' + queryParams;
+    window.location.href = route('thongke_giang_vien.excel') + '?' + queryParams;
 };
 
 // Các hàm xử lý chọn lọc
@@ -306,7 +306,7 @@ const computedPieData = computed(() => {
     <AppLayout :role="role">
         <template #sub-link>
             <li class="breadcrumb-item active">
-                <a :href="route('quality.thongke_giang_vien.index')">Thống kê giảng viên</a>
+                <a :href="route('thongke_giang_vien.index')">Thống kê giảng viên</a>
             </li>
         </template>
 

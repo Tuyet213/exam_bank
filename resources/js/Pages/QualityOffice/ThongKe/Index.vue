@@ -89,7 +89,7 @@ const performSearch = () => {
     }
     debounceTimeout.value = setTimeout(() => {
         router.get(
-            route('quality.thongke.index'),
+            route('thongke.index'),
             { 
                 khoa_id: selectedKhoa.value,
                 bomon_id: selectedBoMon.value,
@@ -141,7 +141,7 @@ const exportExcel = () => {
         nam_hoc: selectedNamHoc.value
     }).toString();
     
-    window.location.href = route('quality.thongke.excel') + '?' + queryParams;
+    window.location.href = route('thongke.excel') + '?' + queryParams;
 };
 
 // Thêm các phương thức xử lý trạng thái
@@ -184,7 +184,7 @@ const exportExcelGioThamGia = () => {
         hoc_ki: selectedHocKi.value,
         nam_hoc: selectedNamHoc.value
     }).toString();
-    window.location.href = route('quality.thongke.excel_gio_tham_gia') + '?' + queryParams;
+    window.location.href = route('thongke.excel_gio_tham_gia') + '?' + queryParams;
 };
 </script>
 
@@ -192,7 +192,7 @@ const exportExcelGioThamGia = () => {
     <AppLayout :role="role">
         <template #sub-link>
             <li class="breadcrumb-item active">
-                <a :href="route('quality.thongke.index')">Thống kê biên soạn</a>
+                <a :href="route('thongke.index')">Thống kê biên soạn</a>
             </li>
         </template>
 

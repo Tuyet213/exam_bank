@@ -131,19 +131,19 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                 </li> -->
                 <li>
                     <i class="fas fa-chart-bar"></i>
-                    <Link :href="route('admin.thongke.index')"
+                    <Link :href="route('thongke.index')"
                         >Thống kê (biên soạn+nghiệm thu)</Link
                     >
                 </li>
                 <li>
                     <i class="fas fa-chart-bar"></i>
-                    <Link :href="route('admin.thongke_giang_vien.index')"
+                    <Link :href="route('thongke_giang_vien.index')"
                         >Thống kê giảng viên biên soạn</Link
                     >
                 </li>
                 <li>
                     <i class="fas fa-chart-bar"></i>
-                    <Link :href="route('admin.thongkehocphan.index')"
+                    <Link :href="route('thongkehocphan.index')"
                         >Thống kê học phần biên soạn</Link
                     >
                 </li>
@@ -193,19 +193,19 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                 </li>
                 <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
                     <i class="fas fa-chart-bar"></i>
-                    <Link :href="route('quality.thongke.index')"
+                    <Link :href="route('thongke.index')"
                         >Thống kê (biên soạn+nghiệm thu)</Link
                     >
                 </li>
                 <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
                     <i class="fas fa-chart-bar"></i>
-                    <Link :href="route('quality.thongke_giang_vien.index')"
+                    <Link :href="route('thongke_giang_vien.index')"
                         >Thống kê giảng viên biên soạn</Link
                     >
                 </li>
                 <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
                     <i class="fas fa-chart-bar"></i>
-                    <Link :href="route('quality.thongkehocphan.index')"
+                    <Link :href="route('thongkehocphan.index')"
                         >Thống kê học phần biên soạn</Link
                     >
                 </li>

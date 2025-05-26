@@ -34,31 +34,34 @@ class CauHoiController extends Controller
         }
         
         $query = CTDSDangKy::whereHas('dsGvBienSoans', function($query) use ($user) {
-                $query->where('id_vien_chuc', $user->id);
+                $query->where('id_vien_chuc', $user->id)->where('able', true);
             })
-            ->where('loai_ngan_hang', 1) // Ngân hàng câu hỏi thi
-            ->with(['hocPhan', 'dsDangKy']);
+            ->where('loai_ngan_hang', 1)->where('able', true) // Ngân hàng câu hỏi thi
+            ->with(['hocPhan', 'dsDangKy', 'dsGvBienSoans']);
 
         // Lọc theo tên/mã học phần
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('hocPhan', function($q) use ($search) {
                 $q->where('ten', 'like', "%{$search}%")
-                  ->orWhere('id', 'like', "%{$search}%");
+                  ->orWhere('id', 'like', "%{$search}%")
+                  ->where('able', true);
             });
         }
 
         // Lọc theo năm học
         if ($request->filled('nam_hoc')) {
             $query->whereHas('dsDangKy', function($q) use ($request) {
-                $q->where('nam_hoc', $request->nam_hoc);
+                $q->where('nam_hoc', $request->nam_hoc)
+                  ->where('able', true);
             });
         }
 
         // Lọc theo học kỳ
         if ($request->filled('hoc_ky')) {
             $query->whereHas('dsDangKy', function($q) use ($request) {
-                $q->where('hoc_ki', $request->hoc_ky);
+                $q->where('hoc_ki', $request->hoc_ky)
+                  ->where('able', true);
             });
         }
 
@@ -95,8 +98,8 @@ class CauHoiController extends Controller
             $role = 'admin';
         }
         
-        $ctDangKy = CTDSDangKy::with(['hocPhan', 'hocPhan.chuongs', 'hocPhan.chuanDauRas'])->findOrFail($id);
-        $query = CauHoi::with(['chuong', 'chuanDauRa'])->where('id_ct_ds_dang_ky', $id);
+        $ctDangKy = CTDSDangKy::with(['hocPhan', 'hocPhan.chuongs', 'hocPhan.chuanDauRas'])->where('able', true)->findOrFail($id);
+        $query = CauHoi::with(['chuong', 'chuanDauRa'])->where('id_ct_ds_dang_ky', $id)->where('able', true);
 
         // Lọc theo nội dung câu hỏi
         if ($request->filled('cau_hoi')) {
@@ -138,7 +141,7 @@ class CauHoiController extends Controller
             $role = 'tbm';
         }
         
-        $ctDangKy = CTDSDangKy::with(['hocPhan'])->findOrFail($id);
+        $ctDangKy = CTDSDangKy::with(['hocPhan'])->where('able', true)->findOrFail($id);
         
         // Lấy danh sách chuẩn đầu ra và chương của học phần
         $chuanDauRas = \App\Models\ChuanDauRa::where('id_hoc_phan', $ctDangKy->hocPhan->id)
@@ -217,7 +220,7 @@ class CauHoiController extends Controller
             $role = 'admin';
         }
         
-        $ctDangKy = CTDSDangKy::with(['hocPhan'])->findOrFail($id);
+        $ctDangKy = CTDSDangKy::with(['hocPhan'])->where('able', true)->findOrFail($id);
         
         return Inertia::render('CauHoi/Import', [
             'ctDangKy' => $ctDangKy,
@@ -235,7 +238,7 @@ class CauHoiController extends Controller
         $ctDangKy = CTDSDangKy::with([
             'hocPhan', 'hocPhan.chuongs', 'hocPhan.chuanDauRas',
             'dsGvBienSoans.vienChuc', 'dsDangKy'
-        ])->findOrFail($request->id_ct_ds_dang_ky);
+        ])->where('able', true)->findOrFail($request->id_ct_ds_dang_ky);
 
         DB::beginTransaction();
         try {
@@ -312,7 +315,7 @@ class CauHoiController extends Controller
                 if (preg_match('/^([IVX]+)\.\s+Chương\/Chủ đề\s+(.+)$/i', $text, $matches)) {
                     $tenChuong = trim($matches[2]);
                     Log::info('Đang tìm chương: ' . $tenChuong);
-                    $chuong = $ctDangKy->hocPhan->chuongs->first(function($item) use ($tenChuong) {
+                    $chuong = $ctDangKy->hocPhan->chuongs->where('able', true)->first(function($item) use ($tenChuong) {
                         return stripos(
                             $this->removeVietnameseAccents($item->ten),
                             $this->removeVietnameseAccents($tenChuong)
@@ -569,7 +572,7 @@ class CauHoiController extends Controller
             $role = 'admin';
         }
         
-        $cauHoi = CauHoi::with(['dapAns', 'chuong', 'chuanDauRa', 'ctDSDangKy.hocPhan'])->findOrFail($id);
+        $cauHoi = CauHoi::with(['dapAns', 'chuong', 'chuanDauRa', 'ctDSDangKy.hocPhan'])->where('able', true)->findOrFail($id);
         
         return Inertia::render('CauHoi/ChiTiet', [
             'cauHoi' => $cauHoi,
@@ -599,7 +602,7 @@ class CauHoiController extends Controller
             $role = 'admin';
         }
         
-        $cauHoi = CauHoi::with(['dapAns', 'ctDSDangKy.hocPhan'])->findOrFail($id);
+        $cauHoi = CauHoi::with(['dapAns', 'ctDSDangKy.hocPhan'])->where('able', true)->findOrFail($id);
         
         // Lấy danh sách chuẩn đầu ra và chương của học phần
         $chuanDauRas = \App\Models\ChuanDauRa::where('id_hoc_phan', $cauHoi->ctDSDangKy->hocPhan->id)
@@ -636,7 +639,7 @@ class CauHoiController extends Controller
             'dap_ans.*.id' => 'nullable|exists:dap_ans,id', // ID đáp án (nếu đã tồn tại)
         ]);
 
-        $cauHoi = CauHoi::findOrFail($id);
+        $cauHoi = CauHoi::where('able', true)->findOrFail($id);
         
         DB::beginTransaction();
         try {
@@ -668,7 +671,7 @@ class CauHoiController extends Controller
             foreach ($request->dap_ans as $dapAnData) {
                 if (isset($dapAnData['id'])) {
                     // Cập nhật đáp án đã tồn tại
-                    $dapAn = \App\Models\DapAn::find($dapAnData['id']);
+                    $dapAn = \App\Models\DapAn::where('able', true)->find($dapAnData['id']);
                     if ($dapAn) {
                         $dapAn->update([
                             'dap_an' => $dapAnData['noi_dung'],
@@ -708,7 +711,7 @@ class CauHoiController extends Controller
      */
     public function xoa($id)
     {
-        $cauHoi = CauHoi::findOrFail($id);
+        $cauHoi = CauHoi::where('able', true)->findOrFail($id);
 
         // Xóa tất cả đáp án trước để tránh lỗi khóa ngoại
         $cauHoi->dapAns()->delete();
@@ -755,11 +758,11 @@ class CauHoiController extends Controller
             'hocPhan.boMon.khoa', 
             'dsGvBienSoans.vienChuc',
             'dsDangKy'
-        ])->findOrFail($id);
+        ])->where('able', true)->findOrFail($id);
         
         // Lấy danh sách chuẩn đầu ra và chương
-        $chuanDauRas = $ctDSDangKy->hocPhan->chuanDauRas;
-        $chuongs = $ctDSDangKy->hocPhan->chuongs;
+        $chuanDauRas = $ctDSDangKy->hocPhan->chuanDauRas->where('able', true);
+        $chuongs = $ctDSDangKy->hocPhan->chuongs->where('able', true);
         
         // Lấy thông tin bộ môn, khoa
         $boMon = $ctDSDangKy->hocPhan->boMon;

@@ -2,7 +2,7 @@
     <AppLayout :role="role">
         <template #sub-link>
             <li class="breadcrumb-item active">
-                <a :href="route('quality.thongkehocphan.index')">Thống kê học phần</a>
+                <a :href="route('thongkehocphan.index')">Thống kê học phần</a>
             </li>
         </template>
 
@@ -302,7 +302,7 @@ const performSearch = () => {
     }
     debounceTimeout.value = setTimeout(() => {
         router.get(
-            route('quality.thongkehocphan.index'),
+            route('thongkehocphan.index'),
             { 
                 khoa_id: selectedKhoa.value,
                 bomon_id: selectedBoMon.value,
@@ -363,7 +363,7 @@ const exportExcel = () => {
         nam_hoc: selectedNamHoc.value
     }).toString();
     
-    window.location.href = route('quality.thongkehocphan.excel') + '?' + queryParams;
+    window.location.href = route('thongkehocphan.excel') + '?' + queryParams;
 };
 
 // Hàm format date
