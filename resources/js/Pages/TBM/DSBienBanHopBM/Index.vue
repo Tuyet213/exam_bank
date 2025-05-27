@@ -253,16 +253,18 @@ const sendNotification = (bienBanId) => {
                                                                             <div class="btn-group">
                                                                                 <Link 
                                                                                     :href="bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected' ? route('tbm.dsbienban.edit', bb.id) : '#'"
+                                                                                   :disabled="!(bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected')"
                                                                                     class="btn btn-sm btn-warning me-2"
-                                                                                    :class="{ 'disabled': bb.trang_thai !== 'Draft' }"
+                                                                                    :class="{ 'disabled': !(bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected') }"
                                                                                     title="Chỉnh sửa"
                                                                                 >
                                                                                     <i class="fas fa-edit"></i>
                                                                                 </Link>
                                                                                 <Link 
                                                                                     :href="bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected' ? route('tbm.dsbienban.edit-so-gio', bb.id) : '#'"
+                                                                                    :disabled="!(bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected')"
                                                                                     class="btn btn-sm btn-secondary me-2"
-                                                                                    :class="{ 'disabled': bb.trang_thai !== 'Draft' }"
+                                                                                    :class="{ 'disabled': !(bb.trang_thai === 'Draft' || bb.trang_thai === 'Rejected') }"
                                                                                     title="Chỉnh sửa số giờ"
                                                                                 >
                                                                                     <i class="fas fa-clock"></i>

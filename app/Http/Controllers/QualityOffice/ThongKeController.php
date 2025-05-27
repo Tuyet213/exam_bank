@@ -47,6 +47,7 @@ class ThongKeController extends Controller
         
         // Lấy danh sách năm học từ dữ liệu hiện có
         $ds_nam_hoc = DSDangKy::select('nam_hoc')
+            ->where('able', true)
             ->distinct()
             ->pluck('nam_hoc')
             ->toArray();
@@ -91,12 +92,13 @@ class ThongKeController extends Controller
                 'ctDSDangKies.dsGVBienSoans.vienChuc',
                 'ctDSDangKies.bienBanHop.dsHop.vienChuc'
             ])
-            ->where('able', true);
+            ->where('d_s_dang_kies.able', true);
             
         // Áp dụng các điều kiện lọc nếu có
         if ($khoa_id) {
             $query->whereHas('boMon', function($q) use ($khoa_id) {
-                $q->where('id_khoa', $khoa_id);
+                $q->where('id_khoa', $khoa_id)
+                  ->where('able', true);
             });
         }
         
@@ -396,19 +398,21 @@ class ThongKeController extends Controller
 
         // Lấy tất cả chi tiết đăng ký phù hợp
         $query = CTDSDangKy::with(['dsGVBienSoans.vienChuc', 'bienBanHop.dsHop.vienChuc'])
-            ->where('able', true);
+            ->where('c_t_d_s_dang_kies.able', true);
 
         if ($bomon_id) {
             $query->whereHas('dsDangKy', function($q) use ($bomon_id) {
-                $q->where('id_bo_mon', $bomon_id);
+                $q->where('id_bo_mon', $bomon_id)
+                  ->where('able', true);
             });
         } elseif ($khoa_id) {
             $query->whereHas('dsDangKy.boMon', function($q) use ($khoa_id) {
-                $q->where('id_khoa', $khoa_id);
+                $q->where('id_khoa', $khoa_id)
+                  ->where('able', true);
             });
         }
-        if ($nam_hoc) $query->whereHas('dsDangKy', fn($q) => $q->where('nam_hoc', $nam_hoc));
-        if ($hoc_ki) $query->whereHas('dsDangKy', fn($q) => $q->where('hoc_ki', $hoc_ki));
+        if ($nam_hoc) $query->whereHas('dsDangKy', fn($q) => $q->where('nam_hoc', $nam_hoc)->where('able', true));
+        if ($hoc_ki) $query->whereHas('dsDangKy', fn($q) => $q->where('hoc_ki', $hoc_ki)->where('able', true));
 
         $ctds = $query->get();
 

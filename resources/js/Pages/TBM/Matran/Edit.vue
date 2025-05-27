@@ -55,7 +55,7 @@ const submit = () => {
     </template>
     <template #content>
       <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header bg-success-tb text-white">
           <h3 class="mb-0">CHỈNH SỬA MA TRẬN ĐỀ THI</h3>
         </div>
         <div class="card-body">
@@ -124,7 +124,7 @@ const submit = () => {
                 <b>Ghi chú:</b> (1) Số lượng câu hỏi Dễ, mức 1; (2) Số lượng câu hỏi Trung bình, mức 2; (3) Số lượng câu hỏi Khó, mức 3.
               </div>
             </div>
-            <button type="submit" class="btn btn-primary mt-4">Cập nhật ma trận</button>
+            <button type="submit" class="btn btn-success mt-4"><i class="fas fa-save"></i> Lưu thay đổi</button>
           </form>
         </div>
       </div>

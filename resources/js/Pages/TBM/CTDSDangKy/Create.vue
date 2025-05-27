@@ -54,7 +54,7 @@ const submit = () => {
         <template v-slot:content>
             <div class="content">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header bg-success-tb text-white p-4 ">
                         <h3 class="mb-0">THÊM GIẢNG VIÊN BIÊN SOẠN <div
                             class="col-4      "
                         >

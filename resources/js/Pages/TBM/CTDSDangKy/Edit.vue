@@ -106,7 +106,7 @@ const submit = () => {
                 </div>
 
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header bg-success-tb text-white p-4 ">
                         <h3 class="mb-0">CẬP NHẬT PHÂN CÔNG</h3>
                     </div>
 

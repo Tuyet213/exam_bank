@@ -227,3 +227,52 @@ const handleSearch = (event) => {
         </template>
     </AppLayout>
 </template>
+<style scoped>
+.bg-success-tb {
+    background-color: #5cb85c;
+}
+
+.btn-success-add {
+    background-color: #5cb85c;
+    color: white;
+}
+
+.btn-success-edit {
+    background-color: #f0ad4e;
+    color: white;
+    border-radius: 0;
+}
+
+.btn-danger-delete {
+    background-color: #d9534f;
+    color: white;
+    border-radius: 0;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.animated-fade-in {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.border-radius-lg {
+    border-radius: 0.5rem;
+}
+
+.shadow-lg {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: #5cb85c;
+    box-shadow: 0 0 0 0.25rem rgba(92, 184, 92, 0.25);
+}
+</style>

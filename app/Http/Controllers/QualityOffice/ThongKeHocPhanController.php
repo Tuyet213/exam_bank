@@ -41,13 +41,14 @@ class ThongKeHocPhanController extends Controller
             ->whereNotIn('id', ['admin', 'DBCL'])
             ->get();
             
-        $bomons = BoMon::whereHas('khoa', function($query) {
-            $query->where('able', true)
-                ->whereNotIn('id', ['admin', 'DBCL']);
-        })->get();
+        $bomons = BoMon::where('able', true)
+            ->whereHas('khoa', function($query) {
+                $query->where('able', true)
+                    ->whereNotIn('id', ['admin', 'DBCL']);
+            })->get();
 
         // Lấy danh sách năm học và học kỳ
-        $ds_nam_hoc = DSDangKy::distinct()->pluck('nam_hoc')->sort()->values();
+        $ds_nam_hoc = DSDangKy::where('able', true)->distinct()->pluck('nam_hoc')->sort()->values();
         $ds_hoc_ki = ['1', '2', 'Hè'];
 
         // Lấy dữ liệu thống kê
@@ -115,12 +116,13 @@ class ThongKeHocPhanController extends Controller
             'ctDSDangKies.hocPhan',
             'ctDSDangKies.dsGVBienSoans.vienChuc',
             'boMon.khoa'
-        ])->where('able', true);
+        ])->where('d_s_dang_kies.able', true);
 
         // Áp dụng các bộ lọc
         if ($khoa_id) {
             $query->whereHas('boMon.khoa', function ($q) use ($khoa_id) {
-                $q->where('id', $khoa_id);
+                $q->where('id', $khoa_id)
+                  ->where('able', true);
             });
         }
         if ($bomon_id) {

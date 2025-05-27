@@ -184,8 +184,8 @@ class HocPhanController extends Controller
             'chuongs.*.chuan_dau_ras' => 'array'
         ]);
 
-        // try {
-        //     DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
             $hocphan = HocPhan::findOrFail($id);
             
@@ -241,10 +241,10 @@ class HocPhanController extends Controller
 
             DB::commit();
             return redirect()->route('admin.hocphan.index');
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return back()->withErrors(['message' => 'Có lỗi xảy ra khi cập nhật học phần: ' . $e->getMessage()]);
-        // }
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->route('admin.hocphan.index')->withErrors(['message' => 'Có lỗi xảy ra khi cập nhật học phần: ' . $e->getMessage()]);
+        }
     }
 
     public function destroy($id)

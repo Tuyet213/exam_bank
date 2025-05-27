@@ -99,7 +99,7 @@ const handleSubmit = () => {
             <div class="content">
                 <!-- Form tạo danh sách đăng ký -->
                 <div class="card mb-4">
-                    <div class="card-header">
+                    <div class="card-header bg-success-tb text-white p-4 ">
                         <h3 class="mb-0">TẠO DANH SÁCH ĐĂNG KÝ (Bộ Môn {{ bo_mon }})</h3>
                     </div>
                     <div class="card-body">
@@ -144,7 +144,7 @@ const handleSubmit = () => {
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h5>Chi tiết danh sách</h5>
                                     <button type="button" class="btn btn-success" @click="addChiTiet">
-                                        <i class="fas fa-plus"></i> Thêm chi tiết
+                                        <i class="fas fa-plus"></i> Thêm học phần
                                     </button>
                                 </div>
                                 
@@ -295,10 +295,7 @@ const handleSubmit = () => {
     color: #495057;
 }
 
-.card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-}
+
 
 .form-control:focus {
     border-color: #28a745;

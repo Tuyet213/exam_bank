@@ -25,7 +25,7 @@ class CTDSDangKyController extends Controller
     {
         $can_create = True;
         $count = 0;
-        $dsdangky = DSDangKy::with(['boMon'])->findOrFail($id);
+        $dsdangky = DSDangKy::with(['boMon'])->where('able', true)->findOrFail($id);
         
         // Lấy danh sách chi tiết đăng ký với viên chức biên soạn
         $chitiet = CTDSDangKy::with(['hocPhan', 'dsGVBienSoans.vienChuc'])
@@ -107,7 +107,8 @@ class CTDSDangKyController extends Controller
             // Tạo bản ghi viên chức biên soạn
             DSGVBienSoan::create([
                 'id_ct_ds_dang_ky' => $ctDSDangKy->id,
-                'id_vien_chuc' => $request->id_vien_chuc
+                'id_vien_chuc' => $request->id_vien_chuc,
+                'able' => true
             ]);
             
             DB::commit();
@@ -154,7 +155,7 @@ class CTDSDangKyController extends Controller
         try {
             DB::beginTransaction();
             
-            $ctdsdangky = CTDSDangKy::findOrFail($id);
+            $ctdsdangky = CTDSDangKy::where('able', true)->findOrFail($id);
             $ctdsdangky->update([
                 'id_hoc_phan' => $request->id_hoc_phan,
                 'hinh_thuc_thi' => $request->hinh_thuc_thi,
@@ -173,14 +174,16 @@ class CTDSDangKyController extends Controller
                 foreach ($request->id_vien_chuc as $id_vien_chuc) {
                     DSGVBienSoan::create([
                         'id_ct_ds_dang_ky' => $id,
-                        'id_vien_chuc' => $id_vien_chuc
+                        'id_vien_chuc' => $id_vien_chuc,
+                        'able' => true
                     ]);
                 }
             } else {
                 // Xử lý khi id_vien_chuc là giá trị đơn
                 DSGVBienSoan::create([
                     'id_ct_ds_dang_ky' => $id,
-                    'id_vien_chuc' => $request->id_vien_chuc
+                    'id_vien_chuc' => $request->id_vien_chuc,
+                    'able' => true
                 ]);
             }
             

@@ -15,9 +15,10 @@ class CTDSDangKyController extends Controller
 {
     public function index($id_ds_dang_ky)
     {
-        $dsDangKy = DSDangKy::with('boMon')->findOrFail($id_ds_dang_ky);
+        $dsDangKy = DSDangKy::with('boMon')->where('able', true)->findOrFail($id_ds_dang_ky);
         $ctDsDangKy = CTDSDangKy::with(['hocPhan', 'dsGVBienSoans.vienChuc'])
             ->where('id_ds_dang_ky', $id_ds_dang_ky)
+            ->where('able', true)
             ->get();
 
         return Inertia::render('QualityOffice/CTDSDangKy/Index', [
@@ -28,7 +29,7 @@ class CTDSDangKyController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        $ctDsDangKy = CTDSDangKy::findOrFail($id);
+        $ctDsDangKy = CTDSDangKy::where('able', true)->findOrFail($id);
         $ctDsDangKy->update([
             'trang_thai' => $request->trang_thai
         ]);
@@ -39,6 +40,7 @@ class CTDSDangKyController extends Controller
     public function updateStatusAll($dsdangky_id, Request $request)
     {
         $ctDSDangKies = CTDSDangKy::where('id_ds_dang_ky', $dsdangky_id)
+            ->where('able', true)
             ->whereIn('trang_thai', ['Draft', 'Rejected', 'Pending'])
             ->get();
 
@@ -53,7 +55,7 @@ class CTDSDangKyController extends Controller
     public function submit($id_ds_dang_ky)
     {
         try {
-            $dsDangKy = DSDangKy::with(['boMon'])->findOrFail($id_ds_dang_ky)->first();
+            $dsDangKy = DSDangKy::with(['boMon'])->where('able', true)->findOrFail($id_ds_dang_ky)->first();
             
 
             // Lấy email của trưởng bộ môn

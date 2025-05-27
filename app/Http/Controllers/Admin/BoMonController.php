@@ -29,14 +29,16 @@ class BoMonController extends Controller
                 $query->where('ten', 'like', "%{$searchTerm}%");
             } elseif ($filterBy === 'khoa') {
                 $query->whereHas('khoa', function ($q) use ($searchTerm) {
-                    $q->where('ten', 'like', "%{$searchTerm}%");
+                    $q->where('ten', 'like', "%{$searchTerm}%")
+                      ->where('able', true);
                 });
             } else {
                 $query->where(function ($q) use ($searchTerm) {
                     $q->where('id', 'like', "%{$searchTerm}%")
                       ->orWhere('ten', 'like', "%{$searchTerm}%")
                       ->orWhereHas('khoa', function ($q) use ($searchTerm) {
-                          $q->where('ten', 'like', "%{$searchTerm}%");
+                          $q->where('ten', 'like', "%{$searchTerm}%")
+                            ->where('able', true);
                       });
                 });
             }
@@ -59,7 +61,7 @@ class BoMonController extends Controller
 
     public function create()
     {
-        $khoas = Khoa::where('able', operator: 1)->get();
+        $khoas = Khoa::where('able', true)->get();
         return Inertia::render('Admin/BoMon/Create', compact('khoas'));
     }
 
@@ -81,7 +83,7 @@ class BoMonController extends Controller
 
     public function edit($id)
     {
-        $bomon = BoMon::find($id);
+        $bomon = BoMon::where('able', true)->find($id);
         $khoas = Khoa::where('able', true)->get();
         return Inertia::render('Admin/BoMon/Edit', compact('bomon', 'khoas'));
     }

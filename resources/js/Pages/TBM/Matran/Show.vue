@@ -50,10 +50,10 @@ const getLoaiKyText = (loai_ky) => {
     </template>
     <template #content>
       <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex justify-content-between bg-success-tb text-white align-items-center">
           <h3 class="mb-0">CHI TIẾT MA TRẬN ĐỀ THI</h3>
           <div>
-            <a :href="route('matran.edit', { id, loai_ky: props.loai_ky })" class="btn btn-primary">Chỉnh sửa</a>
+            <a :href="route('matran.edit', { id, loai_ky: props.loai_ky })" class="btn btn-light">Chỉnh sửa</a>
           </div>
         </div>
         <div class="card-body">

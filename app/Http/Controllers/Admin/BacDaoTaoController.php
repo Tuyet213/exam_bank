@@ -52,7 +52,7 @@ class BacDaoTaoController extends Controller
 
     public function edit($id)
     {
-        $bacdaotao = BacDaoTao::find($id);
+        $bacdaotao = BacDaoTao::where('able', true)->find($id);
         return Inertia::render('Admin/BacDaoTao/Edit', compact('bacdaotao'));
     }
 

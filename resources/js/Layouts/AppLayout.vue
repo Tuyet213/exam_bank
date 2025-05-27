@@ -158,6 +158,12 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                         >Danh sách câu hỏi</Link
                     >
                 </li>
+                <li>
+                    <i class="fas fa-chart-bar"></i>
+                    <Link :href="route('matran.index')"
+                        >Ma trận đề thi</Link
+                    >
+                </li>
             </ul>
 
             <!-- Nhân viên P.ĐBCL Menu -->
@@ -303,14 +309,14 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
 
             <!-- Footer -->
             <footer class="footer">
-                <p>© 2025, made with ❤️ by HTNGOCTUYET.</p>
+                <!-- <p>© 2025, made with ❤️ by HTNGOCTUYET.</p> 
                 <ul>
                     <li><a href="#">Creative Tim</a></li>
                     <li><a href="#">UPDIVISION</a></li>
                     <li><a href="#">About Us</a></li>
                     <li><a href="#">Blog</a></li>
                     <li><a href="#">License</a></li>
-                </ul>
+                </ul>-->
             </footer>
         </div>
     </div>

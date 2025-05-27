@@ -55,7 +55,7 @@ const submit = () => {
             <div class="content">
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
                     <!-- Card Header -->
-                    <div class="card-header bg-success-tb text-white p-4">
+                    <div class="card-header bg-success-tb text-white p-4 ">
                         <h3 class="mb-0 font-weight-bolder">CẬP NHẬT DANH SÁCH ĐĂNG KÝ</h3>
                     </div>
 

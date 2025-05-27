@@ -38,8 +38,8 @@ class MatranController extends Controller
         // Giảng viên chỉ có quyền quản lý học phần mà họ tham gia biên soạn
         if ($roles->contains('Giảng viên')) {
             return DSGVBienSoan::whereHas('ctDSDangKy', function($query) use ($hocPhanId) {
-                $query->where('id_hoc_phan', $hocPhanId);
-            })->where('id_vien_chuc', $user->id)->exists();
+                $query->where('id_hoc_phan', $hocPhanId)->where('able', true);
+            })->where('id_vien_chuc', $user->id)->where('able', true)->exists();
         }
 
         return false;
@@ -92,27 +92,28 @@ class MatranController extends Controller
         
         $loai_ky = $request->query('loai_ky', 'cuoi_ky');
         
-        // Lấy danh sách học phần theo quyền của người dùng
-        if ($roles->contains('Admin') || $roles->contains('Trưởng Bộ Môn')) {
-            // Admin và TBM có thể xem tất cả học phần
-            $dsHocPhan = HocPhan::with('chuongs', 'chuanDauRas')->get();
-        } else {
-            // Giảng viên chỉ có thể xem học phần mà họ tham gia biên soạn
-            $ctDangKyIds = DSGVBienSoan::where('id_vien_chuc', $user->id)
+        $ctDangKyIds = DSGVBienSoan::where('id_vien_chuc', $user->id)
+                ->where('able', true)
                 ->pluck('id_ct_ds_dang_ky');
             
             $hocPhanIds = CTDSDangKy::whereIn('id', $ctDangKyIds)
+                ->where('able', true)
                 ->pluck('id_hoc_phan');
                 
             $dsHocPhan = HocPhan::with('chuongs', 'chuanDauRas')
                 ->whereIn('id', $hocPhanIds)
+                ->where('able', true)
                 ->get();
-        }
         
-        $chuongIdsDaCoMaTran = MaTran::where('loai_ky', $loai_ky)->distinct()->pluck('id_chuong')->toArray();
+        $chuongIdsDaCoMaTran = MaTran::where('loai_ky', $loai_ky)
+                              ->where('able', true)
+                              ->distinct()
+                              ->pluck('id_chuong')
+                              ->toArray();
 
         // Lấy danh sách id_hoc_phan của các chương này
         $hpDaCoMaTran = Chuong::whereIn('id', $chuongIdsDaCoMaTran)
+            ->where('able', true)
             ->distinct()
             ->pluck('id_hoc_phan')
             ->toArray();
@@ -131,12 +132,12 @@ class MatranController extends Controller
             
             // Kiểm tra quyền truy cập học phần
             if ($hocPhan && $this->userCanManageHocPhan($hocPhan->id)) {
-                $chuongs = $hocPhan->chuongs;
-                $cdrs = $hocPhan->chuanDauRas;
+                $chuongs = $hocPhan->chuongs->where('able', true)->values() ?? collect([]);
+                $cdrs = $hocPhan->chuanDauRas->where('able', true)->values() ?? collect([]);
                 // Lấy các cặp giao giữa chương và CDR (bảng chuong_chuan_dau_ra)
                 $giao = [];
                 foreach ($chuongs as $ch) {
-                    foreach ($ch->chuongChuanDauRa as $pivot) {
+                    foreach ($ch->chuongChuanDauRa->where('able', true) as $pivot) {
                         $giao[] = [$ch->id, $pivot->id_chuan_dau_ra];
                     }
                 }
@@ -269,27 +270,27 @@ class MatranController extends Controller
         
         $loai_ky = $request->query('loai_ky', 'cuoi_ky');
         
-        $allHocPhans = HocPhan::select('id', 'ten')->orderBy('ten')->get();
+        $allHocPhans = HocPhan::where('able', true)->select('id', 'ten')->orderBy('ten')->get();
 
         // Lấy các học phần có ma trận tùy theo loại kỳ
         $hocPhanIds = Chuong::whereHas('maTrans', function($query) use ($loai_ky) {
-            $query->where('loai_ky', $loai_ky);
-        })->pluck('id_hoc_phan')->unique();
+            $query->where('loai_ky', $loai_ky)->where('able', true);
+        })->where('able', true)->pluck('id_hoc_phan')->unique();
         
         $query = HocPhan::whereIn('id', $hocPhanIds)
+            ->where('able', true)
             ->withCount(['chuongs'])
             ->orderBy('ten');
 
-        // Nếu là giảng viên, chỉ hiển thị học phần mà họ tham gia biên soạn
-        if (!$roles->contains('Admin') && !$roles->contains('Trưởng Bộ Môn')) {
             $ctDangKyIds = DSGVBienSoan::where('id_vien_chuc', $user->id)
-                ->pluck('id_ct_ds_dang_ky');
-                
-            $gvHocPhanIds = CTDSDangKy::whereIn('id', $ctDangKyIds)
-                ->pluck('id_hoc_phan');
-                
-            $query->whereIn('id', $gvHocPhanIds);
-        }
+            ->where('able', true)
+            ->pluck('id_ct_ds_dang_ky');
+            
+        $gvHocPhanIds = CTDSDangKy::whereIn('id', $ctDangKyIds)
+            ->where('able', true)
+            ->pluck('id_hoc_phan');
+            
+        $query->whereIn('id', $gvHocPhanIds);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -300,6 +301,7 @@ class MatranController extends Controller
         }
 
         $hocPhans = $query->get();
+        Log::info('hocPhans', $hocPhans->toArray());
 
         return Inertia::render('TBM/Matran/Index', [
             'allHocPhans' => $allHocPhans,
@@ -338,12 +340,12 @@ class MatranController extends Controller
         }
         
         // Lấy học phần, chương, CDR, các cặp giao, và dữ liệu ma trận
-        $hocPhan = HocPhan::with(['chuongs.chuanDauRas', 'chuanDauRas'])->findOrFail($id);
-        $chuongs = $hocPhan->chuongs;
-        $cdrs = $hocPhan->chuanDauRas;
+        $hocPhan = HocPhan::with(['chuongs.chuanDauRas', 'chuanDauRas'])->where('able', true)->findOrFail($id);
+        $chuongs = $hocPhan->chuongs->where('able', true)->values() ?? collect([]);
+        $cdrs = $hocPhan->chuanDauRas->where('able', true)->values() ?? collect([]);
         $giao = [];
         foreach ($chuongs as $ch) {
-            foreach ($ch->chuongChuanDauRa as $pivot) {
+            foreach ($ch->chuongChuanDauRa->where('able', true) as $pivot) {
                 $giao[] = [$ch->id, $pivot->id_chuan_dau_ra];
             }
         }
@@ -354,6 +356,7 @@ class MatranController extends Controller
             $row = MaTran::where('id_chuong', $chuongId)
                 ->where('id_chuan_dau_ra', $cdrId)
                 ->where('loai_ky', $loai_ky)
+                ->where('able', true)
                 ->first();
             $bang[$chuongId][$cdrId] = [
                 1 => $row ? $row->so_cau_de : 0,

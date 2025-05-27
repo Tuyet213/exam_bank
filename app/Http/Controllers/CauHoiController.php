@@ -295,6 +295,10 @@ class CauHoiController extends Controller
             }
 
             foreach ($allTexts as $text) {
+                $check = false;
+                // Xử lý ký tự đặc biệt và HTML entities trong text
+                $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                
                 if ($fileInfo['isTracNghiem'] === null) {
                     if (stripos($text, 'Dùng cho câu hỏi thi trắc nghiệm') !== false) {
                         $fileInfo['isTracNghiem'] = true;
@@ -332,7 +336,7 @@ class CauHoiController extends Controller
                 if ($fileInfo['chuongHienTai'] && preg_match('/^Chuẩn đầu ra\s*:?\s*(.+?)[,|:]/i', $text, $matches)) {
                     $tenCDR = trim($matches[1]);
                     Log::info('Đang tìm chuẩn đầu ra: ' . $tenCDR);
-                    $cdr = $ctDangKy->hocPhan->chuanDauRas->first(function($item) use ($tenCDR) {
+                    $cdr = $ctDangKy->hocPhan->chuanDauRas->where('able', true)->first(function($item) use ($tenCDR) {
                         return stripos(
                             $this->removeVietnameseAccents($item->ten),
                             $this->removeVietnameseAccents($tenCDR)
@@ -351,20 +355,21 @@ class CauHoiController extends Controller
                         $questions[] = $currentQuestion;
                     }
                     $currentQuestion = [
-                        'cau_hoi' => trim($matches[1]),
+                        'cau_hoi' => html_entity_decode(trim($matches[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                         'dap_ans' => [],
-                        'diem' => 0,
+                        'diem' => 0.5, // Điểm mặc định 0.5
                         'muc_do' => 2,
                         'id_chuong' => $fileInfo['chuongHienTai'] ? $fileInfo['chuongHienTai']->id : null,
                         'id_chuan_dau_ra' => $fileInfo['chuanDauRaHienTai'] ? $fileInfo['chuanDauRaHienTai']->id : null
                     ];
+                    $check = true;
                     Log::info('Khởi tạo câu hỏi mới', $currentQuestion);
                     continue;
                 }
                 if ($fileInfo['isTracNghiem'] && preg_match('/^([A-D][.)]\s*)(.*)/i', $text, $matches)) {
                     if ($currentQuestion) {
                         $currentQuestion['dap_ans'][] = [
-                            'noi_dung' => trim($matches[2]),
+                            'noi_dung' => html_entity_decode(trim($matches[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                             'trang_thai' => false,
                             'diem' => 0
                         ];
@@ -375,15 +380,18 @@ class CauHoiController extends Controller
                 if (!$fileInfo['isTracNghiem'] && preg_match('/^Nội dung ý\s+(\d+|\.+):\s*(.+)/i', $text, $matches)) {
                     if ($currentQuestion) {
                         $currentQuestion['dap_ans'][] = [
-                            'noi_dung' => trim($matches[2]),
+                            'noi_dung' => html_entity_decode(trim($matches[2]), ENT_QUOTES | ENT_HTML5, 'UTF-8'),
                             'trang_thai' => true,
-                            'diem' => 0
+                            'diem' => 0.25 // Điểm mặc định cho tự luận là 0.25
                         ];
                         Log::info('Thêm đáp án tự luận', ['noi_dung' => trim($matches[2])]);
                     }
                     continue;
                 }
-                if (preg_match('/^([\d.,]+)d$/i', $text, $matches) || preg_match('/^Điểm:\s*([\d.,]+)/i', $text, $matches)) {
+                if(preg_match('/^Đáp án$/i', $text, $matches) || preg_match('/^Đáp án:\s*$/i', $text, $matches)) {
+                    $check = false;
+                }
+                if (!$check && preg_match('/^([\d.,]+)đ$/i', $text, $matches) || preg_match('/^Điểm:\s*([\d.,]+)/i', $text, $matches)) {
                     $diem = (float) str_replace(',', '.', $matches[1]);
                     if ($currentQuestion && !empty($currentQuestion['dap_ans'])) {
                         $lastIndex = count($currentQuestion['dap_ans']) - 1;
@@ -423,6 +431,10 @@ class CauHoiController extends Controller
                         Log::info('Cập nhật mức độ câu hỏi từ văn bản độc lập', ['mucDoText' => $mucDoText, 'muc_do' => $currentQuestion['muc_do']]);
                     }
                     continue;
+                }
+                if (preg_match('/^Tổng điểm/i', $text)) {
+                   Log::info('Đã gặp dòng "Tổng điểm", dừng xử lý file');
+                   break;
                 }
             }
             if ($currentQuestion && !empty($currentQuestion['cau_hoi'])) {
@@ -473,17 +485,65 @@ class CauHoiController extends Controller
                     Log::warning("Bỏ qua câu hỏi #{$index} do không có nội dung");
                     continue;
                 }
+                
+                // Tính tổng điểm từ đáp án
+                $tongDiemDapAn = 0;
                 if (isset($questionData['dap_ans']) && !empty($questionData['dap_ans'])) {
-                    $tongDiemDapAn = 0;
                     foreach ($questionData['dap_ans'] as $dapAn) {
-                        $tongDiemDapAn += (float)($dapAn['diem'] ?? 0);
+                        $diem = (float)($dapAn['diem'] ?? 0);
+                        if ($isTracNghiem) {
+                            // Với trắc nghiệm, chỉ tính điểm của đáp án đúng
+                            if (isset($dapAn['trang_thai']) && $dapAn['trang_thai']) {
+                                $tongDiemDapAn += $diem;
+                            }
+                        } else {
+                            // Với tự luận, tính điểm của tất cả đáp án
+                            $tongDiemDapAn += $diem;
+                        }
                     }
                     $tongDiemDapAn = round($tongDiemDapAn, 2);
-                    $tongDiem = round((float)($questionData['diem'] ?? 0), 2);
-                    if ($tongDiemDapAn != $tongDiem) {
-                        $errorMessages[] = "Câu hỏi #{$index} có tổng điểm đáp án ({$tongDiemDapAn}) không khớp với điểm câu hỏi ({$tongDiem})";
+                }
+                
+                // Nếu tổng điểm đáp án = 0, sử dụng điểm của câu hỏi
+                if ($tongDiemDapAn <= 0) {
+                    $tongDiemDapAn = (float)($questionData['diem'] ?? 0.5);
+                    if ($tongDiemDapAn <= 0) {
+                        $tongDiemDapAn = 0.5; // Đảm bảo luôn có điểm > 0
+                    }
+                    
+                    // Cập nhật điểm cho đáp án
+                    if (isset($questionData['dap_ans']) && !empty($questionData['dap_ans'])) {
+                        if ($isTracNghiem) {
+                            // Với trắc nghiệm, phân bổ điểm cho các đáp án đúng
+                            $dapAnDung = array_filter($questionData['dap_ans'], function($dapAn) {
+                                return isset($dapAn['trang_thai']) && $dapAn['trang_thai'];
+                            });
+                            
+                            if (!empty($dapAnDung)) {
+                                $diemPerDapAn = $tongDiemDapAn / count($dapAnDung);
+                                foreach ($questionData['dap_ans'] as &$dapAn) {
+                                    if (isset($dapAn['trang_thai']) && $dapAn['trang_thai']) {
+                                        $dapAn['diem'] = $diemPerDapAn;
+                                    }
+                                }
+                            } else {
+                                // Nếu không có đáp án đúng, mặc định đáp án đầu tiên là đúng
+                                if (isset($questionData['dap_ans'][0])) {
+                                    $questionData['dap_ans'][0]['trang_thai'] = true;
+                                    $questionData['dap_ans'][0]['diem'] = $tongDiemDapAn;
+                                }
+                            }
+                        } else {
+                            // Với tự luận, phân bổ điểm đều cho các đáp án
+                            $diemPerDapAn = $tongDiemDapAn / count($questionData['dap_ans']);
+                            foreach ($questionData['dap_ans'] as &$dapAn) {
+                                $dapAn['diem'] = $diemPerDapAn;
+                                $dapAn['trang_thai'] = true;
+                            }
+                        }
                     }
                 }
+                
                 try {
                     $cauHoi = new CauHoi([
                         'cau_hoi' => $questionData['cau_hoi'],
@@ -491,7 +551,7 @@ class CauHoiController extends Controller
                         'phan_loai' => $isTracNghiem ? 0 : 1,
                         'id_chuan_dau_ra' => $questionData['id_chuan_dau_ra'] ?? ($fileInfo['chuanDauRaHienTai'] ? $fileInfo['chuanDauRaHienTai']->id : null),
                         'id_chuong' => $questionData['id_chuong'] ?? ($fileInfo['chuongHienTai'] ? $fileInfo['chuongHienTai']->id : null),
-                        'diem' => $questionData['diem'] ?? 0.5,
+                        'diem' => $tongDiemDapAn,
                         'muc_do' => $questionData['muc_do'] ?? 2,
                     ]);
                     if ($cauHoi->id_chuan_dau_ra === null || $cauHoi->id_chuong === null) {
@@ -501,39 +561,40 @@ class CauHoiController extends Controller
                     $cauHoi->save();
                     $successCount++;
                     Log::info("Đã lưu câu hỏi #{$index} với ID: " . $cauHoi->id);
-                    if ($isTracNghiem && isset($questionData['dap_ans']) && !empty($questionData['dap_ans'])) {
+                    
+                    // Xử lý đáp án
+                    $hasDapAn = false;
+                    
+                    if (isset($questionData['dap_ans']) && !empty($questionData['dap_ans'])) {
                         foreach ($questionData['dap_ans'] as $dapAn) {
                             $dapAnDb = $cauHoi->dapAns()->create([
                                 'dap_an' => $dapAn['noi_dung'],
-                                'trang_thai' => $dapAn['trang_thai'] ?? false,
-                                'diem' => $dapAn['diem'] ?? 0
+                                'trang_thai' => $dapAn['trang_thai'] ?? ($isTracNghiem ? false : true),
+                                'diem' => max(0.25, (float)($dapAn['diem'] ?? 0)) // Đảm bảo điểm tối thiểu 0.25
                             ]);
-                            Log::info("Đã lưu đáp án trắc nghiệm với ID: " . $dapAnDb->id);
-                        }
-                    } elseif (!$isTracNghiem && isset($questionData['dap_ans']) && !empty($questionData['dap_ans'])) {
-                        foreach ($questionData['dap_ans'] as $dapAnIndex => $dapAn) {
-                            $diem = (float)($dapAn['diem'] ?? 0);
-                            if ($diem < 0.25 || $diem > 0.5) {
-                                $errorMessages[] = "Đáp án tự luận #{$dapAnIndex} của câu hỏi #{$index} có điểm không hợp lệ: {$diem} (chỉ chấp nhận từ 0.25 đến 0.5)";
-                                continue;
+                            $hasDapAn = true;
+                            
+                            if ($isTracNghiem) {
+                                Log::info("Đã lưu đáp án trắc nghiệm với ID: " . $dapAnDb->id);
+                            } else {
+                                Log::info("Đã lưu đáp án tự luận với ID: " . $dapAnDb->id);
                             }
-                            $dapAnDb = $cauHoi->dapAns()->create([
-                                'dap_an' => $dapAn['noi_dung'],
-                                'trang_thai' => true,
-                                'diem' => $diem
-                            ]);
-                            Log::info("Đã lưu đáp án tự luận với ID: " . $dapAnDb->id);
                         }
-                    } else {
+                    }
+                    
+                    // Nếu không có đáp án nào, tạo đáp án mặc định
+                    if (!$hasDapAn) {
+                        $dapAnMacDinh = $isTracNghiem ? 'Đáp án trắc nghiệm mặc định' : 'Đáp án tự luận mặc định';
                         $dapAnDb = $cauHoi->dapAns()->create([
-                            'dap_an' => $questionData['dap_an'] ?? 'Đáp án mẫu',
+                            'dap_an' => $dapAnMacDinh,
                             'trang_thai' => true,
                             'diem' => $cauHoi->diem
                         ]);
-                        Log::info("Đã lưu đáp án mẫu với ID: " . $dapAnDb->id);
+                        Log::info("Đã lưu đáp án mặc định với ID: " . $dapAnDb->id);
                     }
                 } catch (\Exception $e) {
                     $errorMessages[] = "Lỗi khi lưu câu hỏi #{$index}: " . $e->getMessage();
+                    Log::error("Chi tiết lỗi: " . $e->getTraceAsString());
                 }
             }
             
@@ -769,7 +830,7 @@ class CauHoiController extends Controller
         $khoa = $boMon ? $boMon->khoa : null;
         
         // Lấy thông tin giảng viên biên soạn
-        $dsGVBienSoans = $ctDSDangKy->dsGvBienSoans;
+        $dsGVBienSoans = $ctDSDangKy->dsGvBienSoans->where('able', true);
         $gvBienSoanNames = $dsGVBienSoans->map(function($gv) {
             return $gv->vienChuc ? $gv->vienChuc->name : 'Không xác định';
         })->join(', ');

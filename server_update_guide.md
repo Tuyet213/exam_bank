@@ -257,3 +257,19 @@ Cấu hình Nginx hiện tại:
 Nếu bạn gặp vấn đề trong quá trình cập nhật, vui lòng liên hệ:
 - Email: [địa chỉ email của bạn]
 - Slack: [kênh Slack của bạn] 
+## Cấu hình cho Request URI lớn (414 Error Fix)
+
+Để khắc phục lỗi 414 Request-URI Too Large khi download, đã cấu hình:
+
+### Nginx Configuration
+File: `/etc/nginx/conf.d/large-uri.conf`
+- client_header_buffer_size: 16k
+- large_client_header_buffers: 8 64k
+- client_max_body_size: 100M
+
+### PHP Configuration
+File: `/etc/php/8.3/fpm/conf.d/99-large-requests.ini`
+- memory_limit: 512M
+- max_execution_time: 300 seconds
+- upload_max_filesize: 100M
+- post_max_size: 100M

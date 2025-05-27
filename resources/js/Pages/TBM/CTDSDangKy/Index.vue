@@ -157,18 +157,18 @@ const getStatusBadgeClass = (status) => {
         <template v-slot:content>
             <div class="content">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-success-tb text-white p-4 ">
                         <h3 class="mb-0">CHI TIẾT DANH SÁCH XÂY DỰNG NGÂN HÀNG </h3>
                         <div class="d-flex gap-2" v-if="can_create">
                             <button 
                                 disabled
-                                class="btn btn-sm btn-success me-2"
+                                class="btn btn-sm bg-light text-black me-2"
                             >
                                 <i class="fas fa-plus"></i>Thêm mới
                             </button>
                             <button 
                                 disabled
-                                    class="btn btn-success me-2" 
+                                    class="btn btn-sm bg-light text-black me-2" 
                                     @click="showImportModal = true"
                                     title="Import từ Excel"
                                 >
@@ -179,13 +179,13 @@ const getStatusBadgeClass = (status) => {
                         <div class="d-flex gap-2" v-else>
                             <Link 
                                 :href="route('tbm.ctdsdangky.create', dsdangky.id)"
-                                class="btn btn-sm btn-success me-2"
+                                class="btn btn-sm bg-light text-black me-2"
                             >
                                 <i class="fas fa-plus"></i> Thêm mới
                             </Link>
                             <button 
                                
-                                    class="btn btn-success me-2" 
+                                    class="btn btn-sm bg-light text-black me-2" 
                                     @click="showImportModal = true"
                                     title="Import từ Excel"
                                 >
@@ -339,19 +339,11 @@ const getStatusBadgeClass = (status) => {
 </template>
 
 <style scoped>
-.btn-success-add {
-    background-color: #28a745;
-    color: white;
-}
 
-.btn-success-add:hover {
-    background-color: #218838;
-    color: white;
-}
 
-.btn-success-edit {
-    background-color: #17a2b8;
-    color: white;
+.btn-light {
+    background-color:rgb(243, 245, 247);
+    color: black;
 }
 
 .btn-success-edit:hover {

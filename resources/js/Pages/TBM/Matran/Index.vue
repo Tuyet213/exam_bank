@@ -66,7 +66,7 @@ const exportDe = (hocPhanId) => {
         </div>
         <div class="card-body">
           <div class="mb-4 d-flex justify-content-between align-items-center">
-            <div class="d-flex w-md-50">
+            <div class="d-flex w-md-100">
               <input type="text" v-model="search" placeholder="Tìm kiếm..." class="form-control me-2" @keyup.enter="handleSearch">
               <button @click="handleSearch" class="btn btn-primary">Tìm</button>
             </div>
@@ -121,11 +121,7 @@ const exportDe = (hocPhanId) => {
             </table>
           </div>
           
-          <div class="mt-4">
-            <a :href="route('matran.create', { loai_ky: loai_ky })" class="btn btn-success">
-              <i class="fas fa-plus"></i> Tạo ma trận mới
-            </a>
-          </div>
+         
         </div>
       </div>
     </template>

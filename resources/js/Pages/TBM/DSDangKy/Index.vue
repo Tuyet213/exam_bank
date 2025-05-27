@@ -278,15 +278,7 @@ const getStatusBadgeClass = (status) => {
 </template>
 
 <style scoped>
-.btn-success-add {
-    background-color: #28a745;
-    color: white;
-}
 
-.btn-success-add:hover {
-    background-color: #218838;
-    color: white;
-}
 
 .table-responsive {
     overflow-x: auto;

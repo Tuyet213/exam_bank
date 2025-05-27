@@ -94,7 +94,7 @@ const downloadDeSimple = (idx) => {
     </template>
     <template #content>
       <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header bg-success-tb text-white">
           <h3 class="mb-0">TRÍCH XUẤT ĐỀ THI {{ loai_ky === 'giua_ky' ? 'GIỮA KỲ' : 'CUỐI KỲ' }}</h3>
         </div>
         <div class="card-body">

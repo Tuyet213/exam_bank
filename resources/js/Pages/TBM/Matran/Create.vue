@@ -20,6 +20,7 @@ const form = reactive({
 });
 
 const isGiao = (chuongId, cdrId) => {
+  if (!props.giao || !Array.isArray(props.giao)) return false;
   return props.giao.some(([c, d]) => c === chuongId && d === cdrId);
 };
 
@@ -38,7 +39,14 @@ const onHocPhanChange = (e) => {
   router.visit(route('matran.create', { 
     hoc_phan_id: form.hoc_phan,
     loai_ky: form.loai_ky
-  }), { preserveState: true });
+  }), { 
+    preserveState: true,
+    onSuccess: () => {
+      setTimeout(() => {
+        initBang();
+      }, 100); // Đợi một chút để đảm bảo dữ liệu đã được cập nhật
+    }
+  });
 };
 
 const onLoaiKyChange = (e) => {
@@ -52,9 +60,13 @@ const onLoaiKyChange = (e) => {
 // Khởi tạo bảng nhập liệu khi props.chuongs/cdrs/giao thay đổi
 const initBang = () => {
   form.bang = {};
+  if (!props.chuongs || !props.cdrs || !Array.isArray(props.chuongs) || !Array.isArray(props.cdrs)) return;
+  
   props.chuongs.forEach(ch => {
+    if (!ch || !ch.id) return;
     form.bang[ch.id] = {};
     props.cdrs.forEach(cdr => {
+      if (!cdr || !cdr.id) return;
       if (isGiao(ch.id, cdr.id)) {
         form.bang[ch.id][cdr.id] = { 1: 0, 2: 0, 3: 0 };
       }
@@ -76,6 +88,10 @@ watch(() => form.hoc_phan, (newVal, oldVal) => {
     }), { preserveState: true });
   }
 });
+
+watch(() => [props.chuongs, props.cdrs, props.giao], () => {
+  initBang();
+}, { deep: true, immediate: false });
 </script>
 <template>
   <AppLayout :role="role">
@@ -86,7 +102,7 @@ watch(() => form.hoc_phan, (newVal, oldVal) => {
     </template>
     <template #content>
       <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header bg-success-tb text-white">
           <h3 class="mb-0">TẠO MA TRẬN ĐỀ THI</h3>
         </div>
         <div class="card-body">
@@ -157,7 +173,7 @@ watch(() => form.hoc_phan, (newVal, oldVal) => {
                 <b>Ghi chú:</b> (1) Số lượng câu hỏi Dễ, mức 1; (2) Số lượng câu hỏi Trung bình, mức 2; (3) Số lượng câu hỏi Khó, mức 3.
               </div>
             </div>
-            <button type="submit" class="btn btn-primary mt-4">Lưu ma trận</button>
+            <button type="submit" class="btn btn-success mt-4">Lưu ma trận</button>
           </form>
         </div>
       </div>

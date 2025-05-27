@@ -30,45 +30,51 @@ class DSBienBanController extends Controller
             'ctDSDangKy.hocPhan.boMon', 
             'ctDSDangKy.dsDangKy',
             'ctDSDangKy.dsGVBienSoans.vienChuc'
-        ]);
+        ])->where('bien_ban_hops.able', true);
         
         // Tìm kiếm theo từ khóa
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->whereHas('ctDSDangKy.hocPhan.boMon', function($q) use ($search) {
-                $q->where('ten', 'like', "%{$search}%");
+                $q->where('ten', 'like', "%{$search}%")
+                  ->where('able', true);
             })
             ->orWhereHas('ctDSDangKy.dsDangKy', function($q) use ($search) {
                 $q->where('nam_hoc', 'like', "%{$search}%")
-                  ->orWhere('hoc_ki', 'like', "%{$search}%");
+                  ->orWhere('hoc_ki', 'like', "%{$search}%")
+                  ->where('able', true);
             });
         }
         
         // Lọc theo khoa
         if ($request->has('khoa') && !empty($request->khoa)) {
             $query->whereHas('ctDSDangKy.hocPhan.boMon.khoa', function($q) use ($request) {
-                $q->where('ten', $request->khoa);
+                $q->where('ten', $request->khoa)
+                  ->where('able', true);
             });
         }
         
         // Lọc theo bộ môn
         if ($request->has('bo_mon') && !empty($request->bo_mon)) {
             $query->whereHas('ctDSDangKy.hocPhan.boMon', function($q) use ($request) {
-                $q->where('ten', $request->bo_mon);
+                $q->where('ten', $request->bo_mon)
+                  ->where('able', true);
             });
         }
         
         // Lọc theo học kỳ
         if ($request->has('hoc_ki') && !empty($request->hoc_ki)) {
             $query->whereHas('ctDSDangKy.dsDangKy', function($q) use ($request) {
-                $q->where('hoc_ki', $request->hoc_ki);
+                $q->where('hoc_ki', $request->hoc_ki)
+                  ->where('able', true);
             });
         }
         
         // Lọc theo năm học
         if ($request->has('nam_hoc') && !empty($request->nam_hoc)) {
             $query->whereHas('ctDSDangKy.dsDangKy', function($q) use ($request) {
-                $q->where('nam_hoc', $request->nam_hoc);
+                $q->where('nam_hoc', $request->nam_hoc)
+                  ->where('able', true);
             });
         }
 
@@ -144,6 +150,7 @@ class DSBienBanController extends Controller
         
         // Lấy danh sách khoa (loại trừ admin và DBCL)
         $khoas = Khoa::whereNotIn('id', ['admin', 'DBCL'])
+            ->where('able', true)
             ->orderBy('ten')
             ->get();
         
@@ -154,8 +161,10 @@ class DSBienBanController extends Controller
         // Đảm bảo chỉ lấy bộ môn thuộc các khoa hợp lệ
         $boMons = BoMon::with('khoa')
             ->whereNotIn('id', ['admin', 'dbcl'])
+            ->where('able', true)
             ->whereHas('khoa', function($query) {
-                $query->whereNotIn('id', ['admin', 'DBCL']);
+                $query->whereNotIn('id', ['admin', 'DBCL'])
+                      ->where('able', true);
             })
             ->orderBy('ten')
             ->get();
@@ -213,7 +222,7 @@ class DSBienBanController extends Controller
     public function download($id)
     {
         try {
-            $bienBan = BienBanHop::findOrFail($id);
+            $bienBan = BienBanHop::where('able', true)->findOrFail($id);
             
             if (!$bienBan->noi_dung) {
                 return back()->with([
@@ -297,7 +306,7 @@ class DSBienBanController extends Controller
                 ->whereHas('roles', function($query) {
                     $query->where('name', 'Trưởng Bộ Môn');
                 })
-                ->where('able', 1)
+                ->where('able', true)
                 ->first();
                 
             if (!$truongBoMon || !$truongBoMon->email) {
@@ -344,7 +353,7 @@ class DSBienBanController extends Controller
                 ->whereHas('roles', function($query) {
                     $query->where('name', 'Trưởng Bộ Môn');
                 })
-                ->where('able', 1)
+                ->where('able', true)
                 ->first();
                 
             if (!$truongBoMon || !$truongBoMon->email) {

@@ -83,7 +83,7 @@ const submit = () => {
         <template v-slot:content>
             <div class="content">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-success-tb text-white">
                         <h3 class="mb-0">CHỈNH SỬA BIÊN BẢN HỌP</h3>
                     </div>
 

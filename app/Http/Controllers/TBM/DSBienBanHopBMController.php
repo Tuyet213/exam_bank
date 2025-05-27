@@ -35,10 +35,14 @@ class DSBienBanHopBMController extends Controller
             'ctDSDangKy.dsGVBienSoans.vienChuc'
         ])
         ->whereHas('ctDSDangKy.hocPhan', function($query) {
-            $query->where('id_bo_mon', Auth::user()->id_bo_mon);
+            $query->where('id_bo_mon', Auth::user()->id_bo_mon)
+                  ->where('able', true);
         })
+        ->where('bien_ban_hops.able', true)
         ->join('c_t_d_s_dang_kies', 'bien_ban_hops.id_ct_ds_dang_ky', '=', 'c_t_d_s_dang_kies.id')
         ->join('d_s_dang_kies', 'c_t_d_s_dang_kies.id_ds_dang_ky', '=', 'd_s_dang_kies.id')
+        ->where('c_t_d_s_dang_kies.able', true)
+        ->where('d_s_dang_kies.able', true)
         ->orderBy('d_s_dang_kies.created_at', 'desc')
         ->orderBy('d_s_dang_kies.id', 'desc')
         ->select('bien_ban_hops.*')->where('cap', 'Bộ môn');
@@ -46,14 +50,16 @@ class DSBienBanHopBMController extends Controller
         // Lọc theo học kỳ nếu có
         if ($request->has('hoc_ki') && $request->hoc_ki != '') {
             $query->whereHas('ctDSDangKy.dsDangKy', function($q) use ($request) {
-                $q->where('hoc_ki', $request->hoc_ki);
+                $q->where('hoc_ki', $request->hoc_ki)
+                  ->where('able', true);
             });
         }
 
         // Lọc theo năm học nếu có
         if ($request->has('nam_hoc') && $request->nam_hoc != '') {
             $query->whereHas('ctDSDangKy.dsDangKy', function($q) use ($request) {
-                $q->where('nam_hoc', $request->nam_hoc);
+                $q->where('nam_hoc', $request->nam_hoc)
+                  ->where('able', true);
             });
         }
 

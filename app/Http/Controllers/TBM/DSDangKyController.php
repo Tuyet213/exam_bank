@@ -29,7 +29,8 @@ class DSDangKyController extends Controller
 
         // Lấy tất cả danh sách đăng ký của bộ môn
         $query = DSDangKy::with(['boMon', 'ctDSDangKies'])
-            ->where('id_bo_mon', $boMon->id);
+            ->where('id_bo_mon', $boMon->id)
+            ->where('able', true);
 
         // Lọc theo học kỳ nếu có
         if ($request->has('hoc_ki') && !empty($request->hoc_ki)) {
@@ -190,9 +191,13 @@ class DSDangKyController extends Controller
     {
         $hocPhans = HocPhan::where('id_bo_mon', Auth::user()->id_bo_mon)
             ->orderBy('id')
+            ->where('able', true)
             ->get();
             
-        $vienChucs = User::where('id_bo_mon', Auth::user()->id_bo_mon)->orderBy('name')->get();
+        $vienChucs = User::where('id_bo_mon', Auth::user()->id_bo_mon)
+            ->orderBy('name')
+            ->where('able', true)
+            ->get();
         
         // Tạo danh sách các năm học
         $currentYear = date('Y');

@@ -15,13 +15,14 @@ class DSDangKyController extends Controller
     public function index(Request $request)
     {
         // Lọc dữ liệu theo request
-        $query = DSDangKy::with(['boMon.khoa', 'ctDSDangKies']);
+        $query = DSDangKy::with(['boMon.khoa', 'ctDSDangKies'])->where('d_s_dang_kies.able', true);
         
         // Tìm kiếm theo từ khóa
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->whereHas('boMon', function($q) use ($search) {
-                $q->where('ten', 'like', "%{$search}%");
+                $q->where('ten', 'like', "%{$search}%")
+                  ->where('able', true);
             })
             ->orWhere('nam_hoc', 'like', "%{$search}%")
             ->orWhere('hoc_ki', 'like', "%{$search}%");
@@ -30,14 +31,16 @@ class DSDangKyController extends Controller
         // Lọc theo khoa
         if ($request->has('khoa') && !empty($request->khoa)) {
             $query->whereHas('boMon.khoa', function($q) use ($request) {
-                $q->where('ten', $request->khoa);
+                $q->where('ten', $request->khoa)
+                  ->where('able', true);
             });
         }
         
         // Lọc theo bộ môn
         if ($request->has('bo_mon') && !empty($request->bo_mon)) {
             $query->whereHas('boMon', function($q) use ($request) {
-                $q->where('ten', $request->bo_mon);
+                $q->where('ten', $request->bo_mon)
+                  ->where('able', true);
             });
         }
         
@@ -124,6 +127,7 @@ class DSDangKyController extends Controller
         
         // Lấy danh sách khoa (loại trừ admin và DBCL)
         $khoas = Khoa::whereNotIn('id', ['admin', 'DBCL'])
+            ->where('able', true)
             ->orderBy('ten')
             ->get();
         
@@ -134,8 +138,10 @@ class DSDangKyController extends Controller
         // Đảm bảo chỉ lấy bộ môn thuộc các khoa hợp lệ
         $boMons = BoMon::with('khoa')
             ->whereNotIn('id', ['admin', 'dbcl'])
+            ->where('able', true)
             ->whereHas('khoa', function($query) {
-                $query->whereNotIn('id', ['admin', 'DBCL']);
+                $query->whereNotIn('id', ['admin', 'DBCL'])
+                      ->where('able', true);
             })
             ->orderBy('ten')
             ->get();
