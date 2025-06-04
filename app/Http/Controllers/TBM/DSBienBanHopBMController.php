@@ -139,7 +139,9 @@ class DSBienBanHopBMController extends Controller
         }
 
         // Lấy danh sách viên chức của bộ môn
-        $vienChucs = User::where('id_bo_mon', Auth::user()->id_bo_mon)
+        $vienChucs = User::whereHas('boMon', function($query) {
+                $query->where('id_khoa', Auth::user()->boMon->id_khoa);
+            })
             ->where('able', 1)
             ->get();
             
@@ -270,7 +272,9 @@ class DSBienBanHopBMController extends Controller
         }
 
         // Lấy danh sách viên chức của bộ môn
-        $vienChucs = User::where('id_bo_mon', Auth::user()->id_bo_mon)
+        $vienChucs = User::whereHas('boMon', function($query) {
+                $query->where('id_khoa', Auth::user()->boMon->id_khoa);
+            })
             ->where('able', 1)
             ->get();
             

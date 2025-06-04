@@ -35,7 +35,7 @@ const form = useForm({
         trang_thai: da.trang_thai,
         diem: da.diem
     })) || [
-        { noi_dung: '', trang_thai: false, diem: 0 }
+        { id: null, noi_dung: '', trang_thai: false, diem: 0 }
     ]
 });
 
@@ -82,15 +82,46 @@ const removeDapAn = (index) => {
 
 // Xử lý form submit
 const submit = () => {
+    
+    // Kiểm tra nội dung đáp án
+    const emptyAnswers = form.dap_ans.filter(da => !da.noi_dung.trim());
+    if (emptyAnswers.length > 0) {
+        alert('Vui lòng nhập nội dung cho tất cả đáp án!');
+        return;
+    }
+    
+    
+    
     // Kiểm tra nếu là câu hỏi trắc nghiệm thì phải có ít nhất một đáp án đúng
     if (props.cauHoi.phan_loai === 0) {
         const hasCorrectAnswer = form.dap_ans.some(da => da.trang_thai);
         if (!hasCorrectAnswer) {
-            alert('Phải có ít nhất một đáp án đúng!');
+            alert('Câu hỏi trắc nghiệm phải có ít nhất một đáp án đúng!');
+            return;
+        }
+        
+        // Kiểm tra đáp án đúng phải có điểm > 0
+        const correctAnswersWithoutScore = form.dap_ans.filter(da => da.trang_thai && da.diem <= 0);
+        if (correctAnswersWithoutScore.length > 0) {
+            alert('Đáp án đúng phải có điểm lớn hơn 0!');
             return;
         }
     }
-    form.post(route('cauhoi.capnhat', props.cauHoi.id));
+    
+    console.log('Dữ liệu gửi đi:', form.data());
+    form.post(route('cauhoi.capnhat', props.cauHoi.id), {
+        onError: (errors) => {
+            console.log('Lỗi validation:', errors);
+            // Hiển thị lỗi đầu tiên
+            const firstError = Object.values(errors)[0];
+            if (firstError) {
+                alert('Lỗi: ' + firstError);
+            }
+        },
+        onSuccess: () => {
+            console.log('Cập nhật thành công!');
+        }
+    });
 };
 </script>
 
@@ -227,6 +258,8 @@ const submit = () => {
                                         min="0"
                                         class="form-control"
                                         required
+                                        readonly
+                                        title="Điểm được tính tự động từ tổng điểm các đáp án"
                                     />
                                     <div v-if="form.errors.diem" class="text-danger mt-1">
                                         {{ form.errors.diem }}
@@ -261,7 +294,8 @@ const submit = () => {
                                                 <div class="flex items-center space-x-4">
                                                     <label v-if="props.cauHoi.phan_loai == 0" class="flex items-center">
                                                         <input type="checkbox" v-model="dapAn.trang_thai"
-                                                            class="form-checkbox h-4 w-4 text-blue-600">
+                                                            class="form-checkbox h-4 w-4 text-blue-600"
+                                                            :checked="dapAn.trang_thai">
                                                         <span class="ml-2">Đáp án đúng</span>
                                                     </label>
                                                     <div class="flex items-center">

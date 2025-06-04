@@ -17,6 +17,12 @@ class DapAn extends Model
         'diem',
     ];
 
+    protected $casts = [
+        'trang_thai' => 'boolean',
+        'able' => 'boolean',
+        'diem' => 'decimal:2',
+    ];
+
     public function cauHoi()
     {
         return $this->belongsTo(CauHoi::class, 'id_cau_hoi');

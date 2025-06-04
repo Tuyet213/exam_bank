@@ -150,7 +150,7 @@ const getStatusBadgeClass = (status) => {
     <AppLayout role="dbcl">
         <template v-slot:sub-link>
             <li class="breadcrumb-item active">
-                <a :href="route('quality.dsbienban.index')">Danh sách biên bản họp bộ môn</a>
+                <a :href="route('quality.dsbienban.index')">Danh sách biên bản nghiệm thu</a>
             </li>
         </template>
 
@@ -158,7 +158,7 @@ const getStatusBadgeClass = (status) => {
             <div class="content">
                 <div class="card border-radius-lg shadow-lg animated-fade-in">
                     <div class="card-header d-flex justify-content-between align-items-center bg-info-qo text-white p-4">
-                        <h3 class="mb-0">DANH SÁCH BIÊN BẢN HỌP BỘ MÔN</h3>
+                        <h3 class="mb-0">DANH SÁCH BIÊN BẢN NGHIỆM THU</h3>
                     </div>
 
                     <div class="card-body pb-0">

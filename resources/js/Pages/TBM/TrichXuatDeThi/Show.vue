@@ -13,11 +13,12 @@ const props = defineProps({
   soDe: [String, Number, null],
   dsDe: Array,
   role: String,
-  loai_ky: String
+  loai_ky: String,
+  loaiDe: String
 });
 
 const soDe = ref(props.soDe || '');
-const loaiDe = ref('');
+const loaiDe = ref(props.loaiDe || 'trac_nghiem');
 const loaiDeOptions = [
   { value: 'trac_nghiem', label: 'Trắc nghiệm' },
   { value: 'tu_luan_van_dap', label: 'Tự luận và vấn đáp' }
@@ -28,7 +29,12 @@ const submit = () => {
     alert('Vui lòng nhập số lượng đề hợp lệ!');
     return;
   }
-  router.get(route('matran.export', props.id), { 
+  if (!loaiDe.value) {
+    alert('Vui lòng chọn loại đề thi!');
+    return;
+  }
+  
+  router.get(route('trich-xuat-de-thi.show', props.id), { 
     so_de: soDe.value, 
     loai_de: loaiDe.value,
     loai_ky: props.loai_ky
@@ -39,6 +45,7 @@ const getTenChuong = (id) => {
   const ch = props.chuongs.find(c => c.id == id);
   return ch ? (ch.ten || ch.ten_chuong || ch.id) : id;
 };
+
 const getTenCDR = (id) => {
   const cdr = props.cdrs.find(c => c.id == id);
   return cdr ? (cdr.mo_ta || cdr.ten || cdr.id) : id;
@@ -92,11 +99,12 @@ const downloadDeSimple = (idx) => {
   }), '_blank');
 };
 </script>
+
 <template>
   <AppLayout :role="role">
     <template #sub-link>
       <li class="breadcrumb-item">
-        <a :href="route('matran.index')">Danh sách ma trận</a>
+        <a href="#" @click.prevent="goBack">Trích xuất đề thi</a>
       </li>
       <li class="breadcrumb-item active">{{ hocPhan.ten }}</li>
     </template>
@@ -127,6 +135,7 @@ const downloadDeSimple = (idx) => {
                 </div>
               </div>
             </div>
+            
           </div>
 
           <!-- Form trích xuất -->
@@ -264,6 +273,8 @@ const downloadDeSimple = (idx) => {
               </div>
             </div>
           </div>
+
+
         </div>
       </div>
     </template>
@@ -305,4 +316,4 @@ const downloadDeSimple = (idx) => {
   border-color: #28a745;
   box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
 }
-</style>
+</style> 

@@ -688,79 +688,141 @@ class CauHoiController extends Controller
     public function capNhat(Request $request, $id)
     {
         $validated = $request->validate([
-            'cau_hoi' => 'required|string',
+            'cau_hoi' => 'required|string|max:2000',
             'id_chuan_dau_ra' => 'required|exists:chuan_dau_ras,id',
             'id_chuong' => 'required|exists:chuongs,id',
-            'diem' => 'required|numeric|min:0',
+            'diem' => 'required|numeric|min:0.01|max:10',
             'muc_do' => 'required|in:1,2,3', // 1: dễ, 2: trung bình, 3: khó
-            'dap_ans' => 'required|array', // Bắt buộc cho cả trắc nghiệm và tự luận
-            'dap_ans.*.noi_dung' => 'required|string',
-            'dap_ans.*.trang_thai' => 'required_if:phan_loai,0|boolean', // Chỉ bắt buộc cho trắc nghiệm
-            'dap_ans.*.diem' => 'required|numeric|min:0.25|max:0.5',
-            'dap_ans.*.id' => 'nullable|exists:dap_ans,id', // ID đáp án (nếu đã tồn tại)
+            'dap_ans' => 'required|array|min:1',
+            'dap_ans.*.noi_dung' => 'required|string|max:1000',
+            'dap_ans.*.trang_thai' => 'boolean',
+            'dap_ans.*.diem' => 'required|numeric|min:0|max:5', // Cho phép điểm = 0
+            'dap_ans.*.id' => 'nullable|exists:dap_ans,id',
         ]);
 
         $cauHoi = CauHoi::where('able', true)->findOrFail($id);
         
+        // Kiểm tra logic nghiệp vụ cho trắc nghiệm
+        if ($cauHoi->phan_loai == 0) {
+            $hasCorrectAnswer = collect($request->dap_ans)->some(function($dapAn) {
+                return isset($dapAn['trang_thai']) && $dapAn['trang_thai'];
+            });
+            
+            if (!$hasCorrectAnswer) {
+                return redirect()->back()
+                    ->with('error', 'Câu hỏi trắc nghiệm phải có ít nhất một đáp án đúng!')
+                    ->withInput();
+            }
+        }
+        
         DB::beginTransaction();
         try {
-            // Tính tổng điểm từ các đáp án
-            $tongDiem = 0;
-            foreach ($request->dap_ans as $dapAn) {
-                if ($cauHoi->phan_loai == 0) {
-                    // Nếu là trắc nghiệm, chỉ tính điểm của đáp án đúng
-                    if (isset($dapAn['trang_thai']) && $dapAn['trang_thai']) {
-                        $tongDiem += $dapAn['diem'];
-                    }
-                } else {
-                    // Nếu là tự luận, tính tổng điểm của tất cả đáp án
-                    $tongDiem += $dapAn['diem'];
-                }
-            }
-            
-            // Cập nhật thông tin câu hỏi
+            // Cập nhật thông tin câu hỏi (nội dung, chuẩn đầu ra, chương, mức độ)
             $cauHoi->update([
                 'cau_hoi' => $validated['cau_hoi'],
                 'id_chuan_dau_ra' => $validated['id_chuan_dau_ra'],
                 'id_chuong' => $validated['id_chuong'],
-                'diem' => $tongDiem,
                 'muc_do' => $validated['muc_do']
             ]);
 
-            // Xử lý đáp án
-            $dapAnIds = [];
-            foreach ($request->dap_ans as $dapAnData) {
-                if (isset($dapAnData['id'])) {
-                    // Cập nhật đáp án đã tồn tại
-                    $dapAn = \App\Models\DapAn::where('able', true)->find($dapAnData['id']);
+            // Lấy danh sách ID đáp án được gửi lên
+            $dapAnIdsFromRequest = collect($request->dap_ans)
+                ->pluck('id')
+                ->filter() // Loại bỏ null
+                ->toArray();
+
+            // Xóa các đáp án có ID nhưng không được gửi lên
+            $deletedCount = $cauHoi->dapAns()
+                ->where('able', true)
+                ->whereNotIn('id', $dapAnIdsFromRequest)
+                ->count();
+            
+            if ($deletedCount > 0) {
+                $cauHoi->dapAns()
+                    ->where('able', true)
+                    ->whereNotIn('id', $dapAnIdsFromRequest)
+                    ->delete();
+                Log::info("Đã xóa {$deletedCount} đáp án không còn sử dụng");
+            }
+
+            // Xử lý từng đáp án
+            $processedIds = [];
+            foreach ($request->dap_ans as $index => $dapAnData) {
+                $trangThai = $cauHoi->phan_loai == 0 ? 
+                    (isset($dapAnData['trang_thai']) ? $dapAnData['trang_thai'] : false) : 
+                    true;
+                
+                if (isset($dapAnData['id']) && !empty($dapAnData['id'])) {
+                    // Cập nhật đáp án có ID (đáp án cũ)
+                    $dapAn = \App\Models\DapAn::where('able', true)
+                        ->where('id_cau_hoi', $cauHoi->id)
+                        ->find($dapAnData['id']);
+                    
                     if ($dapAn) {
                         $dapAn->update([
                             'dap_an' => $dapAnData['noi_dung'],
-                            'trang_thai' => $cauHoi->phan_loai == 0 ? $dapAnData['trang_thai'] : true,
+                            'trang_thai' => $trangThai,
+                            'diem' => round((float)$dapAnData['diem'], 2)
+                        ]);
+                        $processedIds[] = $dapAn->id;
+                        
+                        Log::info("Cập nhật đáp án ID: {$dapAn->id}", [
+                            'noi_dung' => $dapAnData['noi_dung'],
+                            'trang_thai' => $trangThai,
                             'diem' => $dapAnData['diem']
                         ]);
-                        $dapAnIds[] = $dapAn->id;
                     }
                 } else {
-                    // Tạo mới đáp án
+                    // Tạo mới đáp án không có ID (đáp án mới)
                     $dapAn = $cauHoi->dapAns()->create([
                         'dap_an' => $dapAnData['noi_dung'],
-                        'trang_thai' => $cauHoi->phan_loai == 0 ? $dapAnData['trang_thai'] : true,
+                        'trang_thai' => $trangThai,
+                        'diem' => round((float)$dapAnData['diem'], 2)
+                    ]);
+                    $processedIds[] = $dapAn->id;
+                    
+                    Log::info("Tạo mới đáp án ID: {$dapAn->id}", [
+                        'noi_dung' => $dapAnData['noi_dung'],
+                        'trang_thai' => $trangThai,
                         'diem' => $dapAnData['diem']
                     ]);
-                    $dapAnIds[] = $dapAn->id;
                 }
             }
             
-            // Xóa các đáp án không có trong request
-            $cauHoi->dapAns()->whereNotIn('id', $dapAnIds)->delete();
+            // Tính lại tổng điểm từ các đáp án
+            $tongDiem = 0;
+            $allDapAns = $cauHoi->dapAns()->where('able', true)->get();
+            foreach ($allDapAns as $dapAn) {
+                if ($cauHoi->phan_loai == 0) {
+                    // Trắc nghiệm: chỉ tính điểm của đáp án đúng
+                    if ($dapAn->trang_thai) {
+                        $tongDiem += (float)$dapAn->diem;
+                    }
+                } else {
+                    // Tự luận: tính tổng điểm của tất cả đáp án
+                    $tongDiem += (float)$dapAn->diem;
+                }
+            }
+            
+            // Cập nhật điểm tổng
+            $cauHoi->update(['diem' => round($tongDiem, 2)]);
 
             DB::commit();
+            
+            Log::info("Cập nhật câu hỏi thành công", [
+                'cau_hoi_id' => $cauHoi->id,
+                'tong_diem' => round($tongDiem, 2),
+                'so_dap_an' => count($processedIds),
+                'dap_an_da_xoa' => $deletedCount
+            ]);
+            
             return redirect()->route('cauhoi.danhsach', $cauHoi->id_ct_ds_dang_ky)
                 ->with('success', 'Cập nhật câu hỏi thành công');
+                
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Lỗi khi cập nhật câu hỏi: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             return redirect()->back()
                 ->with('error', 'Có lỗi xảy ra khi cập nhật câu hỏi: ' . $e->getMessage())
                 ->withInput();

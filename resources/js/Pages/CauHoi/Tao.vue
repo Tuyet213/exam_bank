@@ -233,7 +233,7 @@ const submit = () => {
                                                     <label class="text-sm mr-2">Điểm:</label>
                                                     <input type="number" v-model="dapAn.diem"
                                                         :min="form.phan_loai != 0 ? 0.25 : 0"
-                                                        :max="form.phan_loai != 0 ? 0.5 : 0"
+                                                        :max="form.phan_loai != 0 ? 0.5 : 10"
                                                         step="0.01"
                                                         class="shadow appearance-none border rounded w-20 py-1 px-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                                         >

@@ -101,6 +101,8 @@ const handleEdit = (id) => {
 const getStatusBadgeClass = (status) => {
     const classes = 'badge ';
     switch (status) {
+        case 'Completed':
+            return classes + 'bg-success-tb';
         case 'Approved':
             return classes + 'bg-success';
         case 'Rejected':

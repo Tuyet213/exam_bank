@@ -28,6 +28,12 @@ class UserController extends Controller
             });
         }
 
+        if($request->has('id_khoa') && !empty($request->input('id_khoa'))) {
+            $query->whereHas('bomon', function($q) use ($request) {
+                $q->where('id_khoa', $request->input('id_khoa'));
+            });
+        }
+
         if($request->has('id_bo_mon') && !empty($request->input('id_bo_mon'))) {
             $query->where('id_bo_mon', $request->input('id_bo_mon'));
         }
@@ -35,14 +41,28 @@ class UserController extends Controller
         if($request->has('id_chuc_vu') && !empty($request->input('id_chuc_vu'))) {
             $query->where('id_chuc_vu', $request->input('id_chuc_vu'));
         }
-        $users = $query->paginate(10);
+        $users = $query->paginate(10)->withQueryString();
         $users->map(function ($user) {
             $user->ngay_sinh = date('d/m/Y', strtotime($user->ngay_sinh));
             return $user;
         });
-        $bomons = BoMon::where('able', true)->get(['id', 'ten']);
+        
+        $khoas = Khoa::where('able', true)
+                ->whereNotIn('id', ['admin', 'DBCL'])
+                ->get(['id', 'ten']);
+                
+        $bomons = BoMon::where('able', true)->with('khoa')->get(['id', 'ten', 'id_khoa']);
         $chucvus = ChucVu::where('able', true)->get(['id', 'ten']);
-        return Inertia::render('Admin/User/Index', compact('users', 'bomons', 'chucvus'));
+        
+        // Thêm thông tin filters
+        $filters = [
+            'search' => $request->input('search'),
+            'id_khoa' => $request->input('id_khoa'),
+            'id_bo_mon' => $request->input('id_bo_mon'),
+            'id_chuc_vu' => $request->input('id_chuc_vu')
+        ];
+        
+        return Inertia::render('Admin/User/Index', compact('users', 'bomons', 'chucvus', 'khoas', 'filters'));
     }
 
     public function create()

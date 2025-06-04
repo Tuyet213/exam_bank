@@ -247,7 +247,7 @@ const submit = () => {
                                                 class="form-control"
                                                 :class="{ 'is-invalid': form.errors[`ds_g_v_bien_soans.${index}.so_gio`] }"
                                                 min="0"
-                                                step="0.5"
+                                                step="0.01"
                                                 required
                                                 @input="giangVien.so_gio = formatSoGio($event.target.value)"
                                             >
@@ -307,7 +307,7 @@ const submit = () => {
                                                 class="form-control"
                                                 :class="{ 'is-invalid': form.errors[`ds_hop.${index}.so_gio`] }"
                                                 min="0"
-                                                step="0.5"
+                                                step="0.01"
                                                 required
                                                 @input="thanhVien.so_gio = formatSoGio($event.target.value)"
                                             >

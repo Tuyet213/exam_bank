@@ -329,6 +329,13 @@
         Route::get('/{id}/export-download-simple', [App\Http\Controllers\TBM\MatranController::class, 'exportDownloadSimple'])->name('matran.export-download-simple');
         
     });
+
+    // Routes cho trang trích xuất đề thi dành riêng cho TBM
+    Route::prefix('trich-xuat-de-thi')->middleware(['auth', 'role:Trưởng Bộ Môn'])->name('trich-xuat-de-thi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TBM\TrichXuatDeThiController::class, 'index'])->name('index');
+        Route::get('/{id}', [\App\Http\Controllers\TBM\TrichXuatDeThiController::class, 'show'])->name('show');
+    });
+    
     Route::get('/blank', function () {
         return Inertia::render('Blank');
     })->name('blank');  

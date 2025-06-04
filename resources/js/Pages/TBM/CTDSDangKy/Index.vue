@@ -109,6 +109,13 @@ const handleImport = () => {
     });
 };
 
+const handleCreate = () => {
+    router.get(route('tbm.ctdsdangky.create', props.dsdangky.id), {}, {
+        onError: () => {
+            alert('Có lỗi xảy ra khi chuyển trang!');
+        }
+    });
+};
 // Hàm xử lý tạo biên bản
 const handleCreateBienBan = () => {
     if (selectedCTs.value.length === 0) {
@@ -161,19 +168,20 @@ const getStatusBadgeClass = (status) => {
                         <h3 class="mb-0">CHI TIẾT DANH SÁCH XÂY DỰNG NGÂN HÀNG </h3>
                         <div class="d-flex gap-2" v-if="can_create">
                             <button 
-                                disabled
+                                
                                 class="btn btn-sm bg-light text-black me-2"
+                                @click="handleCreate"
                             >
                                 <i class="fas fa-plus"></i>Thêm mới
                             </button>
-                            <button 
+                            <!-- <button 
                                 disabled
                                     class="btn btn-sm bg-light text-black me-2" 
                                     @click="showImportModal = true"
                                     title="Import từ Excel"
                                 >
                                     <i class="fas fa-file-import"></i> Import
-                                </button>
+                                </button> -->
                             
                         </div>
                         <div class="d-flex gap-2" v-else>

@@ -66,7 +66,7 @@ class CTDSDangKyController extends Controller
             // Gửi mail
             Mail::to($emailTBM)->send(new NotifyTBMReview($dsDangKy));
 
-            return redirect()->route('quality-office.ctdsdangky.index', $id_ds_dang_ky)->with('success', 'Đã gửi thông báo cho Trưởng bộ môn!');
+            return redirect()->route('quality.ctdsdangky.index', $id_ds_dang_ky)->with('success', 'Đã gửi thông báo cho Trưởng bộ môn!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Có lỗi xảy ra khi gửi thông báo: ' . $e->getMessage());
         }

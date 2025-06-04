@@ -194,45 +194,120 @@ class HocPhanController extends Controller
                 'ten', 'so_tin_chi', 'id_bo_mon', 'id_bac_dao_tao'
             ]));
 
-            // Xóa tất cả các liên kết chuong_chuan_dau_ra cũ
+            // Xóa tất cả các liên kết chuong_chuan_dau_ra cũ (xóa thật sự vì là bảng trung gian)
             ChuongChuanDauRa::whereIn('id_chuong', $hocphan->chuongs->pluck('id'))->delete();
-
-            // Xóa tất cả các chương cũ
-            Chuong::where('id_hoc_phan', $id)->delete();
-
-            // Xóa tất cả các chuẩn đầu ra cũ
-            ChuanDauRa::where('id_hoc_phan', $id)->delete();
             
-            // Thêm chuẩn đầu ra mới
+            // Đánh dấu tất cả các chương hiện tại là không khả dụng (soft delete)
+            Chuong::where('id_hoc_phan', $id)->where('able', true)->update(['able' => false]);
+
+            // Đánh dấu tất cả các chuẩn đầu ra hiện tại là không khả dụng (soft delete)
+            ChuanDauRa::where('id_hoc_phan', $id)->where('able', true)->update(['able' => false]);
+            
+            // Mảng để theo dõi ID của các chương và CDR đã tạo/cập nhật
+            $createdChuongIds = [];
+            $createdCDRIds = [];
+            
+            // Xử lý chuẩn đầu ra
             if ($request->has('chuan_dau_ras')) {
-                foreach ($request->chuan_dau_ras as $cdr) {
-                    ChuanDauRa::create([
-                        'ten' => $cdr['ten'],
-                        'noi_dung' => $cdr['noi_dung'],
-                        'id_hoc_phan' => $id
-                    ]);
+                foreach ($request->chuan_dau_ras as $index => $cdrData) {
+                    $cdr = null;
+                    
+                    // Trường hợp 1: Tìm CDR có able=false và tên trùng để update nội dung
+                    $cdr = ChuanDauRa::where('id_hoc_phan', $id)
+                                    ->where('able', false)
+                                    ->where('ten', $cdrData['ten'])
+                                    ->first();
+                    
+                    if ($cdr) {
+                        $cdr->noi_dung = $cdrData['noi_dung'];
+                        $cdr->able = true;
+                        $cdr->save();
+                        Log::info("Cập nhật CDR có tên trùng: " . $cdr->id);
+                    } else {
+                        // Trường hợp 2: Tìm bất kỳ CDR able=false nào để update
+                        $cdr = ChuanDauRa::where('id_hoc_phan', $id)
+                                        ->where('able', false)
+                                        ->first();
+                        
+                        if ($cdr) {
+                            $cdr->ten = $cdrData['ten'];
+                            $cdr->noi_dung = $cdrData['noi_dung'];
+                            $cdr->able = true;
+                            $cdr->save();
+                            Log::info("Cập nhật CDR khác: " . $cdr->id);
+                        } else {
+                            // Trường hợp 3: Tạo mới CDR
+                            $cdr = ChuanDauRa::create([
+                                'ten' => $cdrData['ten'],
+                                'noi_dung' => $cdrData['noi_dung'],
+                                'id_hoc_phan' => $id,
+                                'able' => true
+                            ]);
+                            Log::info("Tạo mới CDR: " . $cdr->id);
+                        }
+                    }
+                    
+                    // Lưu ID và nội dung để tham chiếu sau này
+                    $createdCDRIds[$cdrData['noi_dung']] = $cdr->id;
                 }
             }
-
-            // Thêm chương mới và liên kết với chuẩn đầu ra
+            
+            // Xử lý chương
             if ($request->has('chuongs')) {
-                foreach ($request->chuongs as $c) {
-                    $chuong = Chuong::create([
-                        'ten' => $c['ten'],
-                        'id_hoc_phan' => $id
-                    ]);
-
+                foreach ($request->chuongs as $index => $chuongData) {
+                    $chuong = null;
+                    
+                    // Trường hợp 1: Tìm chương có able=false để update
+                    $chuong = Chuong::where('id_hoc_phan', $id)
+                                   ->where('able', false)
+                                   ->first();
+                    
+                    if ($chuong) {
+                        $chuong->ten = $chuongData['ten'];
+                        $chuong->able = true;
+                        $chuong->save();
+                        Log::info("Cập nhật chương: " . $chuong->id);
+                    } else {
+                        // Trường hợp 2: Tạo mới chương
+                        $chuong = Chuong::create([
+                            'ten' => $chuongData['ten'],
+                            'id_hoc_phan' => $id,
+                            'able' => true
+                        ]);
+                        Log::info("Tạo mới chương: " . $chuong->id);
+                    }
+                    
+                    $createdChuongIds[] = $chuong->id;
+                    
                     // Liên kết chương với chuẩn đầu ra
-                    if (isset($c['chuan_dau_ras']) && is_array($c['chuan_dau_ras'])) {
-                        foreach ($c['chuan_dau_ras'] as $noi_dung) {
-                            $cdr = ChuanDauRa::where('noi_dung', $noi_dung)
-                                           ->where('id_hoc_phan', $id)
-                                           ->first();
-                            if ($cdr) {
+                    if (isset($chuongData['chuan_dau_ras']) && is_array($chuongData['chuan_dau_ras'])) {
+                        foreach ($chuongData['chuan_dau_ras'] as $noi_dung) {
+                            // Tìm ID của CDR dựa trên nội dung
+                            if (isset($createdCDRIds[$noi_dung])) {
+                                $cdrId = $createdCDRIds[$noi_dung];
+                                
+                                // Tạo liên kết mới
                                 ChuongChuanDauRa::create([
                                     'id_chuong' => $chuong->id,
-                                    'id_chuan_dau_ra' => $cdr->id
+                                    'id_chuan_dau_ra' => $cdrId,
+                                    'able' => true
                                 ]);
+                                Log::info("Tạo liên kết chương-CDR: {$chuong->id} - {$cdrId}");
+                            } else {
+                                // Nếu không tìm thấy CDR dựa trên nội dung, tìm dựa trên id_hoc_phan
+                                $cdr = ChuanDauRa::where('noi_dung', $noi_dung)
+                                               ->where('id_hoc_phan', $id)
+                                               ->where('able', true)
+                                               ->first();
+                                
+                                if ($cdr) {
+                                    ChuongChuanDauRa::create([
+                                        'id_chuong' => $chuong->id,
+                                        'id_chuan_dau_ra' => $cdr->id,
+                                        'able' => true
+                                    ]);
+                                    Log::info("Tạo liên kết chương-CDR (tìm kiếm): {$chuong->id} - {$cdr->id}");
+                                }
                             }
                         }
                     }
@@ -240,9 +315,11 @@ class HocPhanController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('admin.hocphan.index');
+            return redirect()->route('admin.hocphan.index')->with('message', 'Cập nhật học phần thành công');
         } catch (\Exception $e) {
             DB::rollback();
+            Log::error("Lỗi cập nhật học phần: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
             return redirect()->route('admin.hocphan.index')->withErrors(['message' => 'Có lỗi xảy ra khi cập nhật học phần: ' . $e->getMessage()]);
         }
     }

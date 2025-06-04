@@ -68,30 +68,35 @@ class DSDangKyController extends Controller
             // Kiểm tra nếu có bất kỳ chi tiết nào bị từ chối
             if ($item->ctDSDangKies->contains('trang_thai', 'Rejected')) {
                 $item->trang_thai = 'Rejected';
+                $item->can_send = true;
             }
             // Kiểm tra nếu có bất kỳ chi tiết nào đang chờ xét duyệt
             else if ($item->ctDSDangKies->contains('trang_thai', 'Pending')) {
                 $item->trang_thai = 'Pending';
+                $item->can_send = false;
             }
             // Kiểm tra nếu tất cả chi tiết đã được phê duyệt
             else if ($item->ctDSDangKies->every(function ($ct) {
                 return $ct->trang_thai === 'Approved';
             })) {
                 $item->trang_thai = 'Approved';
+                $item->can_send = false;
             }
             // Kiểm tra nếu tất cả chi tiết đã hoàn thành
             else if ($item->ctDSDangKies->every(function ($ct) {
                 return $ct->trang_thai === 'Completed';
             })) {
                 $item->trang_thai = 'Completed';
+                $item->can_send = false;
             }
             // Trường hợp còn lại là tất cả chi tiết đều là Draft
             else {
                 $item->trang_thai = 'Draft';
+                $item->can_send = true;
             }
 
             // Có thể gửi nếu tất cả chi tiết đều là Draft và có ít nhất 1 chi tiết
-            $item->can_send = $item->trang_thai === 'Draft' && $item->ctDSDangKies->count() > 0;
+            // $item->can_send = $item->trang_thai === 'Draft' && $item->ctDSDangKies->count() > 0;
             
             return $item;
         });
@@ -152,8 +157,10 @@ class DSDangKyController extends Controller
 
         // Cập nhật trạng thái
         foreach($dsdangky->ctDSDangKies as $ct) {
+            if($ct->trang_thai === 'Draft' || $ct->trang_thai === 'Rejected') {
             $ct->trang_thai = 'Pending';
             $ct->save();
+            }
         }
 
         // Gửi mail

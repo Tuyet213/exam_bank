@@ -301,7 +301,7 @@ const exportExcelGioThamGia = () => {
                                         </div>
                                         <div class="col-md-3">
                                             <div class="stat-item">
-                                                <span class="stat-label">Tổng số giảng viên tham gia:</span>
+                                                <span class="stat-label">Tổng số viên chức tham gia:</span>
                                                 <span class="stat-value">{{ thongke_data?.tong_hop?.tong_so_nguoi_tham_gia || 0 }}</span>
                                             </div>
                                         </div>

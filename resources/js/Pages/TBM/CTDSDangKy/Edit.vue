@@ -247,6 +247,10 @@ const submit = () => {
 </template>
 
 <style scoped>
+.bg-success-tb {
+    background-color: #28a745;
+    color: white;
+}
 .btn-success {
     background-color: #28a745;
     color: white;
@@ -271,9 +275,6 @@ const submit = () => {
     font-weight: 500;
 }
 
-.card-header {
-    background-color: #f8f9fa;
-}
 
 .selected-vien-chuc-list {
     max-height: 150px;

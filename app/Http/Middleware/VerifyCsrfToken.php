@@ -13,6 +13,8 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'matran/*/export-download-full',
-        'matran/*/export-download-simple'
+        'matran/*/export-download-simple',
+        'trich-xuat-de-thi/*/download-full',
+        'trich-xuat-de-thi/*/download-simple'
     ];
 } 

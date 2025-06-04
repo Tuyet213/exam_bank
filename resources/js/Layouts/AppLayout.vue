@@ -260,6 +260,12 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                         >Ma trận đề thi</Link
                     >
                 </li>
+                <li>
+                    <i class="fas fa-file-export"></i>
+                    <Link :href="route('trich-xuat-de-thi.index')"
+                        >Trích xuất đề thi</Link
+                    >
+                </li>
             </ul>
 
             <!-- Chung cho tất cả các menu -->

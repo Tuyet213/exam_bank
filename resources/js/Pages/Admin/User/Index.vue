@@ -1,11 +1,11 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { router } from '@inertiajs/vue3';
 
 
-const { users, message, success, bomons, chucvus } = defineProps({
+const props = defineProps({
     users: {
         type: Object,
         required: true,
@@ -25,6 +25,19 @@ const { users, message, success, bomons, chucvus } = defineProps({
         type: Array,
         required: true,
     },
+    khoas: {
+        type: Array,
+        required: true,
+    },
+    filters: {
+        type: Object,
+        default: () => ({
+            search: '',
+            id_khoa: '',
+            id_bo_mon: '',
+            id_chuc_vu: ''
+        }),
+    },
     message: {
         type: String,
         default: "",
@@ -35,10 +48,10 @@ const { users, message, success, bomons, chucvus } = defineProps({
     },
 });
 
-console.log(users);
+console.log(props.users);
 
 const deleteUser = (id) => {
-    const user = users.data.find((user) => user.id === id);
+    const user = props.users.data.find((user) => user.id === id);
     if (!user) {
         alert("Người dùng không tồn tại!");
         return;
@@ -50,10 +63,25 @@ const deleteUser = (id) => {
     }
     return false;
 };
-const searchTerm = ref("");
-const selectedBoMon = ref("");
-const selectedChucVu = ref("");
+
+const searchTerm = ref(props.filters.search || "");
+const selectedKhoa = ref(props.filters.id_khoa || "");
+const selectedBoMon = ref(props.filters.id_bo_mon || "");
+const selectedChucVu = ref(props.filters.id_chuc_vu || "");
 const debounceTimeout = ref(null);
+
+// Lọc danh sách bộ môn theo khoa đã chọn
+const filteredBoMons = computed(() => {
+    if (!selectedKhoa.value) {
+        return [];
+    }
+    return props.bomons.filter(bomon => bomon.id_khoa === selectedKhoa.value);
+});
+
+// Reset bộ môn khi thay đổi khoa
+watch(selectedKhoa, (newVal) => {
+    selectedBoMon.value = '';
+});
 
 const performSearch = () => {
     if (debounceTimeout.value) {
@@ -64,6 +92,7 @@ const performSearch = () => {
             route("admin.user.index"),
             {
                 search: searchTerm.value,
+                id_khoa: selectedKhoa.value,
                 id_bo_mon: selectedBoMon.value,
                 id_chuc_vu: selectedChucVu.value,
             },
@@ -76,7 +105,7 @@ const performSearch = () => {
 };
 
 // Theo dõi thay đổi của các biến tìm kiếm
-watch([searchTerm, selectedBoMon, selectedChucVu], () => {
+watch([searchTerm, selectedKhoa, selectedBoMon, selectedChucVu], () => {
     performSearch();
 });
 
@@ -120,7 +149,7 @@ const handleSearch = (event) => {
                     <!-- Bộ lọc -->
                     <div class="card-body pb-0">
                         <div class="row mb-4">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <div class="input-group">
                                     <input
                                         v-model="searchTerm"
@@ -137,14 +166,30 @@ const handleSearch = (event) => {
                                     </button>
                                 </div>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
+                                <select
+                                    v-model="selectedKhoa"
+                                    class="form-select"
+                                >
+                                    <option value="">Tất cả Khoa</option>
+                                    <option
+                                        v-for="khoa in khoas"
+                                        :key="khoa.id"
+                                        :value="khoa.id"
+                                    >
+                                        {{ khoa.ten }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
                                 <select
                                     v-model="selectedBoMon"
                                     class="form-select"
+                                    :disabled="!selectedKhoa"
                                 >
-                                    <option value="">Tất cả Bộ môn</option>
+                                    <option value="">{{ selectedKhoa ? 'Tất cả Bộ môn' : 'Vui lòng chọn Khoa trước' }}</option>
                                     <option
-                                        v-for="bomon in bomons"
+                                        v-for="bomon in filteredBoMons"
                                         :key="bomon.id"
                                         :value="bomon.id"
                                     >
@@ -152,7 +197,7 @@ const handleSearch = (event) => {
                                     </option>
                                 </select>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <select
                                     v-model="selectedChucVu"
                                     class="form-select"
@@ -176,13 +221,13 @@ const handleSearch = (event) => {
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Tên</th>
-                                        <th>Email</th>
-                                        <th>Chức vụ</th>
-                                        <th>Khoa</th>
-                                        <th>Bộ môn</th>
-                                        <th>Actions</th>
+                                        <th style="width: 10%">ID</th>
+                                        <th style="width: 15%">Tên</th>
+                                        <th style="width: 20%">Email</th>
+                                        <th style="width: 15%">Chức vụ</th>
+                                        <th style="width: 15%">Khoa</th>
+                                        <th style="width: 15%">Bộ môn</th>
+                                        <th style="width: 10%">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -196,66 +241,59 @@ const handleSearch = (event) => {
                                         :key="user.id"
                                     >
                                         <td>{{ user?.id }}</td>
-                                        <td>{{ user?.name }}</td>
-                                        <td
-                                            style="
-                                                word-wrap: break-word;
-                                                max-width: 150px;
-                                            "
-                                        >
-                                            {{ user?.email }}
+                                        <td>
+                                            <div class="text-truncate" :title="user?.name">
+                                                {{ user?.name }}
+                                            </div>
                                         </td>
-                                        <td
-                                            style="
-                                                word-wrap: break-word;
-                                                max-width: 150px;
-                                            "
-                                        >
-                                            {{ user?.chucvu?.ten }}
+                                        <td>
+                                            <div class="text-truncate" :title="user?.email">
+                                                {{ user?.email }}
+                                            </div>
                                         </td>
-                                        <td
-                                            style="
-                                                word-wrap: break-word;
-                                                max-width: 150px;
-                                            "
-                                        >
-                                            {{ user?.bomon?.khoa?.ten }}
+                                        <td>
+                                            <div class="text-truncate" :title="user?.chucvu?.ten">
+                                                {{ user?.chucvu?.ten }}
+                                            </div>
                                         </td>
-                                        <td
-                                            style="
-                                                word-wrap: break-word;
-                                                max-width: 150px;
-                                            "
-                                        >
-                                            {{ user?.bomon?.ten }}
+                                        <td>
+                                            <div class="text-truncate" :title="user?.bomon?.khoa?.ten">
+                                                {{ user?.bomon?.khoa?.ten }}
+                                            </div>
                                         </td>
-                                        <td class="d-flex" style="word-wrap: break-word;
-                                                max-width: 150px;">
-                                            <Link
-                                                :href="route('admin.user.edit', user.id)"
-                                                class="btn btn-sm btn-success-edit me-2"
-                                            >
-                                                <i class="fas fa-edit"></i>
-                                            </Link>
-                                            <Link
-                                                :href="route('admin.user.destroy', user.id)"
-                                                method="delete"
-                                                as="button"
-                                                type="button"
-                                                :data="{
-                                                    id: user.id,
-                                                    _method: 'delete',
-                                                }"
-                                                class="btn btn-sm btn-danger-delete"
-                                                @click="
-                                                    (e) => {
-                                                        if (!deleteUser(user.id))
-                                                            e.preventDefault();
-                                                    }
-                                                "
-                                            >
-                                                <i class="fas fa-trash"></i>
-                                            </Link>
+                                        <td>
+                                            <div class="text-truncate" :title="user?.bomon?.ten">
+                                                {{ user?.bomon?.ten }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <Link
+                                                    :href="route('admin.user.edit', user.id)"
+                                                    class="btn btn-sm btn-success-edit me-2"
+                                                >
+                                                    <i class="fas fa-edit"></i>
+                                                </Link>
+                                                <Link
+                                                    :href="route('admin.user.destroy', user.id)"
+                                                    method="delete"
+                                                    as="button"
+                                                    type="button"
+                                                    :data="{
+                                                        id: user.id,
+                                                        _method: 'delete',
+                                                    }"
+                                                    class="btn btn-sm btn-danger-delete"
+                                                    @click="
+                                                        (e) => {
+                                                            if (!deleteUser(user.id))
+                                                                e.preventDefault();
+                                                        }
+                                                    "
+                                                >
+                                                    <i class="fas fa-trash"></i>
+                                                </Link>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -354,6 +392,22 @@ const handleSearch = (event) => {
 
 .table th {
     background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    white-space: nowrap;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.text-truncate {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
 }
 
 .animated-fade-in {
@@ -377,5 +431,9 @@ const handleSearch = (event) => {
 .form-control:focus {
     border-color: #5cb85c;
     box-shadow: 0 0 0 0.25rem rgba(92, 184, 92, 0.25);
+}
+
+.table-responsive {
+    min-height: 300px;
 }
 </style>

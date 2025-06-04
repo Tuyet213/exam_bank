@@ -68,6 +68,10 @@ class DSDangKyController extends Controller
                 return $ct->trang_thai === 'Approved';
             })) {
                 $ds->trang_thai = 'Approved';
+            } else if ($ds->ctDSDangKies->every(function ($ct) {
+                return $ct->trang_thai === 'Completed';
+            })) {
+                $ds->trang_thai = 'Completed';
             } else {
                 $ds->trang_thai = 'Pending';
             }
