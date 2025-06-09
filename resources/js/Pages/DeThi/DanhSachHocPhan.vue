@@ -68,7 +68,7 @@ const performSearch = () => {
     }
     debounceTimeout.value = setTimeout(() => {
         router.get(
-            route('cauhoi.hocphan'),
+            route('dethi.hocphan'),
             {
                 search: searchTerm.value,
                 nam_hoc: selectedNamHoc.value,
@@ -93,10 +93,10 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
     <AppLayout :role="role">
         <template #sub-link>
             <li class="breadcrumb-item">
-                <a :href="route('cauhoi.hocphan')">Danh sách học phần</a>
+                <a :href="route('dethi.hocphan')">Danh sách học phần</a>
             </li>
             <li class="breadcrumb-item active">
-                Danh sách câu hỏi
+                Ngân hàng đề thi
             </li>
         </template>
         <template #content>
@@ -104,9 +104,9 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header bg-success-tb">
+                            <div class="card-header bg-success-custom">
                                 <h4 class="card-title text-white">
-                                    <i class="fas fa-question-circle me-2"></i>NGÂN HÀNG CÂU HỎI - DANH SÁCH HỌC PHẦN
+                                    <i class="fas fa-file-alt me-2"></i>NGÂN HÀNG ĐỀ THI - DANH SÁCH HỌC PHẦN
                                 </h4>
                             </div>
                             <div class="card-body">
@@ -166,29 +166,29 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
                                 <div class="row">
                                     <div v-for="ctDangKy in ctdsdangkies" :key="ctDangKy.id" 
                                         class="col-md-4 mb-4">
-                                        <div class="hoc-phan-card" @click="() => router.get(route('cauhoi.danhsach', ctDangKy.id))" style="cursor:pointer;">
+                                        <div class="de-thi-card" @click="() => router.get(route('dethi.danhsach', ctDangKy.id))" style="cursor:pointer;">
                                             <div class="card-icon">
-                                                <i class="fas fa-question-circle"></i>
+                                                <i class="fas fa-file-alt"></i>
                                             </div>
-                                            <h3 class="hoc-phan-title">{{ ctDangKy.hoc_phan.ten }}</h3>
-                                            <p class="hoc-phan-info">
+                                            <h3 class="de-thi-title">{{ ctDangKy.hoc_phan?.ten }}</h3>
+                                            <p class="de-thi-info">
                                                 <i class="fas fa-code"></i>
-                                                Mã HP: {{ ctDangKy.hoc_phan.id }}
+                                                Mã HP: {{ ctDangKy.hoc_phan?.id }}
                                             </p>
-                                            <p class="hoc-phan-info">
+                                            <p class="de-thi-info">
                                                 <i class="fas fa-calendar-alt"></i>
-                                                Năm học: {{ ctDangKy.ds_dang_ky.nam_hoc }}
+                                                Năm học: {{ ctDangKy.ds_dang_ky?.nam_hoc }}
                                             </p>
-                                            <p class="hoc-phan-info">
+                                            <p class="de-thi-info">
                                                 <i class="fas fa-calendar"></i>
-                                                Học kỳ: {{ ctDangKy.ds_dang_ky.hoc_ki }}
+                                                Học kỳ: {{ ctDangKy.ds_dang_ky?.hoc_ki }}
                                             </p>
-                                            <p class="hoc-phan-info">
+                                            <p class="de-thi-info">
                                                 <i class="fas fa-clipboard-check"></i>
                                                 {{ ctDangKy.hinh_thuc_thi }}
                                             </p>
                                             <div class="card-action">
-                                                <span class="action-text">Nhấn để xem câu hỏi</span>
+                                                <span class="action-text">Nhấn để xem đề thi</span>
                                                 <i class="fas fa-arrow-right"></i>
                                             </div>
                                         </div>
@@ -212,7 +212,7 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
 
 <style scoped>
 /* Màu chủ đạo - xanh lá */
-.bg-success-tb {
+.bg-success-custom {
     background: linear-gradient(135deg, rgb(94, 181, 98), rgb(76, 150, 80)) !important;
 }
 
@@ -221,7 +221,7 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
     color: rgb(94, 181, 98);
 }
 
-.hoc-phan-card {
+.de-thi-card {
     background: linear-gradient(135deg, #f8fff8 0%, #e8fde8 100%);
     border-radius: 20px;
     border: 2px solid rgb(94, 181, 98);
@@ -237,7 +237,7 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
     overflow: hidden;
 }
 
-.hoc-phan-card::before {
+.de-thi-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -247,7 +247,7 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
     background: linear-gradient(90deg, rgb(94, 181, 98), rgb(76, 150, 80));
 }
 
-.hoc-phan-card:hover {
+.de-thi-card:hover {
     box-shadow: 0 12px 32px rgba(94, 181, 98, 0.2);
     transform: translateY(-6px) scale(1.02);
     border-color: rgb(76, 150, 80);
@@ -270,7 +270,7 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
     color: white;
 }
 
-.hoc-phan-title {
+.de-thi-title {
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 20px;
@@ -279,7 +279,7 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
     line-height: 1.4;
 }
 
-.hoc-phan-info {
+.de-thi-info {
     color: #424242;
     margin-bottom: 12px;
     font-size: 14px;
@@ -288,7 +288,7 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
     gap: 8px;
 }
 
-.hoc-phan-info i {
+.de-thi-info i {
     width: 16px;
     color: rgb(94, 181, 98);
     font-size: 12px;
@@ -308,7 +308,7 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
     transition: opacity 0.3s ease;
 }
 
-.hoc-phan-card:hover .card-action {
+.de-thi-card:hover .card-action {
     opacity: 1;
 }
 
@@ -317,7 +317,7 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
     transition: transform 0.3s ease;
 }
 
-.hoc-phan-card:hover .card-action i {
+.de-thi-card:hover .card-action i {
     transform: translateX(4px);
 }
 
@@ -325,48 +325,4 @@ watch([searchTerm, selectedNamHoc, selectedHocKy, selectedHinhThucThi], () => {
     max-width: 400px;
     margin: 0 auto;
 }
-
-.button-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.btn {
-    display: block;
-    width: 100%;
-    text-align: center;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-    border: none;
-    color: white;
-}
-
-.btn-primary {
-    background-color: #2196f3;
-}
-
-.btn-primary:hover {
-    background-color: #1976d2;
-}
-
-.btn-success {
-    background-color: #4caf50;
-}
-
-.btn-success:hover {
-    background-color: #388e3c;
-}
-
-.btn-warning {
-    background-color: #ff9800;
-    color: #fff;
-}
-
-.btn-warning:hover {
-    background-color: #f57c00;
-}
-</style> 
+</style>

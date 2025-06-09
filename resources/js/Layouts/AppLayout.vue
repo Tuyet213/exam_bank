@@ -132,10 +132,10 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                 <li>
                     <i class="fas fa-chart-bar"></i>
                     <Link :href="route('thongke.index')"
-                        >Thống kê (biên soạn+nghiệm thu)</Link
+                        >Thống kê</Link
                     >
                 </li>
-                <li>
+                <!-- <li>
                     <i class="fas fa-chart-bar"></i>
                     <Link :href="route('thongke_giang_vien.index')"
                         >Thống kê giảng viên biên soạn</Link
@@ -146,7 +146,7 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                     <Link :href="route('thongkehocphan.index')"
                         >Thống kê học phần biên soạn</Link
                     >
-                </li>
+                </li> -->
                
             </ul>
 
@@ -156,6 +156,12 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                     <i class="fas fa-question-circle"></i>
                     <Link :href="route('cauhoi.hocphan')"
                         >Danh sách câu hỏi</Link
+                    >
+                </li>
+                <li>
+                    <i class="fas fa-file-export"></i>
+                    <Link :href="route('dethi.hocphan')"
+                        >Danh sách đề thi</Link
                     >
                 </li>
                 <li>
@@ -200,10 +206,10 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                 <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
                     <i class="fas fa-chart-bar"></i>
                     <Link :href="route('thongke.index')"
-                        >Thống kê (biên soạn+nghiệm thu)</Link
+                        >Thống kê</Link
                     >
                 </li>
-                <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
+                <!-- <li  v-if="userPermissions.includes('Duyệt danh sách đăng ký')">
                     <i class="fas fa-chart-bar"></i>
                     <Link :href="route('thongke_giang_vien.index')"
                         >Thống kê giảng viên biên soạn</Link
@@ -214,7 +220,7 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                     <Link :href="route('thongkehocphan.index')"
                         >Thống kê học phần biên soạn</Link
                     >
-                </li>
+                </li> -->
             </ul>
 
             <!-- Trưởng Khoa Menu -->
@@ -252,6 +258,12 @@ const userPermissions = computed(() => page.props.auth.permissions || []);
                     <i class="fas fa-question-circle"></i>
                     <Link :href="route('cauhoi.hocphan')"
                         >Danh sách câu hỏi</Link
+                    >
+                </li>
+                <li>
+                    <i class="fas fa-file-export"></i>
+                    <Link :href="route('dethi.hocphan')"
+                        >Danh sách đề thi</Link
                     >
                 </li>
                 <li>

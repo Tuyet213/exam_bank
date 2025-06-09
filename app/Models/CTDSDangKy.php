@@ -53,4 +53,9 @@ class CTDSDangKy extends Model
         return $this->hasMany(BienBanHop::class, 'id_ct_ds_dang_ky');
     }
 
+    public function deThis()
+    {
+        return $this->hasMany(DeThi::class, 'id_ct_ds_dang_ky');
+    }
+
 }

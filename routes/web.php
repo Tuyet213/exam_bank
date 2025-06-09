@@ -27,7 +27,8 @@
     use App\Http\Controllers\QualityOffice\ThongKeGiangVienController as QualityThongKeGiangVienController;
     use App\Http\Controllers\QualityOffice\ThongKeHocPhanController;
     use App\Http\Controllers\Giangvien\ImportCauHoiController;
-    use App\Http\Controllers\CauHoiController;
+use App\Http\Controllers\CauHoiController;
+use App\Http\Controllers\DeThiController;
 
     // chỉ trả về component hoặc page vì nó tự import vào app.blade.php
 
@@ -250,11 +251,13 @@
     });
 
     Route::prefix('thongke')->middleware(['auth', 'role:Nhân viên P.ĐBCL|Admin'])->group(function () {
-        // Thống kê
+        // Thống kê tổng hợp mới
         Route::get('/thongke', [QualityThongKeController::class, 'index'])->name('thongke.index');
-        Route::get('/thongke/excel', [QualityThongKeController::class, 'exportExcel'])->name('thongke.excel');
-        Route::get('/thongke/excel-gio-tham-gia', [QualityThongKeController::class, 'exportExcelGioThamGia'])->name('thongke.excel_gio_tham_gia');
-
+        Route::get('/thongke/export', [QualityThongKeController::class, 'exportExcel'])->name('thongke.export');
+        Route::get('/thongke/export-giang-vien', [QualityThongKeController::class, 'exportGiangVienExcel'])->name('thongke.export_giang_vien');
+        Route::get('/thongke/export-bar-chart', [QualityThongKeController::class, 'exportBarChartExcel'])->name('thongke.export_bar_chart');
+        Route::get('/thongke/export-pie-chart', [QualityThongKeController::class, 'exportPieChartExcel'])->name('thongke.export_pie_chart');
+        
         // Thống kê giảng viên
         Route::get('/thongke-giang-vien', [QualityThongKeGiangVienController::class, 'index'])->name('thongke_giang_vien.index');
         Route::get('/thongke-giang-vien/excel', [QualityThongKeGiangVienController::class, 'exportExcel'])->name('thongke_giang_vien.excel');
@@ -336,6 +339,26 @@
         Route::get('/{id}', [\App\Http\Controllers\TBM\TrichXuatDeThiController::class, 'show'])->name('show');
     });
     
+    // Routes cho ngân hàng đề thi
+    Route::prefix('dethi')->middleware(['auth'])->name('dethi.')->group(function () {
+        // Danh sách học phần để tạo đề thi
+        Route::get('/hocphan', [DeThiController::class, 'danhSachHocPhan'])->name('hocphan');
+        
+        // Danh sách đề thi của một học phần
+        Route::get('/hocphan/{id}', [DeThiController::class, 'danhSachDeThi'])->name('danhsach');
+        
+        // Tạo đề thi mới
+        Route::get('/tao/{id}', [DeThiController::class, 'tao'])->name('tao');
+        Route::post('/luu', [DeThiController::class, 'luu'])->name('luu');
+        
+        // Xóa đề thi
+        Route::delete('/xoa/{id}', [DeThiController::class, 'xoa'])->name('xoa');
+        
+        // Download files
+        Route::get('/download/de/{id}', [DeThiController::class, 'downloadDe'])->name('download.de');
+        Route::get('/download/dapan/{id}', [DeThiController::class, 'downloadDapAn'])->name('download.dapan');
+    });
+
     Route::get('/blank', function () {
         return Inertia::render('Blank');
     })->name('blank');  

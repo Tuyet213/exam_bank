@@ -237,7 +237,7 @@ const handleSubmit = () => {
                                                         <option value="">Chọn hình thức</option>
                                                         <option value="Trắc nghiệm">Trắc nghiệm</option>
                                                         <option value="Tự luận">Tự luận</option>
-                                                        <option value="Trắc nghiệm và tự luận">Trắc nghiệm và tự luận</option>
+                                                        <!-- <option value="Trắc nghiệm và tự luận">Trắc nghiệm và tự luận</option> -->
                                                     </select>
                                                 </td>
                                                 <td>
