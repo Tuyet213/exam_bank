@@ -36,6 +36,11 @@ const mucDoList = [
 const chuongList = props.ctDangKy.hoc_phan.chuongs || [];
 const chuanDauRaList = props.ctDangKy.hoc_phan.chuan_dau_ras || [];
 
+// Kiểm tra xem có được phép thực hiện các thao tác không
+const canPerformActions = computed(() => {
+    return props.ctDangKy.trang_thai === 'Approved';
+});
+
 // Hàm lọc câu hỏi
 const filteredCauHois = computed(() => {
     return props.cauHois.filter(cauHoi => {
@@ -88,7 +93,7 @@ watch([searchCauHoi, selectedMucDo, selectedChuong, selectedChuanDauRa], () => {
                     <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                         <div class="p-6">
                             <!-- Thông tin học phần -->
-                            <div class="mb-4">
+                            <div class="mb-4 bg-success-custom">
                                 <h2 class="text-xl font-semibold">{{ ctDangKy.hoc_phan.ten }}</h2>
                                 <p class="text-gray-600">Mã học phần: {{ ctDangKy.hoc_phan.id }}</p>
                             </div>
@@ -130,22 +135,29 @@ watch([searchCauHoi, selectedMucDo, selectedChuong, selectedChuanDauRa], () => {
 
                             <!-- Nút chức năng -->
                             <div class="mb-6 flex space-x-4">
-                                <Link :href="route('cauhoi.tao', ctDangKy.id)"
+                                <Link v-if="canPerformActions" 
+                                    :href="route('cauhoi.tao', ctDangKy.id)"
                                     class="btn btn-success">
                                     <i class="fas fa-plus-circle mr-2"></i> Tạo câu hỏi mới
                                 </Link>
                                 
                                 <!-- Hiển thị nút import dựa vào hình thức thi -->
-                                <Link v-if="ctDangKy.hinh_thuc_thi == 'Trắc nghiệm'"
+                                <Link v-if="canPerformActions && ctDangKy.hinh_thuc_thi == 'Trắc nghiệm'"
                                     :href="route('cauhoi.import', ctDangKy.id)"
                                     class="btn btn-primary">
                                     <i class="fas fa-file-import mr-2"></i> Import câu hỏi trắc nghiệm
                                 </Link>
-                                <Link v-else
+                                <Link v-if="canPerformActions && ctDangKy.hinh_thuc_thi != 'Trắc nghiệm'"
                                     :href="route('cauhoi.import', ctDangKy.id)"
                                     class="btn btn-primary">
                                     <i class="fas fa-file-import mr-2"></i> Import câu hỏi tự luận/vấn đáp
                                 </Link>
+                                
+                                <!-- Hiển thị thông báo nếu không được phép thực hiện thao tác -->
+                                <div v-if="!canPerformActions" class="alert alert-warning">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Chỉ có thể thực hiện các thao tác khi đăng ký đã được duyệt (trạng thái: Approved)
+                                </div>
                             </div>
 
                             <!-- Danh sách câu hỏi dạng bảng -->
@@ -189,10 +201,16 @@ watch([searchCauHoi, selectedMucDo, selectedChuong, selectedChuanDauRa], () => {
                                                     <Link :href="route('cauhoi.chitiet', cauHoi.id)" class="btn btn-info btn-sm" title="Xem chi tiết">
                                                         <i class="fas fa-eye"></i>
                                                     </Link>
-                                                    <Link :href="route('cauhoi.sua', cauHoi.id)" class="btn btn-warning btn-sm" title="Sửa câu hỏi">
+                                                    <Link v-if="canPerformActions" 
+                                                        :href="route('cauhoi.sua', cauHoi.id)" 
+                                                        class="btn btn-warning btn-sm" 
+                                                        title="Sửa câu hỏi">
                                                         <i class="fas fa-edit"></i>
                                                     </Link>
-                                                    <button @click="confirmDeleteQuestion(cauHoi.id)" class="btn btn-danger btn-sm" title="Xóa câu hỏi">
+                                                    <button v-if="canPerformActions" 
+                                                        @click="confirmDeleteQuestion(cauHoi.id)" 
+                                                        class="btn btn-danger btn-sm" 
+                                                        title="Xóa câu hỏi">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>

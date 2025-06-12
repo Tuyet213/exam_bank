@@ -27,7 +27,7 @@
     use App\Http\Controllers\QualityOffice\ThongKeGiangVienController as QualityThongKeGiangVienController;
     use App\Http\Controllers\QualityOffice\ThongKeHocPhanController;
     use App\Http\Controllers\Giangvien\ImportCauHoiController;
-use App\Http\Controllers\CauHoiController;
+    use App\Http\Controllers\CauHoiController;
 use App\Http\Controllers\DeThiController;
 
     // chỉ trả về component hoặc page vì nó tự import vào app.blade.php
@@ -358,7 +358,7 @@ use App\Http\Controllers\DeThiController;
         Route::get('/download/de/{id}', [DeThiController::class, 'downloadDe'])->name('download.de');
         Route::get('/download/dapan/{id}', [DeThiController::class, 'downloadDapAn'])->name('download.dapan');
     });
-
+    
     Route::get('/blank', function () {
         return Inertia::render('Blank');
     })->name('blank');  

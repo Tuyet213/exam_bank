@@ -29,7 +29,7 @@ class DeThi extends Model
     public function hocPhan()
     {
         return $this->belongsTo(HocPhan::class, 'id_hoc_phan');
-    }
+    }   
 
     /**
      * Relationship với CTDSDangKy
@@ -101,7 +101,7 @@ class DeThi extends Model
     public function getDeUrlAttribute()
     {
         return $this->de ? asset('storage/' . $this->de) : null;
-    }
+    }   
 
     /**
      * Lấy URL public của file đáp án
@@ -178,8 +178,8 @@ class DeThi extends Model
             // Xóa file đề thi nếu tồn tại
             if ($deThi->hasFileDE()) {
                 unlink($deThi->file_de);
-            }
-            
+    }
+    
             // Xóa file đáp án nếu tồn tại
             if ($deThi->hasFileDapAn()) {
                 unlink($deThi->file_dap_an);

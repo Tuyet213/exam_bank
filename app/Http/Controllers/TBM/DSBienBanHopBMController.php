@@ -636,7 +636,7 @@ class DSBienBanHopBMController extends Controller
             $bienBan->trang_thai = 'Pending';
             $bienBan->save();
             Log::info('gửi mail thành công============');
-            return back()->with([
+            return redirect()->route('tbm.dsbienban.index')->with([
                 'type' => 'success',
                 'message' => 'Đã gửi thông báo hoàn thành biên soạn đến Phòng ĐBCL'
             ]);

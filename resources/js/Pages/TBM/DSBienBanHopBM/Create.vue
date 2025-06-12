@@ -131,10 +131,10 @@ const submitAll = () => {
         <template v-slot:content>
             <div class="content">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center bg-success-tb">
                         <h3 class="mb-0">TẠO BIÊN BẢN HỌP</h3>
                         <button 
-                            class="btn btn-primary"
+                            class="btn bg-light"
                             @click="submitAll"
                         >
                             Lưu tất cả
@@ -275,10 +275,6 @@ const submitAll = () => {
 </template>
 
 <style scoped>
-.card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-}
 
 .form-control:focus,
 .form-select:focus {
@@ -317,7 +313,7 @@ const submitAll = () => {
 }
 
 .btn-primary {
-    background-color: #007bff;
+    background-color: li;
     border-color: #007bff;
 }
 

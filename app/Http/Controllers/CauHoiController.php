@@ -37,6 +37,7 @@ class CauHoiController extends Controller
                 $query->where('id_vien_chuc', $user->id)->where('able', true);
             })
             ->where('loai_ngan_hang', 1)->where('able', true) // Ngân hàng câu hỏi thi
+            ->whereIn('trang_thai', ['Approved', 'Completed']) // Chỉ hiển thị những CTDSDangKy đã được duyệt hoặc hoàn thành
             ->with(['hocPhan', 'dsDangKy', 'dsGvBienSoans']);
 
         // Lọc theo tên/mã học phần

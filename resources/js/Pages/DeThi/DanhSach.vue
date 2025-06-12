@@ -19,6 +19,14 @@ const props = defineProps({
     filters: Object
 });
 
+const chuongList = props.ctDangKy.hoc_phan.chuongs || [];
+const chuanDauRaList = props.ctDangKy.hoc_phan.chuan_dau_ras || [];
+
+// Kiểm tra xem có được phép thực hiện các thao tác không
+const canPerformActions = computed(() => {
+    return props.ctDangKy.trang_thai === 'Approved';
+});
+
 // Thêm các biến reactive cho bộ lọc theo ngày
 const tuNgay = ref(props.filters.tu_ngay || '');
 const denNgay = ref(props.filters.den_ngay || '');
@@ -104,13 +112,21 @@ watch([tuNgay, denNgay], () => {
                             </div>
                               <!-- Nút chức năng -->
                               <div class="mb-6 flex space-x-4 offset-md-10 col-md-2">
-                                <Link :href="route('dethi.tao', ctDangKy.id)"
+                                <Link v-if="canPerformActions"
+                                    :href="route('dethi.tao', ctDangKy.id)"
                                     class="btn btn-success">
                                     <i class="fas fa-plus-circle mr-2"></i> Tạo đề thi mới
                                 </Link>
+                                
+                               
                             </div>
 
                            </div>
+                            <!-- Hiển thị thông báo nếu không được phép thực hiện thao tác -->
+                            <div v-if="!canPerformActions" class="alert alert-warning w-100">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Chỉ có thể thực hiện các thao tác khi đăng ký đã được duyệt (trạng thái: Approved)
+                                </div>
 
 
                             <!-- Bộ lọc theo ngày tạo -->
@@ -193,7 +209,8 @@ watch([tuNgay, denNgay], () => {
                                             <td class="text-center">
                                                 <button @click="xoaDeThi(deThi.id)" 
                                                         class="btn btn-danger btn-sm"
-                                                        title="Xóa đề thi">
+                                                        title="Xóa đề thi"
+                                                        v-if="canPerformActions">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </td>

@@ -1,6 +1,7 @@
 <script setup>
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { computed } from 'vue';
 
 const props = defineProps({
     cauHoi: {
@@ -13,6 +14,11 @@ const props = defineProps({
     }
 });
 console.log(props.cauHoi);
+
+// Kiểm tra xem có được phép thực hiện các thao tác không
+const canPerformActions = computed(() => {
+    return props.cauHoi.ct_d_s_dang_ky.trang_thai === 'Approved';
+});
 
 const confirmDeleteQuestion = (id) => {
     if (confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')) {
@@ -52,12 +58,23 @@ const confirmDeleteQuestion = (id) => {
                                 <Link :href="route('cauhoi.danhsach', cauHoi.ct_d_s_dang_ky.id)" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left mr-2"></i> Quay lại
                                 </Link>
-                                <Link :href="route('cauhoi.sua', cauHoi.id)" class="btn btn-warning">
+                                <Link v-if="canPerformActions" 
+                                    :href="route('cauhoi.sua', cauHoi.id)" 
+                                    class="btn btn-warning">
                                     <i class="fas fa-edit mr-2"></i> Sửa câu hỏi
                                 </Link>
-                                <button @click="confirmDeleteQuestion(cauHoi.id)" class="btn btn-danger btn-sm" title="Xóa câu hỏi">
+                                <button v-if="canPerformActions" 
+                                    @click="confirmDeleteQuestion(cauHoi.id)" 
+                                    class="btn btn-danger btn-sm" 
+                                    title="Xóa câu hỏi">
                                     <i class="fas fa-trash mr-2"></i> Xóa câu hỏi
                                 </button>
+                            </div>
+
+                            <!-- Hiển thị thông báo nếu không được phép thực hiện thao tác -->
+                            <div v-if="!canPerformActions" class="alert alert-warning mb-4">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Chỉ có thể thực hiện các thao tác chỉnh sửa khi đăng ký đã được duyệt (trạng thái: Approved)
                             </div>
 
                             <!-- Thông tin chi tiết câu hỏi -->
@@ -121,7 +138,7 @@ const confirmDeleteQuestion = (id) => {
                                                 <tbody>
                                                     <tr v-for="(dapAn, index) in cauHoi.dap_ans" :key="dapAn.id">
                                                         <td class="text-center">{{ index + 1 }}</td>
-                                                        <td>
+                                                        <td class="text-center">
                                                             <span v-if="cauHoi.phan_loai == 0">
                                                                 {{ String.fromCharCode(65 + index) }}. {{ dapAn.dap_an }}
                                                             </span>
@@ -129,7 +146,14 @@ const confirmDeleteQuestion = (id) => {
                                                                 Nội dung ý {{ index + 1 }}: {{ dapAn.dap_an }}
                                                             </span>
                                                         </td>
-                                                        <td class="text-center">{{ dapAn.diem }}</td>
+                                                        <td class="text-center">
+                                                            <span v-if="cauHoi.phan_loai == 0">
+                                                                {{ dapAn.trang_thai == 1 ? dapAn.diem : 0 }}
+                                                            </span>
+                                                            <span v-else>
+                                                                {{ dapAn.diem }}
+                                                            </span>
+                                                        </td>
                                                         <td class="text-center" v-if="cauHoi.phan_loai == 0">
                                                             
                                                                 <i v-if="dapAn.trang_thai==1" class="fas fa-check text-success"></i>
