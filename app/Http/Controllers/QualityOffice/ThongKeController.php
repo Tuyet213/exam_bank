@@ -99,13 +99,15 @@ class ThongKeController extends Controller
         $nam_hoc = $request->input('nam_hoc');
         $hoc_ki = $request->input('hoc_ki');
         
-        // Query cơ bản
+        // Query cơ bản - chỉ lấy những CTDSDangKy đã hoàn thành
         $query = CTDSDangKy::with([
             'hocPhan',
             'dsGVBienSoans.vienChuc',
             'bienBanHop.dsHop.vienChuc',
             'dsDangKy.boMon.khoa'
-        ])->where('able', true);
+        ])
+        ->where('able', true)
+        ->where('trang_thai', 'Completed'); // Chỉ thống kê những CTDSDangKy đã hoàn thành
         
         // Áp dụng bộ lọc
         if ($bomon_id) {
@@ -236,9 +238,15 @@ class ThongKeController extends Controller
         // Cập nhật tổng quan
         $result['tong_quan']['tong_hoc_phan'] = count($dsHocPhan);
         $result['tong_quan']['tong_vien_chuc'] = count($dsVienChuc);
-        $result['tong_quan']['tong_gio'] = array_sum(array_column($chiTietVienChuc, 'tong_gio'));
+        $result['tong_quan']['tong_gio'] = round(array_sum(array_column($chiTietVienChuc, 'tong_gio')), 2);
         
         // Cập nhật chi tiết viên chức
+        foreach ($chiTietVienChuc as &$vienChuc) {
+            $vienChuc['tong_gio'] = round($vienChuc['tong_gio'], 2);
+            foreach ($vienChuc['chi_tiet_hoc_phan'] as &$hocPhan) {
+                $hocPhan['so_gio'] = round($hocPhan['so_gio'], 2);
+            }
+        }
         $result['chi_tiet_vien_chuc'] = array_values($chiTietVienChuc);
         
         // Cập nhật thống kê theo khoa/bộ môn
@@ -266,7 +274,7 @@ class ThongKeController extends Controller
         }
         
         // Cập nhật giờ
-        $chiTietVienChuc[$vienChuc->id]['tong_gio'] += $soGio;
+        $chiTietVienChuc[$vienChuc->id]['tong_gio'] += round($soGio, 2);
         
         // Thêm chi tiết học phần
         $key = $hocPhan->id . '_' . $loai;
@@ -280,15 +288,14 @@ class ThongKeController extends Controller
                 'so_gio' => 0
             ];
         }
-        
-        $chiTietVienChuc[$vienChuc->id]['chi_tiet_hoc_phan'][$key]['so_gio'] += $soGio;
+        $chiTietVienChuc[$vienChuc->id]['chi_tiet_hoc_phan'][$key]['so_gio'] += round($soGio, 2);
         
         // Cập nhật vào cấu trúc học phần
         $result['chi_tiet_khoa'][$khoa->id]['bo_mon'][$boMon->id]['hoc_phan'][$hocPhan->id]['vien_chuc'][] = [
             'id' => $vienChuc->id,
             'ten' => $vienChuc->name,
             'loai' => $loai,
-            'so_gio' => $soGio
+            'so_gio' => round($soGio, 2)
         ];
     }
     
@@ -317,12 +324,12 @@ class ThongKeController extends Controller
                 }
                 
                 $boMon['tong_vien_chuc'] = count($dsVienChucBoMon);
-                $boMon['tong_gio'] = $tongGioBoMon;
+                $boMon['tong_gio'] = round($tongGioBoMon, 2);
             }
             
             $khoa['tong_hoc_phan'] = array_sum(array_column($khoa['bo_mon'], 'tong_hoc_phan'));
             $khoa['tong_vien_chuc'] = count($dsVienChucKhoa);
-            $khoa['tong_gio'] = $tongGioKhoa;
+            $khoa['tong_gio'] = round($tongGioKhoa, 2);
         }
     }
     
@@ -361,7 +368,7 @@ class ThongKeController extends Controller
                     'name' => $khoa['ten'],
                     'hoc_phan' => $khoa['tong_hoc_phan'],
                     'vien_chuc' => $khoa['tong_vien_chuc'],
-                    'gio' => $khoa['tong_gio']
+                    'gio' => round($khoa['tong_gio'], 2)
                 ];
                 $colorIndex++;
             }
@@ -381,7 +388,7 @@ class ThongKeController extends Controller
                         'name' => $boMon['ten'],
                         'hoc_phan' => $boMon['tong_hoc_phan'],
                         'vien_chuc' => $boMon['tong_vien_chuc'],
-                        'gio' => $boMon['tong_gio']
+                        'gio' => round($boMon['tong_gio'], 2)
                     ];
                     $colorIndex++;
                 }
@@ -403,7 +410,7 @@ class ThongKeController extends Controller
                         'name' => $hocPhan['ten'],
                         'hoc_phan' => 1,
                         'vien_chuc' => count($hocPhan['vien_chuc']),
-                        'gio' => array_sum(array_column($hocPhan['vien_chuc'], 'so_gio'))
+                        'gio' => round(array_sum(array_column($hocPhan['vien_chuc'], 'so_gio')), 2)
                     ];
                     $colorIndex++;
                 }

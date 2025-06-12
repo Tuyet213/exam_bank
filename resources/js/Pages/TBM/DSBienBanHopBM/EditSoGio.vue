@@ -46,15 +46,15 @@ const form = useForm({
     id_gio_quy_doi_phan_bien: null
 });
 
-// Hàm format số giờ
+// Hàm format số giờ - làm tròn đến 2 chữ số thập phân
 const formatSoGio = (value) => {
     const num = parseFloat(value);
-    return isNaN(num) ? 0 : (num % 1 === 0 ? num : parseFloat(num.toFixed(1)));
+    return isNaN(num) ? 0 : Math.round(num * 100) / 100;
 };
 
 // Tính tổng số giờ của các giảng viên biên soạn
 const tongSoGioBienSoan = computed(() => {
-    return form.ds_g_v_bien_soans.reduce((total, gv) => total + (gv.so_gio || 0), 0);
+    return Math.round(form.ds_g_v_bien_soans.reduce((total, gv) => total + (parseFloat(gv.so_gio) || 0), 0) * 100) / 100;
 });
 
 // Xử lý khi chọn giờ quy đổi cho người biên soạn
@@ -94,7 +94,7 @@ const handleChonGioQuyDoiPhanBien = () => {
 
 // Tính tổng số giờ của người phản biện
 const tongSoGioPhanBien = computed(() => {
-    return form.ds_hop.reduce((total, hop) => total + (hop.so_gio || 0), 0);
+    return Math.round(form.ds_hop.reduce((total, hop) => total + (parseFloat(hop.so_gio) || 0), 0) * 100) / 100;
 });
 
 // Xử lý submit form
@@ -115,7 +115,7 @@ const submit = () => {
             
             const tongSoGioDuKien = formatSoGio((soLuong / soLuongCauQuyDoi) * gioQuyDoi);
             
-            if (Math.abs(tongSoGioBienSoan.value - tongSoGioDuKien) > 0.1) {
+            if (Math.abs(tongSoGioBienSoan.value - tongSoGioDuKien) > 0.01) {
                 tongSoGioBienSoanError.value = `Tổng số giờ biên soạn (${tongSoGioBienSoan.value}) khác với số giờ quy định (${tongSoGioDuKien})`;
                 return;
             }
@@ -135,7 +135,7 @@ const submit = () => {
             
             const tongSoGioDuKien = formatSoGio((soLuong / soLuongCauQuyDoi) * gioQuyDoi);
             
-            if (Math.abs(tongSoGioPhanBien.value - tongSoGioDuKien) > 0.1) {
+            if (Math.abs(tongSoGioPhanBien.value - tongSoGioDuKien) > 0.01) {
                 tongSoGioError.value = `Tổng số giờ phản biện (${tongSoGioPhanBien.value}) khác với số giờ quy định (${tongSoGioDuKien})`;
                 return;
             }
@@ -249,7 +249,7 @@ const submit = () => {
                                                 min="0"
                                                 step="0.01"
                                                 required
-                                                @input="giangVien.so_gio = formatSoGio($event.target.value)"
+                                                @blur="giangVien.so_gio = formatSoGio(giangVien.so_gio)"
                                             >
                                             <div class="invalid-feedback" v-if="form.errors[`ds_g_v_bien_soans.${index}.so_gio`]">
                                                 {{ form.errors[`ds_g_v_bien_soans.${index}.so_gio`] }}
@@ -309,7 +309,7 @@ const submit = () => {
                                                 min="0"
                                                 step="0.01"
                                                 required
-                                                @input="thanhVien.so_gio = formatSoGio($event.target.value)"
+                                                @blur="thanhVien.so_gio = formatSoGio(thanhVien.so_gio)"
                                             >
                                             <div class="invalid-feedback" v-if="form.errors[`ds_hop.${index}.so_gio`]">
                                                 {{ form.errors[`ds_hop.${index}.so_gio`] }}
